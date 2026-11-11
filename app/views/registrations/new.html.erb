@@ -1,0 +1,14 @@
+<% content_for :title, "สมัครสมาชิก" %>
+<div class="ui-auth">
+  <%= ui_card title: "สมัครสมาชิก" do %>
+    <%= ui_form_with model: @user, url: registration_path do |f| %>
+      <%= f.ui_field :fullname, label: "ชื่อ-นามสกุล", autocomplete: "name", autofocus: true, required: true %>
+      <%= f.ui_field :username, label: "ชื่อผู้ใช้", hint: "a-z 0-9 และ _ ยาว 4–30 ตัวอักษร", autocomplete: "username", required: true %>
+      <%= f.ui_field :email, as: :email, label: "อีเมล", autocomplete: "email", required: true %>
+      <%= f.ui_field :password, as: :password, label: "รหัสผ่าน", hint: "อย่างน้อย 8 ตัวอักษร (ไม่เกิน 72 ไบต์ ตัวอักษรไทย 1 ตัว = 3 ไบต์)", autocomplete: "new-password", required: true %>
+      <%= f.ui_field :password_confirmation, as: :password, label: "ยืนยันรหัสผ่าน", autocomplete: "new-password", required: true %>
+      <%= f.ui_submit "สมัครสมาชิก", block: true %>
+    <% end %>
+    <p class="ui-auth__links">มีบัญชีอยู่แล้ว? <%= link_to "เข้าสู่ระบบ", login_path %></p>
+  <% end %>
+</div>

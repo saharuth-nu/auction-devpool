@@ -114,3 +114,20 @@ textarea.ui-input { height: auto; min-height: 96px; padding: 12px 14px; border-r
 .ui-page-header__desc { margin: 4px 0 0; color: var(--color-zinc-500); }
 .ui-stat__hint { margin: 2px 0 0; font-size: var(--text-xs); color: var(--color-zinc-500); }
 .ui-field { margin-bottom: 16px; }
+
+/* ---------- โครงหน้า (layout) และหน้า login/register ---------- */
+.ui-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--color-zinc-200); }
+.ui-header__brand { font-size: var(--text-lg); font-weight: 700; color: var(--color-primary-600); text-decoration: none; }
+.ui-header__nav { display: flex; align-items: center; gap: 12px; }
+.ui-header__user { color: var(--color-zinc-700); text-decoration: none; font-weight: 500; }
+.ui-header__user:hover { text-decoration: underline; }
+.ui-main { max-width: 1100px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.ui-auth { max-width: 440px; margin: 32px auto; width: 100%; }
+.ui-auth .ui-card__body { display: flex; flex-direction: column; gap: 4px; }
+.ui-auth__links { margin: 16px 0 0; text-align: center; color: var(--color-zinc-600); }
+.ui-auth__links a { color: var(--color-primary-600); font-weight: 600; }
+.ui-secret { display: block; padding: 12px 16px; font: 600 var(--text-lg)/var(--text-lg-lh) ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .05em; background: var(--color-warning-50); border: 1px dashed var(--color-warning-600); border-radius: var(--radius-lg); user-select: all; }
+.ui-dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 24px; margin: 0; }
+.ui-dl dt { color: var(--color-zinc-500); }
+.ui-dl dd { margin: 0; }
+.ui-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

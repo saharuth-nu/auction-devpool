@@ -1,0 +1,8 @@
+<% content_for :title, "ผู้ดูแลระบบ" %>
+<%= ui_page_header "ผู้ดูแลระบบ", description: "เลือก module ที่ต้องการใช้งาน" %>
+<%= ui_card title: "Module" do %>
+  <ul class="ui-dl" style="list-style:none;padding:0;grid-template-columns:1fr">
+    <li><%= link_to "บัญชี admin", admin_admins_path %></li>
+    <li>สินค้าประมูล · วิธีการประมูล · ห้องประมูล · การประมูล · ตรวจสอบผู้ใช้ (อยู่ระหว่างพัฒนา)</li>
+  </ul>
+<% end %>

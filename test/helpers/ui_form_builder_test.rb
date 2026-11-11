@@ -48,6 +48,14 @@ class UiFormBuilderTest < ActionView::TestCase
     assert_includes button["class"].split, "ui-btn--xl"
   end
 
+  test "ฟอร์มที่ไม่ผูกโมเดล (scope) ใช้ได้และไม่มี error" do
+    html = ui_form_with(url: "/login", scope: :login) { |f| f.ui_field(:username, label: "ชื่อผู้ใช้", value: "abc") }
+    doc = Nokogiri::HTML.fragment(html)
+    assert_equal "login[username]", doc.at_css("input.ui-input")["name"]
+    assert_equal "abc", doc.at_css("input.ui-input")["value"]
+    assert_nil doc.at_css(".ui-field__error")
+  end
+
   test "as ที่ไม่รู้จักต้อง raise" do
     assert_raises(ArgumentError) do
       ui_form_with(model: Sample.new, url: "/samples", scope: :sample) { |f| f.ui_field(:title, as: :color) }

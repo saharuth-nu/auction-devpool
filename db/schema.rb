@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_074942) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_075457) do
+  create_table "sessions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "username", null: false
     t.string "email"
@@ -19,7 +28,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_074942) do
     t.string "password_digest", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "must_change_password", default: false, null: false
+    t.datetime "suspended_at"
+    t.datetime "disabled_at"
+    t.text "disabled_reason"
+    t.integer "disabled_by_id"
+    t.index ["disabled_by_id"], name: "index_users_on_disabled_by_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
+
+  add_foreign_key "sessions", "users"
+  add_foreign_key "users", "users", column: "disabled_by_id"
 end

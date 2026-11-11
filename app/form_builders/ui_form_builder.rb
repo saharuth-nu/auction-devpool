@@ -28,7 +28,8 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
       raise ArgumentError, "ui: as ไม่ถูกต้อง #{as.inspect} (ใช้ได้: #{FIELD_TYPES.keys.map(&:inspect).join(', ')})"
     end
 
-    error = object&.errors&.[](method)&.first
+    # ฟอร์มที่ไม่ผูกโมเดล (เช่น form_with scope: :login) มี object เป็น nil/false: ไม่มี error จากโมเดล
+    error = object.respond_to?(:errors) ? object.errors[method].first : nil
     message_id = "#{object_name}_#{method}_message".parameterize(separator: "_")
     classes = @template.class_names("ui-input", ("ui-input--invalid" if error), options.delete(:class))
     options[:"aria-invalid"] = true if error

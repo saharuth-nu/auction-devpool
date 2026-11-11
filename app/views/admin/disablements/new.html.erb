@@ -1,0 +1,13 @@
+<% content_for :title, "ปิดใช้งานบัญชี admin" %>
+<div class="ui-auth">
+  <%= ui_card title: "ปิดใช้งาน “#{@admin.username}”" do %>
+    <p>บัญชีนี้จะ login ไม่ได้ และ session ที่ใช้อยู่จะหมดผลทันที (เปิดใช้งานกลับได้ภายหลัง)</p>
+    <%= ui_form_with url: admin_admin_disablement_path(@admin), scope: :disablement do |f| %>
+      <%= f.ui_field :reason, as: :textarea, label: "เหตุผล (บังคับ)", value: params.dig(:disablement, :reason), required: true, rows: 3 %>
+      <div class="ui-actions">
+        <%= f.ui_submit "ยืนยันปิดใช้งาน", variant: :danger %>
+        <%= ui_link_button "ยกเลิก", admin_admins_path, variant: :secondary, size: :xl %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
