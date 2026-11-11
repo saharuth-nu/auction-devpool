@@ -26,8 +26,8 @@
         <tr>
           <td><%= link_to item.name, admin_item_path(item) %></td>
           <td><%= status_badge :item, item.status %></td>
-          <td class="num"><%= number_to_currency item.starting_price, unit: "฿" %></td>
-          <td class="num"><%= number_to_currency item.reserve_price, unit: "฿" %></td>
+          <td class="num"><%= baht item.starting_price %></td>
+          <td class="num"><%= baht item.reserve_price %></td>
         </tr>
       <% end %>
     </tbody>

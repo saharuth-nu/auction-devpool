@@ -162,4 +162,48 @@ class ItemTest < ActiveSupport::TestCase
     assert_not too_many.valid?
     assert too_many.errors.of_kind?(:images, :too_many)
   end
+
+  # --- ลำดับรูป (ITEM-07) ---
+
+  def item_with_images(count)
+    item = items(:car)
+    item.images.attach(Array.new(count) { |i| image(name: "#{i}.jpg") })
+    item.reload
+  end
+
+  test "รูปเรียงตามลำดับที่อัปโหลดเป็นค่าเริ่มต้น (ITEM-07)" do
+    item = item_with_images(3)
+    assert_equal %w[0.jpg 1.jpg 2.jpg], item.ordered_images.map { |a| a.filename.to_s }
+  end
+
+  test "เลื่อนรูปขึ้น/ลงได้ และลำดับคงอยู่หลังโหลดใหม่ (ITEM-07)" do
+    item = item_with_images(3)
+    third = item.ordered_images.last
+
+    item.move_image!(third.id, :up)
+    assert_equal %w[0.jpg 2.jpg 1.jpg], item.reload.ordered_images.map { |a| a.filename.to_s }
+
+    item.move_image!(item.ordered_images.first.id, :down)
+    assert_equal %w[2.jpg 0.jpg 1.jpg], item.reload.ordered_images.map { |a| a.filename.to_s }
+  end
+
+  test "เลื่อนรูปแรกขึ้นหรือรูปสุดท้ายลงไม่เปลี่ยนอะไร" do
+    item = item_with_images(2)
+    before = item.ordered_images.map(&:id)
+    item.move_image!(before.first, :up)
+    item.move_image!(before.last, :down)
+    assert_equal before, item.reload.ordered_images.map(&:id)
+  end
+
+  test "รูปที่เพิ่มทีหลังต่อท้ายลำดับเดิม" do
+    item = item_with_images(2)
+    item.move_image!(item.ordered_images.last.id, :up)
+    item.images.attach(image(name: "new.jpg"))
+    assert_equal %w[1.jpg 0.jpg new.jpg], item.reload.ordered_images.map { |a| a.filename.to_s }
+  end
+
+  test "เลื่อนรูปที่ไม่ใช่ของสินค้านี้ไม่ได้" do
+    item = item_with_images(1)
+    assert_raises(ActiveRecord::RecordNotFound) { item.move_image!(-1, :up) }
+  end
 end
