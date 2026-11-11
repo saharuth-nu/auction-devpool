@@ -21,7 +21,9 @@ class Item < ApplicationRecord
   has_many_attached :images
   has_many :lots, dependent: :restrict_with_error
 
+  # ITEM-13: ชื่อและรายละเอียดบังคับทั้งคู่ (รายละเอียดแสดงในหน้ารายละเอียดสินค้า USR-04)
   validates :name, presence: true
+  validates :description, presence: { message: "ต้องกรอก" }
   validates :starting_price, :reserve_price, presence: true
   validates :starting_price, :reserve_price, numericality: { greater_than: 0 }, allow_nil: true
   validates :reserve_price, comparison: { greater_than_or_equal_to: :starting_price },

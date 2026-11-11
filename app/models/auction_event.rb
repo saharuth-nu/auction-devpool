@@ -49,6 +49,9 @@ class AuctionEvent < ApplicationRecord
   # ตั้ง job เริ่มการประมูลไว้ที่ starts_at ทุกครั้งที่สร้างหรือเลื่อนเวลา (job เก่าที่เวลาไม่ตรงจะไม่ทำอะไร)
   after_commit :schedule_start, on: %i[create update], if: -> { scheduled? && saved_change_to_starts_at? }
   # เริ่มรับราคาแล้ว → ตั้ง job สรุปผลไว้ที่เวลาปิดรับราคา (NFR-06) job ที่หลุดมี SettleDueAuctionEventsJob กวาดซ้ำ
+  # NFR-21: เมื่อสถานะเปลี่ยน (เริ่ม/สรุปผล/ยกเลิก) สั่งให้หน้าห้องของผู้ที่เปิดอยู่รีเฟรชเอง
+  # ส่งแค่สัญญาณให้โหลดหน้าใหม่ ไม่มีข้อมูลราคาหรือ reserve ในข้อความ
+  after_commit :broadcast_room_refresh, on: :update, if: :saved_change_to_status?
   after_commit :schedule_settlement, on: :update, if: -> { bidding? && saved_change_to_status? }
 
   scope :unfinished, -> { where(status: %w[scheduled bidding]) }
@@ -157,6 +160,10 @@ class AuctionEvent < ApplicationRecord
   end
 
   private
+
+  def broadcast_room_refresh
+    Turbo::StreamsChannel.broadcast_refresh_to(self)
+  end
     def schedule_start
       StartAuctionEventJob.set(wait_until: starts_at).perform_later(id)
     end

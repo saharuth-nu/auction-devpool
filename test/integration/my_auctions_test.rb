@@ -17,7 +17,7 @@ class MyAuctionsPageTest < ActionDispatch::IntegrationTest
     starts = @base + hours.hours
     event = AuctionEvent.create!(name: "รอบ #{hours} ชม.", room:, auction_method: auction_methods(:first_price),
                                  starts_at: starts, ends_at: starts + 1.hour)
-    lot = Lot.create!(auction_event: event, item: Item.create!(name: item_name, starting_price: 100, reserve_price: 100, status: :available))
+    lot = Lot.create!(auction_event: event, item: Item.create!(description: "รายละเอียด", name: item_name, starting_price: 100, reserve_price: 100, status: :available))
     Participation.create!(user:, lot:)
     [ event, lot ]
   end
@@ -133,7 +133,8 @@ class MyAuctionsPageTest < ActionDispatch::IntegrationTest
       assert_equal "ถูกยกเลิก", badges["ถูกนำออก"]
       assert_equal "รอสรุปผล", badges["รอผล"]
       assert_nil finished.at_css("dialog")
-      assert_includes buttons(finished), "ดูผลการประมูล"
+      # event ในกลุ่มนี้ยังไม่สรุปผล จึงกดดูผลไม่ได้ชั่วคราว (ลิงก์จริงเมื่อสรุปผลแล้ว ครอบใน auction_results_test)
+      assert_includes buttons(finished), "กำลังสรุปผล"
     end
   end
 

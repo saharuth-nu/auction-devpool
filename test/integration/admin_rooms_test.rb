@@ -74,7 +74,7 @@ class AdminRoomsTest < ActionDispatch::IntegrationTest
 
   test "ROOM-04: ลดจำนวนสินค้าสูงสุดต่ำกว่าที่การประมูลที่ยังไม่จบใช้อยู่ไม่ได้ แสดงเหตุผลใต้ช่อง" do
     event = auction_events(:upcoming)
-    event.lots.create!(item: Item.create!(name: "ของเพิ่ม", starting_price: 100, reserve_price: 100, status: :available))
+    event.lots.create!(item: Item.create!(description: "รายละเอียด", name: "ของเพิ่ม", starting_price: 100, reserve_price: 100, status: :available))
 
     patch admin_room_path(rooms(:main_hall)), params: room_params(name: "ห้องใหญ่", max_items: 1)
     assert_response :unprocessable_entity

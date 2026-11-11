@@ -15,6 +15,8 @@
     <dt>ชื่อ-นามสกุล</dt><dd><%= @user.fullname %></dd>
     <dt>อีเมล</dt><dd><%= @user.email %></dd>
     <dt>สมัครเมื่อ</dt><dd><%= display_time(@user.created_at) %></dd>
+    <dt>ยินยอมเงื่อนไข (PDPA)</dt>
+    <dd><%= @user.consented_at ? "#{display_time(@user.consented_at)} (ฉบับ #{@user.terms_version})" : "- (ไม่มีบันทึกการยินยอม)" %></dd>
     <dt>สถานะคุณสมบัติ</dt><dd><%= status_badge :qualification, @user.qualification_status %></dd>
     <dt>บัญชี</dt><dd><%= status_badge :suspension, @user.suspended? ? "suspended" : "active" %>
       <% if @user.suspended? %> ตั้งแต่ <%= display_time(@user.suspended_at) %><% end %></dd>

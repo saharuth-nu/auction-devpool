@@ -8,7 +8,7 @@ class ParticipationTest < ActiveSupport::TestCase
     event = AuctionEvent.create!(name: "ทดสอบ", room:, auction_method: auction_methods(:first_price),
                                  starts_at:, ends_at: starts_at + 1.hour)
     lots = Array.new(lots) do |i|
-      item = Item.create!(name: "สินค้า #{i}", starting_price: 100, reserve_price: 100, status: :available)
+      item = Item.create!(description: "รายละเอียด", name: "สินค้า #{i}", starting_price: 100, reserve_price: 100, status: :available)
       Lot.create!(auction_event: event, item:)
     end
     [ event, *lots ]

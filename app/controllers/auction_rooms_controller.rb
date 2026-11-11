@@ -15,7 +15,11 @@ class AuctionRoomsController < ApplicationController
 
     # สรุปผลแล้ว: ผู้ที่นั่งอยู่ในห้องตอนหมดเวลา (หน้ารีเฟรชเองเมื่อนับถอยหลังถึงศูนย์ ตอนนั้นมักสรุปผลเสร็จแล้ว)
     # ต้องไปหน้าที่ดูผลได้ ไม่ใช่เจอ 404 (หน้าผลการประมูลโดยเฉพาะอยู่ที่ #61)
-    return redirect_to(my_auctions_path, notice: "การประมูลนี้สรุปผลแล้ว ดูผลได้ที่การประมูลของฉัน") if @event.settled?
+    if @event.settled?
+      return redirect_to(auction_event_results_path(@event), notice: "การประมูลนี้สรุปผลแล้ว") if participated?(@event)
+
+      return redirect_to(my_auctions_path, notice: "การประมูลนี้สรุปผลแล้ว")
+    end
 
     return redirect_to(my_auctions_path, alert: closed_message(@event)) unless may_enter?(@event)
 
@@ -31,6 +35,10 @@ class AuctionRoomsController < ApplicationController
   end
 
   private
+    def participated?(event)
+      Participation.active.joins(:lot).exists?(user_id: current_user.id, lots: { auction_event_id: event.id })
+    end
+
     # USR-08 / EVT-06: ถึงเวลาเริ่มแล้ว และยังไม่เลยเวลาปิดห้อง
     def may_enter?(event)
       Clock.within?(event.starts_at, event.ends_at)

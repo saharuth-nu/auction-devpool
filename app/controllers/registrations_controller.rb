@@ -11,7 +11,7 @@ class RegistrationsController < ApplicationController
 
   def create
     # role กำหนดโดยระบบเสมอ ไม่รับจากฟอร์ม (กันสมัครเป็น admin)
-    @user = User.new(registration_params.merge(role: :bidder))
+    @user = User.new(registration_params.merge(role: :bidder, require_terms: true))
     if @user.save
       start_new_session_for @user
       redirect_to qualification_path, notice: "สมัครสมาชิกสำเร็จ กรุณากรอกทรัพย์สินเพื่อตรวจสอบคุณสมบัติ"
@@ -23,6 +23,6 @@ class RegistrationsController < ApplicationController
   private
 
   def registration_params
-    params.expect(user: %i[fullname username email password password_confirmation])
+    params.expect(user: %i[fullname username email password password_confirmation accept_terms])
   end
 end

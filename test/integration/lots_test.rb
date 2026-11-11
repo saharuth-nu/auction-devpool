@@ -52,7 +52,8 @@ class LotsTest < ActionDispatch::IntegrationTest
   end
 
   test "NFR-11 ไม่มีรายละเอียดแสดงข้อความ ยังไม่มีรายละเอียด" do
-    @item.update!(description: nil)
+    # ITEM-13 บังคับกรอกรายละเอียดแล้ว แต่ข้อมูลเก่าที่ว่างอยู่ต้องยังแสดงข้อความสำรอง (จำลองด้วยการเขียนตรง ข้าม validation)
+    @item.update_column(:description, nil)
     show_lot
     assert_includes page.text, "ยังไม่มีรายละเอียด"
   end

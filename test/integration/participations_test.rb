@@ -21,7 +21,7 @@ class ParticipationsTest < ActionDispatch::IntegrationTest
     starts = 1.day.from_now.change(usec: 0)
     event = AuctionEvent.create!(name: "รอบเล็ก", room:, auction_method: auction_methods(:first_price), starts_at: starts, ends_at: starts + 1.hour)
     Array.new(2) do |i|
-      Lot.create!(auction_event: event, item: Item.create!(name: "ของ #{i}", starting_price: 100, reserve_price: 100, status: :available))
+      Lot.create!(auction_event: event, item: Item.create!(description: "รายละเอียด", name: "ของ #{i}", starting_price: 100, reserve_price: 100, status: :available))
     end
   end
 

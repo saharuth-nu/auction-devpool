@@ -91,7 +91,7 @@ class AdminAuctionEventsTest < ActionDispatch::IntegrationTest
 
   test "EVT-03: ใส่สินค้าเกินที่ห้องรองรับไม่ได้" do
     room = Room.create!(name: "ห้องจิ๋ว", max_participants: 5, max_items: 1)
-    extra = Item.create!(name: "ชิ้นที่สอง", starting_price: 100, reserve_price: 100, status: :available)
+    extra = Item.create!(description: "รายละเอียด", name: "ชิ้นที่สอง", starting_price: 100, reserve_price: 100, status: :available)
     assert_no_difference -> { AuctionEvent.count } do
       post admin_auction_events_path, params: valid_params(room_id: room.id, selected_item_ids: [ items(:car).id, extra.id ])
     end
