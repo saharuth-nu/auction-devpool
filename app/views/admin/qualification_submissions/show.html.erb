@@ -1,5 +1,6 @@
 <% user = @submission.user %>
 <% content_for :title, "ตรวจคุณสมบัติ #{user.username}" %>
+<%= ui_back_link "กลับคิวตรวจคุณสมบัติ", admin_qualification_submissions_path %>
 <%= ui_page_header "ตรวจคุณสมบัติ “#{user.username}”", description: user.fullname do %>
   <%= ui_link_button "ดูข้อมูลผู้ใช้", admin_user_path(user), variant: :secondary %>
 <% end %>
@@ -22,8 +23,10 @@
     <p>ผ่าน: ผู้ใช้ใช้งานได้เต็มรูปแบบ และเพดานราคาที่ยื่นได้คือ <strong><%= baht(@submission.total_value) %></strong> ·
        ไม่ผ่าน: ผู้ใช้เห็นเหตุผลและแก้ไขส่งใหม่ได้</p>
     <div class="ui-actions">
-      <%= ui_button_to "ผ่าน", approve_admin_qualification_submission_path(@submission), size: :xl,
-            data: { turbo_confirm: "ยืนยันให้ “#{user.username}” ผ่านการตรวจสอบคุณสมบัติ? เพดานราคา #{baht(@submission.total_value)}" } %>
+      <%= ui_confirm_button "ผ่าน", approve_admin_qualification_submission_path(@submission), method: :post, variant: :primary,
+            size: :xl, confirm_label: "ยืนยันผ่าน",
+            title: "ให้ “#{user.username}” ผ่านการตรวจคุณสมบัติ?",
+            message: "ผู้ใช้จะใช้งานได้เต็มรูปแบบ เพดานราคาที่ยื่นได้ #{baht(@submission.total_value)}" %>
     </div>
     <%= ui_form_with url: reject_admin_qualification_submission_path(@submission), scope: :rejection,
                      data: { turbo_confirm: "ยืนยันว่า “#{user.username}” ไม่ผ่าน? ผู้ใช้จะเห็นเหตุผลนี้" } do |f| %>

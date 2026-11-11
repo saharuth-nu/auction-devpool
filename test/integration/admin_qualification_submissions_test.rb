@@ -31,8 +31,9 @@ class AdminQualificationSubmissionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "td", "บ้าน"
     assert_select "td", "รถ"
-    # ui_button_to ใส่ data-turbo-confirm ที่ปุ่ม (Turbo อ่านจาก submitter ได้)
-    assert_select "form[action='#{approve_admin_qualification_submission_path(@submission)}'] button[data-turbo-confirm]"
+    # ปุ่มผ่านใช้หน้าต่างยืนยันมาตรฐาน (ui_confirm_button) ที่บอกผลที่จะเกิด
+    assert_select "dialog.ui-dialog form[action='#{approve_admin_qualification_submission_path(@submission)}']"
+    assert_select "dialog .ui-dialog__title", /ผ่านการตรวจคุณสมบัติ/
     assert_select "form[action='#{reject_admin_qualification_submission_path(@submission)}'][data-turbo-confirm]"
   end
 

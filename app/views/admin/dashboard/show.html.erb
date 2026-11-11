@@ -1,5 +1,12 @@
 <% content_for :title, "ผู้ดูแลระบบ" %>
 <%= ui_page_header "ผู้ดูแลระบบ", description: "เลือก module ที่ต้องการใช้งาน" %>
+<div class="ui-stats">
+  <%= ui_stat_card "รอตรวจคุณสมบัติ", QualificationSubmission.pending.count, hint: "คน" %>
+  <%= ui_stat_card "ผู้ประมูลทั้งหมด", User.bidder.count, hint: "คน" %>
+  <%= ui_stat_card "สินค้าพร้อมขาย", Item.where(status: :available).count, hint: "ชิ้น" %>
+  <%= ui_stat_card "การประมูลที่เปิดอยู่", AuctionEvent.where(status: :bidding).count, hint: "รอบ" %>
+</div>
+
 <%= ui_card title: "Module" do %>
   <ul class="ui-link-list">
     <li><%= link_to "ตรวจสอบผู้ใช้", admin_qualification_submissions_path %>

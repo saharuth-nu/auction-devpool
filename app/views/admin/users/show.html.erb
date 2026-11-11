@@ -1,9 +1,10 @@
 <%# รายละเอียดผู้ใช้ (ADM-02): ข้อมูลบัญชี, สถานะ, เพดานราคา, ประวัติส่งตรวจทุกรอบ (QUAL-14), ประวัติระงับ (SUSP-08) %>
 <%# TODO(ADM-02): การเข้าร่วมและราคาที่ยื่นทั้งหมด — เพิ่มเมื่อมี Participation (#59) และ Bid (#63) %>
 <% content_for :title, "ผู้ใช้ #{@user.username}" %>
+<%= ui_back_link "กลับรายการผู้ใช้", admin_users_path %>
 <%= ui_page_header @user.username, description: @user.fullname do %>
-  <%= ui_button_to "รีเซ็ตรหัสผ่าน", admin_user_password_reset_path(@user), variant: :secondary,
-        data: { turbo_confirm: "รีเซ็ตรหัสผ่านของ #{@user.username}? ผู้ใช้จะถูกออกจากระบบและต้องตั้งรหัสใหม่" } %>
+  <%= ui_confirm_button "รีเซ็ตรหัสผ่าน", admin_user_password_reset_path(@user), method: :post, variant: :primary, trigger_variant: :secondary,
+        title: "รีเซ็ตรหัสผ่านของ #{@user.username}?", message: "ผู้ใช้จะถูกออกจากระบบและต้องตั้งรหัสผ่านใหม่ รหัสชั่วคราวจะแสดงครั้งเดียว" %>
   <% unless @user.suspended? %>
     <%= ui_link_button "ระงับบัญชี", new_admin_user_suspension_path(@user), variant: :danger_outline %>
   <% end %>
