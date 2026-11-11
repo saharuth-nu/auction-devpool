@@ -22,9 +22,9 @@
           <td>
             <div class="ui-actions">
               <% if method.enabled? %>
-                <%= ui_button_to "ปิดใช้งาน", disable_admin_auction_method_path(method), method: :patch,
-                      variant: :danger_outline, size: :sm,
-                      data: { turbo_confirm: "ปิดใช้งาน “#{method.name}”? จะเลือกตอนสร้างการประมูลใหม่ไม่ได้ (การประมูลเดิมไม่กระทบ)" } %>
+                <%= ui_confirm_button "ปิดใช้งาน", disable_admin_auction_method_path(method), method: :patch,
+                      trigger_variant: :danger_outline, size: :sm, title: "ปิดใช้งานวิธีประมูลนี้?",
+                      message: "“#{method.name}” จะเลือกตอนสร้างการประมูลใหม่ไม่ได้ การประมูลเดิมไม่กระทบ (เปิดกลับได้ภายหลัง)" %>
               <% else %>
                 <%= ui_button_to "เปิดใช้งาน", enable_admin_auction_method_path(method), method: :patch,
                       variant: :secondary, size: :sm %>
