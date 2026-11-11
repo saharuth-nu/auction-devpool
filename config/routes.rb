@@ -72,5 +72,10 @@ Rails.application.routes.draw do
         patch :move, on: :member
       end
     end
+
+    # การประมูล (EVT-01): ไม่มีหน้า show แยก ดู/แก้ที่หน้า edit · ยกเลิกเป็น PATCH แยก (EVT-08)
+    resources :auction_events, path: "auctions", except: :show do
+      patch :cancel, on: :member
+    end
   end
 end

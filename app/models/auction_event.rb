@@ -31,12 +31,40 @@ class AuctionEvent < ApplicationRecord
   # ต้องมาก่อน has_many dependent: :destroy เพื่อกันการลบ lot ของ event ที่ลบไม่ได้
   before_destroy :ensure_deletable, prepend: true
 
+  # ตั้งจากฟอร์ม: id ของสินค้าที่เลือก บันทึกเป็น lot หลัง save (ดู sync_lots)
+  # ไม่ใช้ item_ids= ของ has_many :through เพราะ Rails จะบันทึก lot ทันทีก่อน validate
+  attr_reader :selected_item_ids
+
   validates :name, :starts_at, :ends_at, presence: true
+  validates :name, length: { maximum: 200 }
   validate :ends_after_bidding_window
+  validate :starts_in_future, if: -> { new_record? || will_save_change_to_starts_at? }
+  validate :auction_method_selectable, if: -> { new_record? || will_save_change_to_auction_method_id? }
+  validate :room_selectable, if: -> { new_record? || will_save_change_to_room_id? }
   validate :status_transition_allowed, on: :update
   validate :schedule_locked_after_start, on: :update
+  validate :items_selection_valid, unless: -> { selected_item_ids.nil? }
+
+  after_save :sync_lots, unless: -> { selected_item_ids.nil? }
 
   scope :unfinished, -> { where(status: %w[scheduled bidding]) }
+
+  def selected_item_ids=(ids)
+    @selected_item_ids = Array(ids).compact_blank.map(&:to_i).uniq
+  end
+
+  # id ของสินค้าที่อยู่ใน event นี้ (ไม่นับ lot ที่ถูกยกเลิก) ใช้ติ๊กช่องในฟอร์ม
+  def current_item_ids
+    selected_item_ids || lots.reject(&:cancelled?).map(&:item_id)
+  end
+
+  # สินค้าที่เลือกใส่ event นี้ได้ (EVT-04): พร้อมขาย ไม่เก็บถาวร ไม่อยู่ใน event อื่นที่ยังไม่จบ
+  # รวมสินค้าที่อยู่ใน event นี้อยู่แล้วด้วย เพื่อให้แก้ไขโดยไม่หลุดหายจากรายการ
+  def selectable_items
+    busy = Lot.pending.where.not(auction_event_id: id).select(:item_id)
+    available = Item.active.available.where.not(id: busy)
+    Item.where(id: available).or(Item.where(id: lots.pending.select(:item_id))).order(:name)
+  end
 
   # ปิดรับราคาเมื่อครบระยะเวลาของวิธีประมูลนับจากเวลาเริ่ม (BID-02, EVT-06)
   def bidding_ends_at
@@ -67,7 +95,7 @@ class AuctionEvent < ApplicationRecord
   # ยกเลิกก่อนเริ่ม: lot ที่ยังไม่จบเป็น cancelled เพื่อปล่อยสินค้าไปใส่ event อื่นได้ (ITEM-10)
   def cancel!
     transaction do
-      transition_to!(:cancelled, cancelled_at: Time.current)
+      transition_to!(:cancelled, cancelled_at: Clock.now)
       lots.pending.find_each { |lot| lot.update!(status: :cancelled) }
     end
   end
@@ -80,6 +108,60 @@ class AuctionEvent < ApplicationRecord
 
       errors.add(:ends_at, :before_bidding_window,
         message: "ต้องไม่เร็วกว่าเวลาเริ่ม + #{auction_method.bidding_seconds} วินาที")
+    end
+
+    def starts_in_future
+      return if starts_at.blank? || starts_at > Clock.now
+
+      errors.add(:starts_at, :in_past, message: "ต้องเป็นเวลาในอนาคต")
+    end
+
+    # METH-06: วิธีที่ปิดใช้งาน (หรือยังไม่มีกติกาจริง) เลือกตอนสร้าง/เปลี่ยนไม่ได้ · event เดิมไม่กระทบ
+    def auction_method_selectable
+      return if auction_method.blank? || AuctionMethod.selectable.exists?(auction_method.id)
+
+      errors.add(:auction_method, :not_selectable, message: "ถูกปิดใช้งานหรือยังไม่รองรับ")
+    end
+
+    # ROOM-05: ห้องที่เก็บถาวรแล้วเลือกใส่ event ใหม่ไม่ได้
+    def room_selectable
+      return if room.blank? || !room.archived?
+
+      errors.add(:room, :archived, message: "ถูกเก็บถาวรแล้ว")
+    end
+
+    # EVT-02/03/04/08 ของสินค้าที่เลือก
+    def items_selection_valid
+      if selected_item_ids.empty?
+        errors.add(:selected_item_ids, :blank, message: "ต้องเลือกสินค้าอย่างน้อย 1 ชิ้น")
+        return
+      end
+
+      if persisted? && status_in_database != "scheduled" && selected_item_ids.sort != lots.map(&:item_id).sort
+        errors.add(:selected_item_ids, :locked_after_start, message: "แก้สินค้าไม่ได้เมื่อการประมูลเริ่มแล้ว")
+        return
+      end
+
+      if room && selected_item_ids.size > room.max_items
+        errors.add(:selected_item_ids, :too_many,
+          message: "เลือกได้ไม่เกิน #{room.max_items} ชิ้นตามที่ห้องรองรับ (เลือก #{selected_item_ids.size} ชิ้น)")
+      end
+
+      allowed = selectable_items.where(id: selected_item_ids).pluck(:id)
+      rejected = Item.where(id: selected_item_ids - allowed).pluck(:name)
+      if (selected_item_ids - allowed).any?
+        errors.add(:selected_item_ids, :not_selectable,
+          message: "เลือกไม่ได้: #{rejected.presence&.join(', ') || 'ไม่พบสินค้า'} (ต้องพร้อมขายและไม่อยู่ในการประมูลอื่น)")
+      end
+    end
+
+    # สร้าง lot ของสินค้าที่เพิ่ม และลบ lot ของสินค้าที่เอาออก (ทำได้เฉพาะก่อนเริ่ม ตรวจไว้ใน items_selection_valid)
+    def sync_lots
+      current = lots.pending.to_a
+      current.reject { |lot| selected_item_ids.include?(lot.item_id) }.each(&:destroy!)
+      (selected_item_ids - current.map(&:item_id)).each { |item_id| lots.create!(item_id: item_id) }
+      lots.reset
+      @selected_item_ids = nil
     end
 
     def status_transition_allowed
