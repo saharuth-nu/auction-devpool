@@ -63,11 +63,17 @@ class AuctionRoomsTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "event ที่สรุปผลหรือยกเลิกแล้วไม่มีห้อง (404)" do
+  test "event ที่สรุปผลแล้ว พาไปการประมูลของฉันพร้อมข้อความ (ผู้ที่อยู่ในห้องตอนหมดเวลาต้องไม่เจอ 404)" do
     event, = build_event
     event.update_columns(status: "settled")
-    open_room_at(event.starts_at + 5.seconds, event) { assert_response :not_found }
+    open_room_at(event.starts_at + 5.seconds, event) do
+      assert_redirected_to my_auctions_path
+      follow_redirect!
+      assert_select ".ui-alert--success", /สรุปผลแล้ว/
+    end
+  end
 
+  test "event ที่ยกเลิกแล้วไม่มีห้อง (404)" do
     other, = build_event(hours: 3)
     other.update_columns(status: "cancelled")
     open_room_at(other.starts_at + 5.seconds, other) { assert_response :not_found }

@@ -10,7 +10,13 @@ class AuctionRoomsController < ApplicationController
   allow_roles :bidder
 
   def show
-    @event = AuctionEvent.unfinished.includes(:room, :auction_method).find(params[:auction_event_id])
+    @event = AuctionEvent.includes(:room, :auction_method).find(params[:auction_event_id])
+    raise ActiveRecord::RecordNotFound, "ไม่มีห้องของการประมูลที่ถูกยกเลิก" if @event.cancelled?
+
+    # สรุปผลแล้ว: ผู้ที่นั่งอยู่ในห้องตอนหมดเวลา (หน้ารีเฟรชเองเมื่อนับถอยหลังถึงศูนย์ ตอนนั้นมักสรุปผลเสร็จแล้ว)
+    # ต้องไปหน้าที่ดูผลได้ ไม่ใช่เจอ 404 (หน้าผลการประมูลโดยเฉพาะอยู่ที่ #61)
+    return redirect_to(my_auctions_path, notice: "การประมูลนี้สรุปผลแล้ว ดูผลได้ที่การประมูลของฉัน") if @event.settled?
+
     return redirect_to(my_auctions_path, alert: closed_message(@event)) unless may_enter?(@event)
 
     @lots = @event.lots.pending.joins(:item).merge(Item.active)
