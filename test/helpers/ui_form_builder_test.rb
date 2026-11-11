@@ -6,9 +6,18 @@ class UiFormBuilderTest < ActionView::TestCase
   # โมเดลจำลองที่ไม่ต้องใช้ตารางในฐานข้อมูล
   class Sample
     include ActiveModel::Model
-    attr_accessor :title, :description
+    attr_accessor :title, :description, :room_id, :enabled, :images
     validates :title, presence: true
   end
+
+  setup do
+    # ชื่อช่องภาษาไทยของโมเดลจำลอง (ช่องที่ไม่ใส่ label: ต้องมีชื่อใน locale ตาม NFR-01)
+    I18n.backend.store_translations(:th, activemodel: { attributes: { "ui_form_builder_test/sample": {
+      title: "ชื่อเรื่อง", room_id: "ห้องประมูล", enabled: "เปิดใช้งาน", images: "รูปสินค้า"
+    } } })
+  end
+
+  teardown { I18n.backend.reload! }
 
   def render_form(record)
     ui_form_with(model: record, url: "/samples", scope: :sample) do |f|
@@ -18,7 +27,7 @@ class UiFormBuilderTest < ActionView::TestCase
 
   test "ช่องกรอกมี label, ui-input และ hint" do
     doc = Nokogiri::HTML.fragment(render_form(Sample.new(title: "ของเก่า")))
-    assert_equal "Title", doc.at_css("label.ui-field__label").text
+    assert_equal "ชื่อเรื่อง", doc.at_css("label.ui-field__label").text # ชื่อช่องมาจาก locale ไทย
     input = doc.at_css("input.ui-input")
     assert_equal "ของเก่า", input["value"]
     assert_equal "ชื่อสั้นๆ", doc.at_css(".ui-field__hint").text
@@ -60,5 +69,68 @@ class UiFormBuilderTest < ActionView::TestCase
     assert_raises(ArgumentError) do
       ui_form_with(model: Sample.new, url: "/samples", scope: :sample) { |f| f.ui_field(:title, as: :color) }
     end
+  end
+
+  # ---------- NFR-11: label ทุกช่อง, ชนิดช่องเพิ่ม, สถานะกำลังบันทึก ----------
+
+  def form_with_field(record = Sample.new, &block)
+    Nokogiri::HTML.fragment(ui_form_with(model: record, url: "/samples", scope: :sample, &block))
+  end
+
+  test "NFR-11 select มี label, ตัวเลือก และ include_blank" do
+    doc = form_with_field { |f| f.ui_field(:room_id, as: :select, choices: [ [ "ห้อง A", 1 ], [ "ห้อง B", 2 ] ], include_blank: "เลือกห้อง") }
+    select = doc.at_css("select.ui-input")
+    assert_equal "ห้องประมูล", doc.at_css("label.ui-field__label").text
+    assert_equal select["id"], doc.at_css("label")["for"]
+    assert_equal [ "เลือกห้อง", "ห้อง A", "ห้อง B" ], select.css("option").map(&:text)
+  end
+
+  test "NFR-11 select ไม่ส่ง choices ต้อง raise" do
+    assert_raises(ArgumentError) { form_with_field { |f| f.ui_field(:room_id, as: :select) } }
+  end
+
+  test "NFR-11 checkbox: ป้ายชื่ออยู่ข้างช่องและคลิกข้อความติ๊กได้" do
+    doc = form_with_field { |f| f.ui_field(:enabled, as: :checkbox) }
+    label = doc.at_css("label.ui-check")
+    checkbox = label.at_css("input[type=checkbox].ui-checkbox")
+    assert_equal checkbox["id"], label["for"]
+    assert_equal "เปิดใช้งาน", label.at_css(".ui-check__text").text
+  end
+
+  test "NFR-11 file รองรับหลายไฟล์และ accept (รูปสินค้า ITEM-07)" do
+    doc = form_with_field { |f| f.ui_field(:images, as: :file, multiple: true, accept: "image/webp") }
+    input = doc.at_css("input[type=file].ui-input")
+    assert input["multiple"]
+    assert_equal "image/webp", input["accept"]
+    assert_equal "รูปสินค้า", doc.at_css("label.ui-field__label").text
+  end
+
+  test "NFR-11 error แสดงใต้ select และ checkbox ด้วย" do
+    record = Sample.new
+    record.errors.add(:room_id, :blank)
+    record.errors.add(:enabled, :accepted)
+    doc = form_with_field(record) do |f|
+      f.ui_field(:room_id, as: :select, choices: [ [ "ห้อง A", 1 ] ]) + f.ui_field(:enabled, as: :checkbox)
+    end
+    assert_equal [ "ต้องกรอก", "ต้องยอมรับก่อน" ], doc.css(".ui-field__error").map(&:text)
+    assert_includes doc.at_css("select")["class"].split, "ui-input--invalid"
+    assert_equal "true", doc.at_css("select")["aria-invalid"]
+  end
+
+  test "NFR-01 ช่องที่ไม่มีชื่อไทยและไม่ส่ง label raise (กันชื่อช่องอังกฤษหลุดถึงผู้ใช้)" do
+    error = assert_raises(ArgumentError) { form_with_field { |f| f.ui_field(:description) } }
+    assert_match "ไม่มีชื่อภาษาไทย", error.message
+  end
+
+  test "NFR-01 ฟอร์มไม่ผูกโมเดลที่ไม่ส่ง label raise ด้วย" do
+    assert_raises(ArgumentError) { ui_form_with(url: "/login", scope: :login) { |f| f.ui_field(:username) } }
+  end
+
+  test "NFR-11 ui_submit แสดงสถานะกำลังบันทึกระหว่างส่ง และเปลี่ยนข้อความได้" do
+    button = form_with_field { |f| f.ui_submit("บันทึก") }.at_css("button[type=submit]")
+    assert_equal "กำลังบันทึก...", button["data-turbo-submits-with"]
+
+    button = form_with_field { |f| f.ui_submit("ยื่นราคา", submitting: "กำลังส่งราคา...") }.at_css("button[type=submit]")
+    assert_equal "กำลังส่งราคา...", button["data-turbo-submits-with"]
   end
 end
