@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
   resource :registration, only: %i[new create]
+  # หน้าสถานะคุณสมบัติ + ส่ง/แก้ทรัพย์สิน (QUAL-02/04/05/06/09)
+  resource :qualification, only: %i[show create]
 
   # ---- บัญชีของตนเอง (admin และผู้ใช้): โปรไฟล์, เปลี่ยนรหัสผ่าน, บังคับเปลี่ยนหลังถูกรีเซ็ต
   resource :profile, only: :show
@@ -32,8 +34,10 @@ Rails.application.routes.draw do
       resource :disablement, only: %i[new create destroy]
       resource :password_reset, only: :create
     end
-    resources :users, only: [] do
+    # ผู้ใช้ทั้งหมด + รายละเอียด (ADM-01/02) · ระงับ/ยกเลิกระงับ (SUSP-01/07)
+    resources :users, only: %i[index show] do
       resource :password_reset, only: :create
+      resource :suspension, only: %i[new create destroy]
     end
 
     # ข้อมูลหลัก (#43-#51)
@@ -53,5 +57,15 @@ Rails.application.routes.draw do
       end
       resources :images, only: :destroy, controller: "item_images"
     end
+
+    # คิวตรวจคุณสมบัติ (QUAL-07/08)
+    resources :qualification_submissions, only: %i[index show] do
+      member do
+        post :approve
+        post :reject
+      end
+    end
+    # ประวัติการกระทำของ admin (NFR-17/18) ดูได้อย่างเดียว
+    resources :audit_logs, only: :index
   end
 end

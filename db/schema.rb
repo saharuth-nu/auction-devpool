@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_080659) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -39,6 +39,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080659) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "assets", force: :cascade do |t|
+    t.integer "qualification_submission_id", null: false
+    t.string "name", null: false
+    t.decimal "value", precision: 15, scale: 2, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["qualification_submission_id"], name: "index_assets_on_qualification_submission_id"
+  end
+
   create_table "auction_methods", force: :cascade do |t|
     t.string "code", null: false
     t.string "name", null: false
@@ -48,6 +58,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080659) do
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_auction_methods_on_code", unique: true
     t.check_constraint "bidding_seconds > 0", name: "auction_methods_bidding_seconds_positive"
+  end
+
+  create_table "audit_logs", force: :cascade do |t|
+    t.integer "admin_id", null: false
+    t.string "action", null: false
+    t.string "target_type"
+    t.integer "target_id"
+    t.json "change_set", default: {}, null: false
+    t.text "reason"
+    t.datetime "created_at", null: false
+    t.index ["action"], name: "index_audit_logs_on_action"
+    t.index ["admin_id"], name: "index_audit_logs_on_admin_id"
+    t.index ["created_at"], name: "index_audit_logs_on_created_at"
+    t.index ["target_type", "target_id"], name: "index_audit_logs_on_target"
   end
 
   create_table "items", force: :cascade do |t|
@@ -67,6 +91,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080659) do
     t.check_constraint "reserve_price >= starting_price", name: "items_reserve_not_below_starting"
     t.check_constraint "starting_price > 0", name: "items_starting_price_positive"
     t.check_constraint "status IN ('awaiting_approval', 'available', 'in_auction', 'sold')", name: "items_status_valid"
+  end
+
+  create_table "qualification_submissions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "submitted_at", null: false
+    t.integer "reviewed_by_id"
+    t.datetime "reviewed_at"
+    t.text "rejection_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reviewed_by_id"], name: "index_qualification_submissions_on_reviewed_by_id"
+    t.index ["status"], name: "index_qualification_submissions_on_status"
+    t.index ["user_id", "submitted_at"], name: "index_qualification_submissions_on_user_id_and_submitted_at"
+    t.index ["user_id"], name: "index_qualification_submissions_on_user_id"
+    t.index ["user_id"], name: "index_qualification_submissions_one_pending_per_user", unique: true, where: "status = 'pending'"
   end
 
   create_table "rooms", force: :cascade do |t|
@@ -91,6 +131,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080659) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "suspension_events", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "admin_id", null: false
+    t.string "action", null: false
+    t.text "reason", null: false
+    t.datetime "created_at", null: false
+    t.index ["admin_id"], name: "index_suspension_events_on_admin_id"
+    t.index ["user_id", "created_at"], name: "index_suspension_events_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_suspension_events_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "username", null: false
     t.string "email"
@@ -104,14 +155,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080659) do
     t.datetime "disabled_at"
     t.text "disabled_reason"
     t.integer "disabled_by_id"
+    t.string "qualification_status"
     t.index ["disabled_by_id"], name: "index_users_on_disabled_by_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["qualification_status"], name: "index_users_on_qualification_status"
+    t.index ["suspended_at"], name: "index_users_on_suspended_at"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "assets", "qualification_submissions"
+  add_foreign_key "audit_logs", "users", column: "admin_id"
   add_foreign_key "items", "users", column: "approved_by_id"
+  add_foreign_key "qualification_submissions", "users"
+  add_foreign_key "qualification_submissions", "users", column: "reviewed_by_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "suspension_events", "users"
+  add_foreign_key "suspension_events", "users", column: "admin_id"
   add_foreign_key "users", "users", column: "disabled_by_id"
 end

@@ -11,7 +11,7 @@ class HomeTest < ActionDispatch::IntegrationTest
   def entry(item, starts_at) = AuctionListing::Entry.new(item:, starts_at:)
 
   test "USR-01 ผู้ใช้เห็น banner คงที่ และหัวข้อสินค้าประมูล" do
-    sign_in create_bidder
+    sign_in create_approved_bidder
     get root_path
     assert_response :success
     assert_equal 1, page.css("h1").size, "ต้องมี h1 เดียวต่อหน้า"
@@ -21,10 +21,16 @@ class HomeTest < ActionDispatch::IntegrationTest
 
   test "USR-03 ยังไม่มี event: ไม่แสดงสินค้าใดเลย แม้มีสินค้าพร้อมขายในระบบ" do
     assert Item.available.exists?, "fixture ต้องมีสินค้าพร้อมขาย"
-    sign_in create_bidder
+    sign_in create_approved_bidder
     get root_path
     assert_empty page.css(".ui-item-card")
     assert_equal "ยังไม่มีสินค้าเปิดประมูล", page.at_css(".ui-empty__title").text
+  end
+
+  test "QUAL-05 ผู้ใช้ที่ยังไม่ผ่านการตรวจคุณสมบัติถูกส่งไปหน้าสถานะ ไม่เห็นหน้าแรก" do
+    sign_in create_bidder
+    get root_path
+    assert_redirected_to qualification_path
   end
 
   test "NFR-08 ยังไม่ login ถูกส่งไปหน้า login" do
@@ -43,7 +49,7 @@ class HomeTest < ActionDispatch::IntegrationTest
     doc = render_listings([ entry(items(:car), starts), entry(items(:painting), starts + 1.hour) ])
     assert_nil doc.at_css(".ui-empty")
     assert_equal [ "รถยนต์", "ภาพวาด" ], doc.css(".ui-item-card__name").map(&:text)
-    assert_equal [ "฿300,000", "฿5,000" ], doc.css(".ui-item-card__price").map(&:text)
+    assert_equal [ "300,000 บาท", "5,000 บาท" ], doc.css(".ui-item-card__price").map(&:text)
     assert_equal 2, doc.css("ul.ui-item-grid > li").size
   end
 

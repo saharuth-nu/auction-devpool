@@ -136,3 +136,16 @@ textarea.ui-input { height: auto; min-height: 96px; padding: 12px 14px; border-r
 .ui-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
 .ui-thumbs__item { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
 .ui-thumbs__item img { width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); background: var(--color-zinc-50); }
+
+/* ---------- Pagination (ui_pagination) ---------- */
+.ui-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.ui-pagination__info { font-size: var(--text-xs); color: var(--color-zinc-500); font-variant-numeric: tabular-nums; }
+
+/* ---------- ฟอร์มหลายคอลัมน์ / แถบตัวกรอง ---------- */
+/* แถวกรอกข้อมูลหลายช่อง (เช่น ชื่อทรัพย์สิน + มูลค่า) ยุบเป็นคอลัมน์เดียวบนมือถือ */
+.ui-form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 0 16px; }
+.ui-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0 16px; }
+.ui-filter-bar .ui-field { min-width: 180px; flex: 1 1 180px; }
+@media (max-width: 640px) {
+  .ui-form-row { grid-template-columns: 1fr; }
+}

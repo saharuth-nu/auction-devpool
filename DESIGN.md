@@ -62,6 +62,8 @@
 | **Input / Textarea** | `ui-input` (`--sm`, `--invalid`) | สูง **48px** (sm = 40px) มุมโค้งเต็ม ขอบ **2px** `zinc-300` → hover/focus `brand-border` · invalid ขอบ `danger-500` · ข้อความ error ใต้ช่อง `ui-field__error` · Textarea มุม 16px |
 | **Field** | `ui-field__label` `__hint` `__error` | ป้ายชื่อด้านบน 14px medium `zinc-600` |
 | **Checkbox / Radio** | `ui-checkbox` `ui-radio` | 16px สี `primary-600` · ต้องมี `<label>` หรือ `aria-label` |
+| **Pagination** | `ui-pagination` + `__info` | ชิดขวา ปุ่ม secondary sm · ข้อความ 14px `zinc-500` `tabular-nums` |
+| **Form row / Filter bar** | `ui-form-row` `ui-filter-bar` | `ui-form-row` = แถวกรอกหลายช่อง (2:1) ยุบเป็นคอลัมน์เดียวบนมือถือ · `ui-filter-bar` = แถบตัวกรองเหนือตาราง ช่องละ ≥ 180px ขึ้นบรรทัดใหม่อัตโนมัติ |
 | **Table** | `ui-table-card` `ui-table` `ui-table__message` | การ์ด มุม 16px · หัวคอลัมน์สูง 44px พื้น `zinc-50` ตัวอักษร 14px semibold `zinc-500` · แถวสูง ~72px padding ข้าง 24px · คอลัมน์แรกเด่น (`zinc-900` medium) · เส้นคั่นแถว `zinc-200` · ตัวเลขใส่ class `num` (ชิดขวา, `tabular-nums`) |
 
 ### วิธีใช้ใน view (component กลาง)
@@ -83,8 +85,10 @@
 | `ui_confirm_button` | `ui_confirm_button("ลบสินค้า", item_path(i), title: "ลบสินค้านี้?", message: "ลบ “#{i.name}” แล้วกู้คืนไม่ได้")` — ปุ่มที่เปิดหน้าต่างยืนยันก่อนส่ง ใช้กับการกระทำที่ย้อนกลับไม่ได้ (ดูหัวข้อ 4 ข้อ 3) |
 | `ui_empty_state` | `ui_empty_state("ยังไม่มีการประมูล", description: "...") { ui_link_button("ดูสินค้า", root_path) }` — สถานะว่างของรายการที่ไม่ใช่ตาราง |
 | `ui_loading` | `ui_loading("กำลังโหลด...")` — placeholder ใน `<turbo-frame>` ที่โหลดทีหลัง |
-| `baht` / `baht_text` / `thai_date` / `thai_datetime` | จาก `FormatHelper`: `baht(1800)` → `฿1,800` · `thai_datetime(t)` → `13 พ.ย. 2569 20:00 น.` (ดู `.claude/knowledge/locale-time-money.md`) |
+| `baht` / `baht_symbol` / `display_time` | จาก `FormatHelper`: `baht(1800)` → `1,800 บาท` · `baht_symbol(1800)` → `฿1,800` · `display_time(t)` → `13/11/2026 20:00` (ปี ค.ศ. ตามที่ทีมใช้) (ดู `.claude/knowledge/locale-time-money.md`) |
 | `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
+| `f.ui_select` | `f.ui_select :status, [["ผ่าน", "approved"]], include_blank: "ทั้งหมด", selected: params[:status]` (native select หน้าตาเดียวกับ `ui-input`) |
+| `ui_pagination` | `ui_pagination(@pagination)` คู่กับ `Paginated#paginate` ใน controller (ก่อนหน้า / หน้า X จาก Y / ถัดไป คงค่าตัวกรอง) วางใน `footer:` ของ `ui_table_card` |
 
 - ชนิดช่องของ `f.ui_field`: `as:` `:text` `:email` `:password` `:number` `:url` `:tel` `:search` `:date` `:datetime_local` `:textarea` `:select` (ส่ง `choices:`) `:checkbox` `:file` (`multiple: true`, `accept:`) · ทุกช่องมี label เสมอ: ส่ง `label:` หรือเพิ่มชื่อช่องภาษาไทยใน `config/locales` (`activerecord.attributes.<model>.<ช่อง>`) ไม่งั้น dev/test จะ raise · `f.ui_submit` ปิดตัวเองและแสดง "กำลังบันทึก..." ระหว่างส่ง (เปลี่ยนด้วย `submitting:`)
 - ตัวเลือก: `variant:` (`:primary :secondary :outline :danger :danger_outline :ghost :link`), `size:` (`:sm :md :xl`), `shape:` (`:round :square`), `block: true`, `icon_left:` / `icon_right:` (HTML ของ SVG)
@@ -129,7 +133,7 @@
 
 ### สถานะของโดเมน
 
-ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ปรับให้ตรง enum จริงเมื่อสร้าง model) สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
+ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ปรับให้ตรง enum จริงเมื่อสร้าง model) · domain ที่มีแล้ว: `:qualification` (รอกรอกทรัพย์สิน→`neutral`, รอ admin ตรวจ→`warning`, ผ่าน→`success`, ไม่ผ่าน→`danger`), `:submission`, `:suspension` (`"active"`/`"suspended"`), `:suspension_event` สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
 
 ## 4. หลักการเขียนหน้า
 
@@ -159,4 +163,4 @@
 
 ## ที่ยังไม่ได้ย้ายมา
 
-Select/DatePicker แบบ custom (ตอนนี้ใช้ `<select>`/`<input type=date>` ของเบราว์เซอร์ผ่าน `ui_field`), Modal ทั่วไป (มีเฉพาะหน้าต่างยืนยันของ `ui_confirm_button`), Tabs, SegmentedControl, Pagination, Switch, DetailGrid (ตอนนี้ใช้ `<dl class="ui-dl">`) — ต้นทางเป็น React component ที่มี interaction เยอะ ให้ทำเมื่อมีหน้าที่ต้องใช้จริง (ใช้ Stimulus + สเปกใน `mmm-admin-fe/docs/ui-standards.md` ส่วน 2 เป็นแบบ)
+Select/DatePicker แบบ custom (ตอนนี้ใช้ native: `f.ui_field ..., as: :select` หรือ `f.ui_select` สำหรับแถบตัวกรอง และ `as: :date`), Modal ทั่วไป (มีเฉพาะหน้าต่างยืนยันของ `ui_confirm_button`), Tabs, SegmentedControl, Pagination แบบมีเลขหน้า (มี `ui_pagination` แบบก่อนหน้า/ถัดไป), Switch, DetailGrid (ตอนนี้ใช้ `<dl class="ui-dl">`) — ต้นทางเป็น React component ที่มี interaction เยอะ ให้ทำเมื่อมีหน้าที่ต้องใช้จริง (ใช้ Stimulus + สเปกใน `mmm-admin-fe/docs/ui-standards.md` ส่วน 2 เป็นแบบ)

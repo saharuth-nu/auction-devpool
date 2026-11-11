@@ -13,12 +13,13 @@
 - ใน test ใช้ `travel_to` / `freeze_time` (ใส่ `with_usec: true` ถ้าต้องทดสอบระดับมิลลิวินาที)
 - อย่าเรียก `Time.now` / `Date.today` ตรงๆ ในโค้ดที่ตัดสินเวลา (rubocop `Rails/TimeZone` จับอยู่แล้ว)
 
-## เงิน: `baht` / `baht_text` (`app/helpers/format_helper.rb`)
-- `baht(1800)` → `฿1,800` (ในรายการ) · `baht_text(1800)` → `1,800 บาท` (ขั้นยืนยันก่อนยื่นราคา, BID-20)
-- รับ Integer / BigDecimal / String ตัวเลข **หน่วยเป็นบาท** · ส่ง Float แล้ว raise · ถ้าเก็บเป็นสตางค์ให้หาร 100 เป็น BigDecimal ก่อนเรียก
+## เงิน: `baht` (`app/helpers/format_helper.rb`)
+- `baht(1800)` → `1,800 บาท` (รูปแบบมาตรฐาน: หน้า admin, การ์ดสินค้า, ขั้นยืนยันก่อนยื่นราคา BID-20) · `baht_symbol(1800)` → `฿1,800` (แบบสั้นสำหรับที่แคบ) · nil ได้ `-`
+- รับ Integer / BigDecimal / String ตัวเลข **หน่วยเป็นบาท** · ส่ง Float แล้ว raise (NFR-09) · ถ้าเก็บเป็นสตางค์ให้หาร 100 เป็น BigDecimal ก่อนเรียก
 - DB: คอลัมน์เงินใช้ `integer` หรือ `decimal` เท่านั้น `test/models/money_columns_test.rb` จะแดงถ้า migration ใหม่มี `float` หรือคอลัมน์ชื่อเกี่ยวกับเงิน (price/amount/value/fee/cost/reserve/balance/total/bid) ที่ไม่ใช่ integer/decimal
 
-## วันที่: `thai_date` / `thai_datetime`
-- `thai_date(t)` → `13 พ.ย. 2569` · `thai_datetime(t)` → `13 พ.ย. 2569 20:00 น.` (ปี พ.ศ. เขตเวลาไทย แม้ส่ง UTC มา)
-- หน้า admin ดูเวลาที่ยื่น (BID-13): `thai_datetime(t, precision: :millisecond)` → `13 พ.ย. 2569 20:00:05.123 น.`
-- `I18n.l(t)` ให้ปี ค.ศ. ตามกลไก Rails ข้อความที่ผู้ใช้เห็นให้ใช้ helper ข้างบน
+## วันที่: `display_time`
+- `display_time(t)` → `13/11/2026 20:00` (เขตเวลาไทย แม้ส่ง UTC มา · **ปี ค.ศ. ตามที่ทีมใช้** ตกลงกันแล้ว) · nil ได้ `-`
+- หน้า admin ดูเวลาที่ยื่น (BID-13): `display_time(t, precision: :millisecond)` → `13/11/2026 20:00:05.123`
+- `thai_date` / `thai_datetime` ให้ปี พ.ศ. เก็บไว้เป็นทางเลือก ตอนนี้ไม่มีหน้าไหนใช้ ถ้าทีมอยากเปลี่ยนทั้งระบบเป็น พ.ศ. ให้เปลี่ยน `display_time` แล้วลบสองตัวนั้น
+- `I18n.l(t)` ให้ปี ค.ศ. ตามกลไก Rails แต่ไม่ผ่านเขตเวลาแบบเดียวกับ helper ข้างบน ข้อความที่ผู้ใช้เห็นให้ใช้ `display_time`

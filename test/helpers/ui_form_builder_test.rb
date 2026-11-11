@@ -126,6 +126,27 @@ class UiFormBuilderTest < ActionView::TestCase
     assert_raises(ArgumentError) { ui_form_with(url: "/login", scope: :login) { |f| f.ui_field(:username) } }
   end
 
+  test "NFR-11 ฟอร์มที่ไม่ผูกโมเดลส่ง error: เองได้ แสดงใต้ช่องพร้อม aria เหมือน error จากโมเดล" do
+    html = ui_form_with(url: "/x", scope: :rejection) do |f|
+      f.ui_field(:reason, as: :textarea, label: "เหตุผล", error: "ต้องกรอกเหตุผล", value: "abc", rows: 3, maxlength: 500)
+    end
+    doc = Nokogiri::HTML.fragment(html)
+    textarea = doc.at_css("textarea.ui-input")
+    assert_equal "ต้องกรอกเหตุผล", doc.at_css(".ui-field__error").text
+    assert_equal "rejection_reason_message", doc.at_css(".ui-field__error")["id"]
+    assert_equal "rejection_reason_message", textarea["aria-describedby"]
+    assert_equal "true", textarea["aria-invalid"]
+    assert_includes textarea["class"].split, "ui-input--invalid"
+    assert_equal "500", textarea["maxlength"]
+    assert_equal "เหตุผล", doc.at_css("label.ui-field__label").text
+  end
+
+  test "NFR-11 error: ที่เป็นสตริงว่างหรือ nil ไม่นับเป็น error" do
+    doc = Nokogiri::HTML.fragment(ui_form_with(url: "/x", scope: :s) { |f| f.ui_field(:reason, label: "เหตุผล", error: nil) })
+    assert_nil doc.at_css(".ui-field__error")
+    assert_nil doc.at_css("input")["aria-invalid"]
+  end
+
   test "NFR-11 ui_submit แสดงสถานะกำลังบันทึกระหว่างส่ง และเปลี่ยนข้อความได้" do
     button = form_with_field { |f| f.ui_submit("บันทึก") }.at_css("button[type=submit]")
     assert_equal "กำลังบันทึก...", button["data-turbo-submits-with"]

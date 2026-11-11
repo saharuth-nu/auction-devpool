@@ -57,9 +57,9 @@ class DesignSystemPagesTest < ActionDispatch::IntegrationTest
   test "styleguide: เงินบาทและเวลาไทยแสดงถูก" do
     get styleguide_path
     text = page.text
-    assert_includes text, "฿182,000"
-    assert_includes text, "฿36,500.50"
-    assert_includes text, "12 พ.ย. 2569 20:00 น." # 12 พ.ย. 13:00 UTC = 20:00 เวลาไทย
+    assert_includes text, "182,000 บาท"
+    assert_includes text, "36,500.50 บาท"
+    assert_includes text, "12/11/2026 20:00" # 12 พ.ย. 13:00 UTC = 20:00 เวลาไทย
   end
 
   test "NFR-13 styleguide: ทุกปุ่มที่ย้อนกลับไม่ได้อยู่หลังหน้าต่างยืนยัน และส่งได้จริงเมื่อยืนยัน" do

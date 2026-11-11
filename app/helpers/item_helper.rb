@@ -18,7 +18,7 @@ module ItemHelper
             content_tag(:h3, item_card_name(item, url), class: "ui-item-card__name"),
             content_tag(:dl, class: "ui-item-card__meta") do
               safe_join([
-                content_tag(:dt, "เวลาประมูล"), content_tag(:dd, thai_datetime(starts_at)),
+                content_tag(:dt, "เวลาประมูล"), content_tag(:dd, display_time(starts_at)),
                 content_tag(:dt, "ราคาเริ่มต้น"), content_tag(:dd, baht(item.starting_price), class: "ui-item-card__price")
               ])
             end

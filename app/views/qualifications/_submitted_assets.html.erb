@@ -1,0 +1,12 @@
+<%# รายการทรัพย์สินของรอบหนึ่ง (อ่านอย่างเดียว) ใช้ทั้งหน้าผู้ใช้และหน้า admin %>
+<%= ui_table_card title: "รายการทรัพย์สินที่ส่ง (#{display_time(submission.submitted_at)})" do %>
+  <table class="ui-table">
+    <thead><tr><th>ทรัพย์สิน</th><th class="num">มูลค่า</th></tr></thead>
+    <tbody>
+      <% submission.assets.each do |asset| %>
+        <tr><td><%= asset.name %></td><td class="num"><%= baht(asset.value) %></td></tr>
+      <% end %>
+      <tr><td><strong>รวม</strong></td><td class="num"><strong><%= baht(submission.total_value) %></strong></td></tr>
+    </tbody>
+  </table>
+<% end %>

@@ -29,6 +29,13 @@ module ActiveSupport
       @user_counter = (@user_counter || 0) + 1
       format("%04d", @user_counter)
     end
+
+    # ผู้ประมูลที่ส่งทรัพย์สินและผ่านตรวจแล้ว (QUAL-10)
+    def create_approved_bidder(assets: [ { name: "บ้าน", value: "5000" } ], admin: create_admin, **attrs)
+      user = create_bidder(**attrs)
+      QualificationSubmission.submit(user, assets).approve!(admin)
+      user.reload
+    end
   end
 end
 

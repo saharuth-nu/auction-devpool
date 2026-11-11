@@ -24,7 +24,7 @@ class ItemHelperTest < ActionView::TestCase
     assert_equal "รถยนต์", node.at_css(".ui-item-card__name").text
     meta = node.at_css(".ui-item-card__meta")
     assert_equal [ "เวลาประมูล", "ราคาเริ่มต้น" ], meta.css("dt").map(&:text)
-    assert_equal [ "13 พ.ย. 2569 20:00 น.", "฿300,000" ], meta.css("dd").map(&:text)
+    assert_equal [ "13/11/2026 20:00", "300,000 บาท" ], meta.css("dd").map(&:text)
   end
 
   test "USR-02 ราคาที่แสดงคือราคาเริ่มต้น ไม่ใช่ราคาขั้นต่ำ (reserve เป็นความลับ BID-18)" do
@@ -35,7 +35,7 @@ class ItemHelperTest < ActionView::TestCase
 
   test "USR-02 ราคาเริ่มต้นมีสตางค์แสดงทศนิยม 2 ตำแหน่ง" do
     @item.starting_price = BigDecimal("1250.5")
-    assert_equal "฿1,250.50", card.at_css(".ui-item-card__price").text
+    assert_equal "1,250.50 บาท", card.at_css(".ui-item-card__price").text
   end
 
   test "USR-02 มีรูปแสดงรูปแรกพร้อม alt เป็นชื่อสินค้า" do

@@ -1,0 +1,40 @@
+<% content_for :title, "ผู้ใช้ทั้งหมด" %>
+<%= ui_page_header "ผู้ใช้ทั้งหมด", description: "ค้นหาและจัดการบัญชีผู้ประมูล" do %>
+  <%= ui_link_button "คิวตรวจคุณสมบัติ", admin_qualification_submissions_path, variant: :secondary %>
+<% end %>
+
+<%= ui_card do %>
+  <%= ui_form_with url: admin_users_path, method: :get, class: "ui-filter-bar" do |f| %>
+    <%= f.ui_field :q, as: :search, label: "ค้นหา", value: @filters[:q], placeholder: "username, ชื่อ หรืออีเมล" %>
+    <%= f.ui_select :qualification_status,
+          User::Qualification::STATUS_LABELS.map { |value, label| [ label, value ] },
+          label: "สถานะคุณสมบัติ", include_blank: "ทั้งหมด", selected: @filters[:qualification_status] %>
+    <%= f.ui_select :suspension, [ [ "ใช้งานได้", "active" ], [ "ถูกระงับ", "suspended" ] ],
+          label: "การระงับ", include_blank: "ทั้งหมด", selected: @filters[:suspension] %>
+    <div class="ui-field ui-actions">
+      <%= f.ui_submit "ค้นหา", size: :md %>
+      <%= ui_link_button "ล้างตัวกรอง", admin_users_path, variant: :ghost %>
+    </div>
+  <% end %>
+<% end %>
+
+<%= ui_table_card title: "ผู้ใช้ (#{@pagination.total_count})", footer: ui_pagination(@pagination).presence do %>
+  <table class="ui-table">
+    <thead><tr><th>username</th><th>ชื่อ-นามสกุล</th><th>อีเมล</th><th>คุณสมบัติ</th><th>บัญชี</th><th>สมัครเมื่อ</th></tr></thead>
+    <tbody>
+      <% if @users.empty? %>
+        <%= ui_table_message 6, @filters.values.any?(&:present?) ? "ไม่พบผู้ใช้ตามเงื่อนไข" : "ยังไม่มีผู้ใช้" %>
+      <% end %>
+      <% @users.each do |user| %>
+        <tr>
+          <td><%= link_to user.username, admin_user_path(user) %></td>
+          <td><%= user.fullname %></td>
+          <td><%= user.email %></td>
+          <td><%= status_badge :qualification, user.qualification_status %></td>
+          <td><%= status_badge :suspension, user.suspended? ? "suspended" : "active" %></td>
+          <td><%= display_time(user.created_at) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

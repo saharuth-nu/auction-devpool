@@ -245,6 +245,24 @@ module UiHelper
     content_tag(:tr) { content_tag(:td, message, colspan:, class: "ui-table__message") }
   end
 
+  # ตัวแบ่งหน้า (ก่อนหน้า / หน้า X จาก Y / ถัดไป) คงค่าตัวกรองใน query string ไว้
+  #   ui_pagination(@pagination)   # @pagination มาจาก Paginated#paginate
+  def ui_pagination(page)
+    return "".html_safe if page.total_pages <= 1
+
+    link = ->(label, number, rel) {
+      url = "#{request.path}?#{request.query_parameters.merge("page" => number).to_query}"
+      ui_link_button(label, url, variant: :secondary, size: :sm, rel:)
+    }
+    content_tag(:nav, class: "ui-pagination", "aria-label": "แบ่งหน้า") do
+      safe_join([
+        (link.call("ก่อนหน้า", page.number - 1, "prev") unless page.first?),
+        content_tag(:span, "หน้า #{page.number} จาก #{page.total_pages}", class: "ui-pagination__info"),
+        (link.call("ถัดไป", page.number + 1, "next") unless page.last?)
+      ].compact)
+    end
+  end
+
   # ---------- Form ----------
 
   # form_with ที่ใช้ UiFormBuilder (ช่องกรอกมีสไตล์ ui-input และแสดง error ใต้ช่องอัตโนมัติ)

@@ -16,6 +16,29 @@ module StatusHelper
       "available" => { label: "พร้อมขาย", tone: :success },
       "in_auction" => { label: "อยู่ระหว่างการประมูล", tone: :info },
       "sold" => { label: "ขายได้แล้ว", tone: :neutral }
+    },
+    # สถานะคุณสมบัติของผู้ประมูล (QUAL, User::Qualification)
+    qualification: {
+      "awaiting_assets" => { label: "รอกรอกทรัพย์สิน", tone: :neutral },
+      "awaiting_review" => { label: "รอ admin ตรวจ", tone: :warning },
+      "approved" => { label: "ผ่าน", tone: :success },
+      "rejected" => { label: "ไม่ผ่าน", tone: :danger }
+    },
+    # ผลตรวจของรอบส่งทรัพย์สิน (QualificationSubmission#status)
+    submission: {
+      "pending" => { label: "รอตรวจ", tone: :warning },
+      "approved" => { label: "ผ่าน", tone: :success },
+      "rejected" => { label: "ไม่ผ่าน", tone: :danger }
+    },
+    # การระงับบัญชีผู้ใช้ (SUSP): ส่ง user.suspended? ? "suspended" : "active"
+    suspension: {
+      "active" => { label: "ใช้งานได้", tone: :success },
+      "suspended" => { label: "ถูกระงับ", tone: :danger }
+    },
+    # ประเภทเหตุการณ์ในประวัติการระงับ (SuspensionEvent#action)
+    suspension_event: {
+      "suspend" => { label: "ระงับ", tone: :danger },
+      "unsuspend" => { label: "ยกเลิกระงับ", tone: :success }
     }
   }.freeze
 

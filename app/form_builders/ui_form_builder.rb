@@ -15,6 +15,7 @@
 #   f.ui_field :room_id, as: :select, choices: Room.pluck(:name, :id), include_blank: "เลือกห้อง"
 #   f.ui_field :enabled, as: :checkbox, label: "เปิดใช้งาน"
 #   f.ui_field :images, as: :file, multiple: true, accept: "image/jpeg,image/png,image/webp"
+#   f.ui_field :reason, as: :textarea, label: "เหตุผล", error: @reason_error   # ฟอร์มที่ไม่ผูกโมเดล ส่งข้อความ error เอง
 #
 # ทุกช่องมี label เสมอ (NFR-11) และต้องเป็นภาษาไทย (NFR-01): ส่ง label: หรือเพิ่มชื่อช่องใน config/locales
 #   th:
@@ -39,10 +40,11 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
 
   SPECIAL_TYPES = %i[select checkbox file].freeze
 
-  def ui_field(method, as: :text, label: nil, hint: nil, choices: nil, include_blank: nil, **options)
+  def ui_field(method, as: :text, label: nil, hint: nil, error: nil, choices: nil, include_blank: nil, **options)
     ui_check_field_type!(as)
     # ฟอร์มที่ไม่ผูกโมเดล (เช่น form_with scope: :login) มี object เป็น nil/false: ไม่มี error จากโมเดล
-    error = object.respond_to?(:errors) ? object.errors[method].first : nil
+    # ส่ง error: เองได้ (ข้อความที่ controller เก็บไว้) มีผลก่อน error จากโมเดล
+    error ||= object.respond_to?(:errors) ? object.errors[method].first : nil
     message_id = "#{object_name}_#{method}_message".parameterize(separator: "_")
     options[:"aria-invalid"] = true if error
     options[:"aria-describedby"] = message_id if error || hint
@@ -66,6 +68,27 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
 
     @template.content_tag(:div, class: "ui-field") do
       @template.safe_join([ self.label(method, text, class: "ui-field__label"), control, message ].compact)
+    end
+  end
+
+  # ช่องเลือก (native <select>) หน้าตาเดียวกับ ui-input
+  #   f.ui_select :status, [ [ "ผ่าน", "approved" ] ], include_blank: "ทั้งหมด"
+  #   ฟอร์มที่ไม่ผูกโมเดลส่ง selected: params[:status] เพื่อคงค่าที่เลือกไว้
+  def ui_select(method, choices, label: nil, hint: nil, include_blank: false, selected: nil, **html)
+    error = object.respond_to?(:errors) ? object.errors[method].first : nil
+    message_id = "#{object_name}_#{method}_message".parameterize(separator: "_")
+    html[:class] = @template.class_names("ui-input", ("ui-input--invalid" if error), html[:class])
+    html[:"aria-invalid"] = true if error
+    html[:"aria-describedby"] = message_id if error || hint
+    select_options = { include_blank: }
+    select_options[:selected] = selected unless selected.nil?
+
+    @template.content_tag(:div, class: "ui-field") do
+      @template.safe_join([
+        self.label(method, label, class: "ui-field__label"),
+        select(method, choices, select_options, html),
+        ui_field_message(message_id, error, hint)
+      ].compact)
     end
   end
 
