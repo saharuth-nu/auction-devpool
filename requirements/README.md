@@ -10,7 +10,7 @@
 | ไฟล์ | หมวด | รหัส |
 |---|---|---|
 | [01-accounts.md](01-accounts.md) | บัญชี, login, register, ตรวจสอบคุณสมบัติ | `AUTH` `QUAL` |
-| [02-admin.md](02-admin.md) | Module ฝั่ง admin: สินค้า, วิธีประมูล, ห้อง, event | `ITEM` `METH` `ROOM` `EVT` |
+| [02-admin.md](02-admin.md) | Module ฝั่ง admin: สินค้า, วิธีประมูล, ห้อง, event, audit log | `ITEM` `METH` `ROOM` `EVT` `AUD` |
 | [03-user-portal.md](03-user-portal.md) | หน้าฝั่งผู้ใช้: หน้าแรก, เข้าร่วม, ห้อง, ผลการประมูล | `USR` |
 | [04-bidding.md](04-bidding.md) | กติกาการประมูล first-price sealed | `BID` |
 | [05-non-functional.md](05-non-functional.md) | ความปลอดภัย ความถูกต้อง ประสิทธิภาพ UI | `NFR` |
