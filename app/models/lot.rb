@@ -21,6 +21,22 @@ class Lot < ApplicationRecord
 
   before_destroy :ensure_event_deletable
 
+  # BID-12: หลังขายได้ ผู้ใช้ทุกคนเห็นราคาที่ชนะ แต่ไม่เห็นว่าใครชนะ · BID-19: ไม่ขายแสดงแค่ "ไม่ขาย" ไม่มีราคา
+  def public_winning_price
+    sold? ? winning_price : nil
+  end
+
+  # ผลของ lot ต่อผู้ใช้คนหนึ่ง: :pending / :won / :lost / :unsold / :cancelled
+  # ผู้ชนะรู้เฉพาะว่าตัวเอง "ชนะ" คนอื่นเป็น :lost โดยไม่รู้ว่าใครชนะหรือยื่นเท่าไร (BID-12)
+  # :unsold ไม่แยกสาเหตุ (ไม่มีผู้ยื่น / ต่ำกว่าขั้นต่ำ) และไม่บอกราคาสูงสุดหรือจำนวนผู้ยื่น (BID-19, BID-18)
+  def outcome_for(user)
+    return :pending if pending?
+    return :cancelled if cancelled?
+    return :unsold if unsold?
+
+    winning_bid&.user_id == user&.id ? :won : :lost
+  end
+
   private
     # ITEM-10: DB บังคับด้วย unique index แบบมีเงื่อนไข ที่นี่ให้ข้อความ error ที่อ่านรู้เรื่อง
     def item_in_one_unfinished_event

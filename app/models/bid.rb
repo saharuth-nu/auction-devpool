@@ -17,6 +17,10 @@ class Bid < ApplicationRecord
   # คัดผู้ชนะ (BID-06, BID-07): ราคาสูงสุดก่อน เท่ากันให้ผู้ยื่นก่อน (placed_at น้อยกว่า) และ id เป็นตัวตัดสินสุดท้าย
   scope :for_settlement, -> { order(amount: :desc, placed_at: :asc, id: :asc) }
 
+  # BID-11, NFR-04: admin เห็นทุกราคา ผู้ใช้เห็นเฉพาะของตัวเอง ไม่มีผู้ใช้ (nil) เห็นอะไรไม่ได้
+  # ทุกที่ที่แสดงราคาที่ยื่นให้คนอื่นนอกจาก admin ต้องดึงผ่าน scope นี้
+  scope :visible_to, ->(user) { user&.admin? ? all : where(user_id: user&.id) }
+
   # แก้ไขไม่ได้หลังบันทึก (BID-01) · update_columns/อัปเดตตรงด้วย SQL ยังทำได้ จึงมี check constraint และ test ครอบ
   def readonly?
     persisted? || super
