@@ -1,0 +1,59 @@
+<% user = @submission.user %>
+<% content_for :title, "ตรวจคุณสมบัติ #{user.username}" %>
+<%= ui_page_header "ตรวจคุณสมบัติ “#{user.username}”", description: user.fullname do %>
+  <%= ui_link_button "ดูข้อมูลผู้ใช้", admin_user_path(user), variant: :secondary %>
+<% end %>
+
+<%= ui_card title: "รอบที่ส่งเมื่อ #{display_time(@submission.submitted_at)}", actions: status_badge(:submission, @submission.status) do %>
+  <dl class="ui-dl">
+    <dt>สถานะผู้ใช้</dt><dd><%= status_badge :qualification, user.qualification_status %></dd>
+    <dt>อีเมล</dt><dd><%= user.email %></dd>
+    <% unless @submission.pending? %>
+      <dt>ตรวจโดย</dt><dd><%= @submission.reviewed_by&.username %> เมื่อ <%= display_time(@submission.reviewed_at) %></dd>
+      <% if @submission.rejected? %><dt>เหตุผลที่ไม่ผ่าน</dt><dd><%= @submission.rejection_reason %></dd><% end %>
+    <% end %>
+  </dl>
+<% end %>
+
+<%= render "qualifications/submitted_assets", submission: @submission %>
+
+<% if @submission.pending? %>
+  <%= ui_card title: "ผลการตรวจ" do %>
+    <p>ผ่าน: ผู้ใช้ใช้งานได้เต็มรูปแบบ และเพดานราคาที่ยื่นได้คือ <strong><%= baht(@submission.total_value) %></strong> ·
+       ไม่ผ่าน: ผู้ใช้เห็นเหตุผลและแก้ไขส่งใหม่ได้</p>
+    <div class="ui-actions">
+      <%= ui_button_to "ผ่าน", approve_admin_qualification_submission_path(@submission), size: :xl,
+            data: { turbo_confirm: "ยืนยันให้ “#{user.username}” ผ่านการตรวจสอบคุณสมบัติ? เพดานราคา #{baht(@submission.total_value)}" } %>
+    </div>
+    <%= ui_form_with url: reject_admin_qualification_submission_path(@submission), scope: :rejection,
+                     data: { turbo_confirm: "ยืนยันว่า “#{user.username}” ไม่ผ่าน? ผู้ใช้จะเห็นเหตุผลนี้" } do |f| %>
+      <div class="ui-field">
+        <%= f.label :reason, "เหตุผลที่ไม่ผ่าน (บังคับ ผู้ใช้จะเห็นข้อความนี้)", class: "ui-field__label" %>
+        <%= f.text_area :reason, value: params.dig(:rejection, :reason), rows: 3, required: true,
+              maxlength: QualificationSubmission::REJECTION_REASON_MAX,
+              class: class_names("ui-input", "ui-input--invalid" => @rejection_error),
+              "aria-invalid": (@rejection_error.present? || nil), "aria-describedby": ("rejection_reason_message" if @rejection_error) %>
+        <% if @rejection_error %><p id="rejection_reason_message" class="ui-field__error"><%= @rejection_error %></p><% end %>
+      </div>
+      <%= f.ui_submit "ไม่ผ่าน", variant: :danger_outline %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% if @history.any? %>
+  <%= ui_table_card title: "รอบก่อนหน้าของผู้ใช้นี้" do %>
+    <table class="ui-table">
+      <thead><tr><th>ส่งเมื่อ</th><th>ผล</th><th>เหตุผล</th><th class="num">มูลค่ารวม</th></tr></thead>
+      <tbody>
+        <% @history.each do |past| %>
+          <tr>
+            <td><%= display_time(past.submitted_at) %></td>
+            <td><%= status_badge :submission, past.status %></td>
+            <td><%= past.rejection_reason.presence || "-" %></td>
+            <td class="num"><%= baht(past.total_value) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+<% end %>

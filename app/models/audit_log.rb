@@ -16,6 +16,18 @@ class AuditLog < ApplicationRecord
     bids.view
   ].freeze
 
+  # ชื่อภาษาไทยของแต่ละ action (หน้าดู/ตัวกรอง) — ต้องมีครบทุกตัวใน ACTIONS (มี test ตรวจ)
+  ACTION_LABELS = {
+    "item.create" => "สร้างสินค้า", "item.update" => "แก้ไขสินค้า", "item.destroy" => "ลบสินค้า",
+    "item.archive" => "เก็บถาวรสินค้า", "item.approve" => "อนุมัติสินค้า",
+    "event.create" => "สร้างการประมูล", "event.update" => "แก้ไขการประมูล", "event.cancel" => "ยกเลิกการประมูล",
+    "auction_method.enable" => "เปิดใช้วิธีประมูล", "auction_method.disable" => "ปิดใช้วิธีประมูล",
+    "qualification.approve" => "ผ่านคุณสมบัติ", "qualification.reject" => "ไม่ผ่านคุณสมบัติ",
+    "user.suspend" => "ระงับผู้ใช้", "user.unsuspend" => "ยกเลิกระงับผู้ใช้", "user.password_reset" => "รีเซ็ตรหัสผ่าน",
+    "admin.create" => "สร้าง admin", "admin.deactivate" => "ปิดใช้งาน admin", "admin.activate" => "เปิดใช้งาน admin",
+    "bids.view" => "เปิดดูราคาที่ยื่น"
+  }.freeze
+
   # NFR-18: ห้ามเก็บรหัสผ่านหรือรหัสชั่วคราวใน log แม้ส่งมาใน change_set
   # ตรงชื่อที่เก็บค่าลับจริง ไม่รวม flag อย่าง must_change_password
   SENSITIVE_KEY = /\A(password|password_confirmation|temporary_password|temp_password|\w*_digest|\w*token|\w*secret)\z/i
@@ -65,6 +77,10 @@ class AuditLog < ApplicationRecord
         value
       end
     end
+  end
+
+  def action_label
+    ACTION_LABELS.fetch(action, action)
   end
 
   # append-only: บันทึกแล้วแก้หรือลบไม่ได้

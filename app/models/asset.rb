@@ -10,7 +10,7 @@ class Asset < ApplicationRecord
 
   normalizes :name, with: ->(v) { v.strip }
 
-  validates :name, presence: true, length: { maximum: NAME_MAX }
+  validates :name, presence: { message: "ต้องกรอก" }, length: { maximum: NAME_MAX, message: "ยาวไม่เกิน %{count} ตัวอักษร" }
   validate :value_rules
 
   # รับค่าที่ผู้ใช้พิมพ์คั่นหลักพัน เช่น "1,500,000.50"
@@ -27,7 +27,7 @@ class Asset < ApplicationRecord
   def value_rules
     raw = value_before_type_cast
     if raw.blank?
-      errors.add(:value, :blank)
+      errors.add(:value, "ต้องกรอก")
     elsif raw.is_a?(String) && !raw.match?(VALUE_FORMAT)
       errors.add(:value, "ต้องเป็นตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 2 ตำแหน่ง")
     elsif value.nil? || value <= 0

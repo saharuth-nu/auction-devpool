@@ -2,6 +2,7 @@
 class SessionsController < ApplicationController
   allow_unauthenticated_access only: %i[new create]
   allow_pending_password_change only: :destroy
+  allow_unqualified_access only: :destroy # QUAL-05 (3) ออกจากระบบ
   allow_roles :admin, :bidder # ใช้กับ destroy (ต้อง login อยู่)
   rate_limit to: 10, within: 3.minutes, only: :create, with: :too_many_attempts # NFR-07
   before_action :redirect_if_signed_in, only: :new

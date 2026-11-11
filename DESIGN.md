@@ -62,6 +62,8 @@
 | **Input / Textarea** | `ui-input` (`--sm`, `--invalid`) | สูง **48px** (sm = 40px) มุมโค้งเต็ม ขอบ **2px** `zinc-300` → hover/focus `brand-border` · invalid ขอบ `danger-500` · ข้อความ error ใต้ช่อง `ui-field__error` · Textarea มุม 16px |
 | **Field** | `ui-field__label` `__hint` `__error` | ป้ายชื่อด้านบน 14px medium `zinc-600` |
 | **Checkbox / Radio** | `ui-checkbox` `ui-radio` | 16px สี `primary-600` · ต้องมี `<label>` หรือ `aria-label` |
+| **Pagination** | `ui-pagination` + `__info` | ชิดขวา ปุ่ม secondary sm · ข้อความ 14px `zinc-500` `tabular-nums` |
+| **Form row / Filter bar** | `ui-form-row` `ui-filter-bar` | `ui-form-row` = แถวกรอกหลายช่อง (2:1) ยุบเป็นคอลัมน์เดียวบนมือถือ · `ui-filter-bar` = แถบตัวกรองเหนือตาราง ช่องละ ≥ 180px ขึ้นบรรทัดใหม่อัตโนมัติ |
 | **Table** | `ui-table-card` `ui-table` `ui-table__message` | การ์ด มุม 16px · หัวคอลัมน์สูง 44px พื้น `zinc-50` ตัวอักษร 14px semibold `zinc-500` · แถวสูง ~72px padding ข้าง 24px · คอลัมน์แรกเด่น (`zinc-900` medium) · เส้นคั่นแถว `zinc-200` · ตัวเลขใส่ class `num` (ชิดขวา, `tabular-nums`) |
 
 ### วิธีใช้ใน view (component กลาง)
@@ -81,6 +83,8 @@
 | `ui_stat_card` | `ui_stat_card("เปิดอยู่", 12, hint: "รายการ")` |
 | `ui_table_card` / `ui_table_message` | ดูตัวอย่างด้านล่าง |
 | `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
+| `f.ui_select` | `f.ui_select :status, [["ผ่าน", "approved"]], include_blank: "ทั้งหมด", selected: params[:status]` (native select หน้าตาเดียวกับ `ui-input`) |
+| `ui_pagination` | `ui_pagination(@pagination)` คู่กับ `Paginated#paginate` ใน controller (ก่อนหน้า / หน้า X จาก Y / ถัดไป คงค่าตัวกรอง) วางใน `footer:` ของ `ui_table_card` |
 
 - ตัวเลือก: `variant:` (`:primary :secondary :outline :danger :danger_outline :ghost :link`), `size:` (`:sm :md :xl`), `shape:` (`:round :square`), `block: true`, `icon_left:` / `icon_right:` (HTML ของ SVG)
 - ส่งค่าที่ไม่อยู่ในมาตรฐาน (เช่น `variant: :purple`) จะ **raise ArgumentError** ทันที
@@ -124,7 +128,7 @@
 
 ### สถานะของโดเมน
 
-ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ปรับให้ตรง enum จริงเมื่อสร้าง model) สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
+ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ปรับให้ตรง enum จริงเมื่อสร้าง model) · domain ที่มีแล้ว: `:qualification` (รอกรอกทรัพย์สิน→`neutral`, รอ admin ตรวจ→`warning`, ผ่าน→`success`, ไม่ผ่าน→`danger`), `:submission`, `:suspension` (`"active"`/`"suspended"`), `:suspension_event` สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
 
 ## 4. หลักการเขียนหน้า
 
@@ -144,4 +148,4 @@
 
 ## ที่ยังไม่ได้ย้ายมา
 
-Select/DatePicker แบบ custom, Modal/ConfirmDialog, Tabs, SegmentedControl, Pagination, Switch, Spinner, EmptyState, DetailGrid — ต้นทางเป็น React component ที่มี interaction เยอะ ให้ทำเมื่อมีหน้าที่ต้องใช้จริง (ใช้ Stimulus + สเปกใน `mmm-admin-fe/docs/ui-standards.md` ส่วน 2 เป็นแบบ)
+Select/DatePicker แบบ custom (ตอนนี้ใช้ native ผ่าน `ui_select` / `as: :date`), Modal/ConfirmDialog, Tabs, SegmentedControl, Pagination แบบมีเลขหน้า, Switch, Spinner, EmptyState, DetailGrid — ต้นทางเป็น React component ที่มี interaction เยอะ ให้ทำเมื่อมีหน้าที่ต้องใช้จริง (ใช้ Stimulus + สเปกใน `mmm-admin-fe/docs/ui-standards.md` ส่วน 2 เป็นแบบ)

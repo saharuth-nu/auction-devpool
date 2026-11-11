@@ -7,7 +7,8 @@ class SuspensionEvent < ApplicationRecord
   belongs_to :user
   belongs_to :admin, class_name: "User"
 
-  validates :reason, presence: true, length: { maximum: REASON_MAX }
+  validates :reason, presence: { message: "ต้องระบุเหตุผล" },
+                     length: { maximum: REASON_MAX, message: "ยาวไม่เกิน %{count} ตัวอักษร" }
 
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
 

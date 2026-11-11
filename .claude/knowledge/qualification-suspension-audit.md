@@ -1,6 +1,14 @@
 # ชั้น model ของ QUAL / SUSP / ADM-01 / audit log (tasks #33 #34–#38 #41 #71)
 
-ส่วนหน้าจอ (controller/view) ยังไม่ทำ รอ login (#26) และ authorization กลาง (#27)
+## หน้าจอ
+- ผู้ประมูล: `/qualification` (QualificationsController show/create) หน้าเดียวที่ผู้ยังไม่ผ่านเข้าได้
+- **QualificationGate** (`app/controllers/concerns/qualification_gate.rb`, include ใน ApplicationController หลัง Authentication): ปฏิเสธโดยค่าเริ่มต้น
+  ผู้ประมูลที่ `qualified?` ไม่จริงถูก redirect ไป `/qualification` ทุกหน้า ยกเว้น controller/action ที่ประกาศ `allow_unqualified_access`
+  (ตอนนี้: qualifications, sessions#destroy, forced_passwords) · **หน้าใหม่ของผู้ประมูลไม่ต้องทำอะไร ปลอดภัยอัตโนมัติ**
+  · test ฝั่งผู้ประมูลที่ต้องเข้าหน้าปกติให้ใช้ `create_approved_bidder` ไม่ใช่ `create_bidder`
+- admin: `/admin/qualification_submissions` (คิวตรวจ + ผ่าน/ไม่ผ่าน), `/admin/users` (+ `/:id`, `/:id/suspension`), `/admin/audit_logs`
+- audit log ถูกเรียกแล้วใน admins#create, disablements#create/destroy, password_resets#create (#30 #31 #42)
+- helper ใหม่: `baht`, `display_time`, `plain_amount` (FormatHelper) · `ui_pagination` + concern `Paginated` · `f.ui_select`
 
 ## API ที่ task อื่นใช้ได้
 - **สถานะคุณสมบัติ** `user.qualification_status` (bidder เท่านั้น, admin = NULL): `awaiting_assets` → `awaiting_review` → `approved` | `rejected`

@@ -1,0 +1,79 @@
+<%# รายละเอียดผู้ใช้ (ADM-02): ข้อมูลบัญชี, สถานะ, เพดานราคา, ประวัติส่งตรวจทุกรอบ (QUAL-14), ประวัติระงับ (SUSP-08) %>
+<%# TODO(ADM-02): การเข้าร่วมและราคาที่ยื่นทั้งหมด — เพิ่มเมื่อมี Participation (#59) และ Bid (#63) %>
+<% content_for :title, "ผู้ใช้ #{@user.username}" %>
+<%= ui_page_header @user.username, description: @user.fullname do %>
+  <%= ui_button_to "รีเซ็ตรหัสผ่าน", admin_user_password_reset_path(@user), variant: :secondary,
+        data: { turbo_confirm: "รีเซ็ตรหัสผ่านของ #{@user.username}? ผู้ใช้จะถูกออกจากระบบและต้องตั้งรหัสใหม่" } %>
+  <% unless @user.suspended? %>
+    <%= ui_link_button "ระงับบัญชี", new_admin_user_suspension_path(@user), variant: :danger_outline %>
+  <% end %>
+<% end %>
+
+<%= ui_card title: "ข้อมูลบัญชี" do %>
+  <dl class="ui-dl">
+    <dt>username</dt><dd><%= @user.username %></dd>
+    <dt>ชื่อ-นามสกุล</dt><dd><%= @user.fullname %></dd>
+    <dt>อีเมล</dt><dd><%= @user.email %></dd>
+    <dt>สมัครเมื่อ</dt><dd><%= display_time(@user.created_at) %></dd>
+    <dt>สถานะคุณสมบัติ</dt><dd><%= status_badge :qualification, @user.qualification_status %></dd>
+    <dt>บัญชี</dt><dd><%= status_badge :suspension, @user.suspended? ? "suspended" : "active" %>
+      <% if @user.suspended? %> ตั้งแต่ <%= display_time(@user.suspended_at) %><% end %></dd>
+    <dt>เพดานราคาที่ยื่นได้</dt>
+    <dd><%= @user.qualified? ? baht(@user.bid_ceiling) : "- (ยังไม่ผ่านการตรวจสอบคุณสมบัติ)" %></dd>
+  </dl>
+<% end %>
+
+<% if @user.suspended? %>
+  <%= ui_card title: "ยกเลิกการระงับ" do %>
+    <p>ผู้ใช้จะกลับมา login ได้ด้วยสถานะคุณสมบัติเดิม</p>
+    <%= ui_form_with url: admin_user_suspension_path(@user), method: :delete, scope: :suspension,
+                     data: { turbo_confirm: "ยืนยันยกเลิกการระงับ “#{@user.username}”?" } do |f| %>
+      <%= f.ui_field :reason, as: :textarea, label: "เหตุผล (บังคับ)", required: true, rows: 2,
+                              maxlength: SuspensionEvent::REASON_MAX %>
+      <%= f.ui_submit "ยกเลิกการระงับ", variant: :secondary %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= ui_table_card title: "ประวัติการส่งตรวจคุณสมบัติ (#{@submissions.size} รอบ)" do %>
+  <table class="ui-table">
+    <thead><tr><th>ส่งเมื่อ</th><th>ผล</th><th>ทรัพย์สิน</th><th class="num">มูลค่ารวม</th><th>ตรวจโดย</th><th>เหตุผล</th></tr></thead>
+    <tbody>
+      <% if @submissions.empty? %>
+        <%= ui_table_message 6, "ยังไม่เคยส่งทรัพย์สิน" %>
+      <% end %>
+      <% @submissions.each_with_index do |submission, i| %>
+        <tr>
+          <td>
+            <%= link_to display_time(submission.submitted_at), admin_qualification_submission_path(submission) %>
+            <% if i.zero? %> <%= ui_badge "ล่าสุด", tone: :primary %><% end %>
+          </td>
+          <td><%= status_badge :submission, submission.status %></td>
+          <td><%= submission.assets.map { |a| "#{a.name} (#{baht(a.value)})" }.join(", ") %></td>
+          <td class="num"><%= baht(submission.total_value) %></td>
+          <td><%= submission.reviewed_by ? "#{submission.reviewed_by.username} · #{display_time(submission.reviewed_at)}" : "-" %></td>
+          <td><%= submission.rejection_reason.presence || "-" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<%= ui_table_card title: "ประวัติการระงับบัญชี" do %>
+  <table class="ui-table">
+    <thead><tr><th>เมื่อ</th><th>การกระทำ</th><th>โดย</th><th>เหตุผล</th></tr></thead>
+    <tbody>
+      <% if @suspension_events.empty? %>
+        <%= ui_table_message 4, "ไม่เคยถูกระงับ" %>
+      <% end %>
+      <% @suspension_events.each do |event| %>
+        <tr>
+          <td><%= display_time(event.created_at) %></td>
+          <td><%= status_badge :suspension_event, event.action %></td>
+          <td><%= event.admin.username %></td>
+          <td><%= event.reason %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

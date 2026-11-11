@@ -1,5 +1,5 @@
 # สมัครสมาชิกผู้ใช้ (AUTH-03) และ login ให้อัตโนมัติ (AUTH-03a)
-# หมายเหตุ: ต้องพาไปหน้าสถานะ/ฟอร์มกรอกทรัพย์สิน (งาน #35 ของสาย B) ตอนนี้ไปหน้าแรก
+# สมัครแล้วพาไปหน้าสถานะ/ฟอร์มกรอกทรัพย์สินทันที (AUTH-03a, QUAL-02)
 class RegistrationsController < ApplicationController
   allow_unauthenticated_access only: %i[new create]
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_registration_path, alert: "พยายามสมัครบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่" }
@@ -14,7 +14,7 @@ class RegistrationsController < ApplicationController
     @user = User.new(registration_params.merge(role: :bidder))
     if @user.save
       start_new_session_for @user
-      redirect_to root_path, notice: "สมัครสมาชิกสำเร็จ"
+      redirect_to qualification_path, notice: "สมัครสมาชิกสำเร็จ กรุณากรอกทรัพย์สินเพื่อตรวจสอบคุณสมบัติ"
     else
       render :new, status: :unprocessable_entity
     end

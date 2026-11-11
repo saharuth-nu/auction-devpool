@@ -22,7 +22,9 @@ class QualificationSubmission < ApplicationRecord
   validates :submitted_at, presence: true
   validate :assets_count_within_limits, on: :create
   validate :user_can_submit, on: :create
-  validates :rejection_reason, presence: true, length: { maximum: REJECTION_REASON_MAX }, if: :rejected?
+  validates :rejection_reason, presence: { message: "ต้องระบุเหตุผล" },
+                               length: { maximum: REJECTION_REASON_MAX, message: "ยาวไม่เกิน %{count} ตัวอักษร" },
+                               if: :rejected?
 
   before_validation :set_submitted_at, on: :create
   before_validation :number_asset_positions, on: :create

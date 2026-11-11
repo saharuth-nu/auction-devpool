@@ -44,6 +44,27 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
+  # ช่องเลือก (native <select>) หน้าตาเดียวกับ ui-input
+  #   f.ui_select :status, [ [ "ผ่าน", "approved" ] ], include_blank: "ทั้งหมด"
+  #   ฟอร์มที่ไม่ผูกโมเดลส่ง selected: params[:status] เพื่อคงค่าที่เลือกไว้
+  def ui_select(method, choices, label: nil, hint: nil, include_blank: false, selected: nil, **html)
+    error = object.respond_to?(:errors) ? object.errors[method].first : nil
+    message_id = "#{object_name}_#{method}_message".parameterize(separator: "_")
+    html[:class] = @template.class_names("ui-input", ("ui-input--invalid" if error), html[:class])
+    html[:"aria-invalid"] = true if error
+    html[:"aria-describedby"] = message_id if error || hint
+    select_options = { include_blank: }
+    select_options[:selected] = selected unless selected.nil?
+
+    @template.content_tag(:div, class: "ui-field") do
+      @template.safe_join([
+        self.label(method, label, class: "ui-field__label"),
+        select(method, choices, select_options, html),
+        ui_field_message(message_id, error, hint)
+      ].compact)
+    end
+  end
+
   # ปุ่มบันทึกหลักของฟอร์ม (primary ขนาด xl) ปรับได้ผ่าน variant/size
   def ui_submit(text = nil, variant: :primary, size: :xl, **options)
     text ||= submit_default_value

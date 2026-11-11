@@ -24,6 +24,11 @@ class AuditLogTest < ActiveSupport::TestCase
     assert_raises(ActiveRecord::RecordInvalid) { AuditLog.record!(admin: @user, action: "item.create") }
   end
 
+  test "NFR-18: ทุก action มีชื่อภาษาไทยสำหรับหน้าดู/ตัวกรอง" do
+    assert_equal AuditLog::ACTIONS.sort, AuditLog::ACTION_LABELS.keys.sort
+    assert_equal "ระงับผู้ใช้", AuditLog.new(action: "user.suspend").action_label
+  end
+
   test "NFR-17: ไม่ต้องมีเป้าหมายก็บันทึกได้" do
     assert AuditLog.record!(admin: @admin, action: "admin.create").persisted?
   end

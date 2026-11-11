@@ -13,7 +13,8 @@ end
 
 class AuthorizationTest < ActionDispatch::IntegrationTest
   setup do
-    @bidder = create_bidder
+    # ผ่านการตรวจคุณสมบัติแล้ว: ผู้ที่ยังไม่ผ่านเข้าได้เฉพาะหน้าสถานะ (QUAL-05) ดู qualification_gate_test.rb
+    @bidder = create_approved_bidder
     @admin = create_admin
   end
 

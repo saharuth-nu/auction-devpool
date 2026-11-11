@@ -21,7 +21,7 @@ class RegistrationsTest < ActionDispatch::IntegrationTest
     assert_difference -> { User.bidder.count }, 1 do
       register
     end
-    assert_redirected_to root_path
+    assert_redirected_to qualification_path # พาไปฟอร์มกรอกทรัพย์สินทันที (AUTH-03a, QUAL-02)
 
     user = User.find_by!(username: "somchai")
     assert user.bidder?
