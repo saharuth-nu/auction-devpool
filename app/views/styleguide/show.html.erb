@@ -1,0 +1,84 @@
+<% content_for :title, "ตัวอย่าง Design System" %>
+<%= ui_page_header "ตัวอย่าง Design System", description: "หน้านี้มีเฉพาะตอนพัฒนา ใช้ดู component ทั้งหมดบนมือถือและเดสก์ท็อป" do %>
+  <%= ui_link_button "ดู DESIGN.md", "https://github.com/saharuth-nu/auction-devpool/blob/dev/DESIGN.md", variant: :secondary %>
+<% end %>
+
+<%= ui_flash %>
+
+<%= ui_card title: "ปุ่ม" do %>
+  <div class="ui-actions">
+    <%= ui_button "หลัก" %>
+    <%= ui_button "ขอบเทา", variant: :secondary %>
+    <%= ui_button "กรอบ", variant: :outline %>
+    <%= ui_button "อันตราย", variant: :danger %>
+    <%= ui_button "ghost", variant: :ghost %>
+    <%= ui_button "ขนาด xl", size: :xl %>
+  </div>
+<% end %>
+
+<%= ui_card title: "ขั้นยืนยันการกระทำที่ย้อนกลับไม่ได้ (NFR-13)" do %>
+  <div class="ui-actions">
+    <%= ui_confirm_button "ลบสินค้า", styleguide_path, method: :delete,
+          title: "ลบสินค้านี้?", message: "ลบ “นาฬิกาข้อมือวินเทจ 1968” แล้วกู้คืนไม่ได้" %>
+    <%= ui_confirm_button "อนุมัติ", styleguide_path, method: :post, variant: :primary,
+          title: "อนุมัติสินค้า?", message: "สินค้าจะเปลี่ยนเป็น พร้อมขาย และแก้ราคาไม่ได้เมื่อเข้าประมูล" %>
+  </div>
+<% end %>
+
+<%= ui_card title: "ป้ายสถานะและแถบแจ้งผล" do %>
+  <div class="ui-actions">
+    <%= ui_badge "ผ่าน", tone: :success %>
+    <%= ui_badge "รอตรวจ", tone: :warning %>
+    <%= ui_badge "ไม่ผ่าน", tone: :danger %>
+    <%= ui_badge "กำลังประมูล", tone: :info %>
+    <%= ui_badge "ไม่ทราบ", tone: :muted %>
+  </div>
+  <%= ui_alert "บันทึกเรียบร้อย", tone: :success %>
+  <%= ui_alert "ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบ", tone: :error %>
+<% end %>
+
+<%= ui_card title: "ฟอร์ม: ช่องกรอก (label, hint, error ใต้ช่อง)" do %>
+  <%= ui_form_with model: @sample, url: styleguide_path, scope: :sample, method: :post do |f| %>
+    <%= f.ui_field :name, label: "ชื่อสินค้า", hint: "ช่องนี้ยังไม่กรอก จึงมี error" %>
+    <%= f.ui_field :room_id, as: :select, label: "ห้องประมูล", choices: [ [ "ห้อง A", 1 ], [ "ห้อง B", 2 ] ], include_blank: "เลือกห้อง" %>
+    <%= f.ui_field :images, as: :file, label: "รูปสินค้า", multiple: true, accept: "image/jpeg,image/png,image/webp" %>
+    <%= f.ui_field :enabled, as: :checkbox, label: "เปิดใช้งาน" %>
+    <%= f.ui_submit "บันทึก", submitting: "กำลังบันทึก..." %>
+  <% end %>
+<% end %>
+
+<%= ui_table_card title: "ตาราง (เงินบาทและวันที่เวลาไทย)" do %>
+  <table class="ui-table">
+    <thead><tr><th>สินค้า</th><th>สถานะ</th><th class="num">ราคา</th><th>เวลา</th></tr></thead>
+    <tbody>
+      <% @rows.each do |name, status, price| %>
+        <tr>
+          <td><%= name %></td>
+          <td><%= status_badge :auction, status %></td>
+          <td class="num"><%= baht price %></td>
+          <td><%= display_time Time.utc(2026, 11, 12, 13, 0, 0) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<%= ui_table_card title: "ตารางที่ไม่มีข้อมูล" do %>
+  <table class="ui-table">
+    <thead><tr><th>สินค้า</th><th class="num">ราคา</th></tr></thead>
+    <tbody><%= ui_table_message 2, "ยังไม่มีรายการ" %></tbody>
+  </table>
+<% end %>
+
+<%= ui_empty_state "ยังไม่มีการประมูลที่เข้าร่วม", description: "เลือกสินค้าที่สนใจแล้วกดเข้าร่วม" do %>
+  <%= ui_link_button "ดูสินค้า", root_path %>
+<% end %>
+
+<%= ui_card title: "กำลังโหลด" do %>
+  <%= ui_loading %>
+<% end %>
+
+<div class="ui-stats">
+  <%= ui_stat_card "การประมูลที่เปิดอยู่", 12, hint: "รายการ" %>
+  <%= ui_stat_card "ยอดสูงสุด", baht(182000) %>
+</div>

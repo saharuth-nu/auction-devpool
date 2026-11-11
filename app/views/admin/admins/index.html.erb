@@ -1,0 +1,32 @@
+<% content_for :title, "บัญชี admin" %>
+<%= ui_page_header "บัญชี admin", description: "รายชื่อผู้ดูแลระบบทั้งหมด" do %>
+  <%= ui_link_button "สร้างบัญชี admin", new_admin_admin_path %>
+<% end %>
+
+<%= ui_table_card title: "admin ทั้งหมด (#{@admins.size})" do %>
+  <table class="ui-table">
+    <thead><tr><th>username</th><th>สถานะ</th><th>เหตุผลที่ปิดใช้งาน</th><th></th></tr></thead>
+    <tbody>
+      <% @admins.each do |admin| %>
+        <tr>
+          <td><%= admin.username %><%= " (คุณ)" if admin == current_user %></td>
+          <td><%= admin.disabled? ? ui_badge("ปิดใช้งาน", tone: :danger) : ui_badge("ใช้งาน", tone: :success) %></td>
+          <td><%= admin.disabled_reason.presence || "-" %></td>
+          <td>
+            <% unless admin == current_user %>
+              <div class="ui-actions">
+                <%= ui_button_to "รีเซ็ตรหัสผ่าน", admin_admin_password_reset_path(admin), variant: :secondary, size: :sm,
+                      data: { turbo_confirm: "รีเซ็ตรหัสผ่านของ #{admin.username}? ผู้ใช้จะถูกออกจากระบบและต้องตั้งรหัสใหม่" } %>
+                <% if admin.disabled? %>
+                  <%= ui_button_to "เปิดใช้งาน", admin_admin_disablement_path(admin), method: :delete, variant: :secondary, size: :sm %>
+                <% else %>
+                  <%= ui_link_button "ปิดใช้งาน", new_admin_admin_disablement_path(admin), variant: :danger_outline, size: :sm %>
+                <% end %>
+              </div>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

@@ -1,0 +1,49 @@
+<% content_for :title, "ประวัติการกระทำ" %>
+<%= ui_page_header "ประวัติการกระทำ (audit log)", description: "บันทึกการกระทำของ admin ทั้งหมด เพิ่มได้อย่างเดียว แก้ไขหรือลบไม่ได้" %>
+
+<%= ui_card do %>
+  <%= ui_form_with url: admin_audit_logs_path, method: :get, class: "ui-filter-bar" do |f| %>
+    <%= f.ui_select :admin_id, @admins.map { |a| [ a.username, a.id ] }, label: "admin",
+          include_blank: "ทั้งหมด", selected: @filters[:admin_id] %>
+    <%= f.ui_select :action_name, AuditLog::ACTION_LABELS.map { |value, label| [ label, value ] },
+          label: "การกระทำ", include_blank: "ทั้งหมด", selected: @filters[:action_name] %>
+    <%= f.ui_field :from, as: :date, label: "ตั้งแต่วันที่", value: @filters[:from] %>
+    <%= f.ui_field :to, as: :date, label: "ถึงวันที่", value: @filters[:to] %>
+    <% if @filters[:target_type].present? %>
+      <%= hidden_field_tag :target_type, @filters[:target_type] %>
+      <%= hidden_field_tag :target_id, @filters[:target_id] %>
+    <% end %>
+    <div class="ui-field ui-actions">
+      <%= f.ui_submit "กรอง", size: :md %>
+      <%= ui_link_button "ล้างตัวกรอง", admin_audit_logs_path, variant: :ghost %>
+    </div>
+  <% end %>
+  <% if @filters[:target_type].present? %>
+    <p>เฉพาะสิ่งที่ถูกกระทำ: <%= @filters[:target_type] %> <%= "##{@filters[:target_id]}" if @filters[:target_id].present? %></p>
+  <% end %>
+<% end %>
+
+<%= ui_table_card title: "รายการ (#{@pagination.total_count})", footer: ui_pagination(@pagination).presence do %>
+  <table class="ui-table">
+    <thead><tr><th>เวลา</th><th>admin</th><th>การกระทำ</th><th>สิ่งที่ถูกกระทำ</th><th>รายละเอียด</th><th>เหตุผล</th></tr></thead>
+    <tbody>
+      <% if @logs.empty? %>
+        <%= ui_table_message 6, "ไม่พบรายการ" %>
+      <% end %>
+      <% @logs.each do |log| %>
+        <tr>
+          <td><%= display_time(log.created_at) %></td>
+          <td><%= log.admin.username %></td>
+          <td><%= log.action_label %></td>
+          <td>
+            <% if log.target_type %>
+              <%= link_to audit_target_label(log), admin_audit_logs_path(target_type: log.target_type, target_id: log.target_id) %>
+            <% else %>-<% end %>
+          </td>
+          <td><%= audit_change_summary(log) %></td>
+          <td><%= log.reason.presence || "-" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

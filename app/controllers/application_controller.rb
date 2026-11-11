@@ -4,4 +4,7 @@ class ApplicationController < ActionController::Base
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
+
+  include Authentication
+  include QualificationGate # ต้องอยู่หลัง Authentication (ใช้ Current.user ที่ resume แล้ว)
 end

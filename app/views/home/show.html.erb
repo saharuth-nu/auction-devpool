@@ -1,0 +1,7 @@
+<% content_for :title, "หน้าแรก" %>
+<%= render "home/banner" %>
+
+<section aria-labelledby="listings-title">
+  <h2 id="listings-title" class="ui-section-title">สินค้าประมูล</h2>
+  <%= render "home/listings", listings: @listings %>
+</section>

@@ -1,0 +1,40 @@
+<% content_for :title, "ห้องประมูล" %>
+<%= ui_page_header "ห้องประมูล", description: "ห้องกำหนดจำนวนผู้เข้าร่วมและจำนวนสินค้าสูงสุดของการประมูล" do %>
+  <%= ui_link_button "เพิ่มห้อง", new_admin_room_path %>
+<% end %>
+
+<div class="ui-actions">
+  <%= ui_link_button "ใช้งานอยู่", admin_rooms_path, variant: (@show_archived ? :secondary : :primary), size: :sm %>
+  <%= ui_link_button "เก็บถาวร", admin_rooms_path(archived: 1), variant: (@show_archived ? :primary : :secondary), size: :sm %>
+</div>
+
+<%= ui_table_card title: "#{@show_archived ? 'ห้องที่เก็บถาวร' : 'ห้องที่ใช้งานอยู่'} (#{@rooms.size})" do %>
+  <table class="ui-table">
+    <thead><tr><th>ชื่อห้อง</th><th>รายละเอียด</th><th class="num">ผู้เข้าร่วมสูงสุด</th><th class="num">สินค้าสูงสุด</th><th></th></tr></thead>
+    <tbody>
+      <% if @rooms.empty? %>
+        <%= ui_table_message 5, @show_archived ? "ยังไม่มีห้องที่เก็บถาวร" : "ยังไม่มีห้อง" %>
+      <% end %>
+      <% @rooms.each do |room| %>
+        <tr>
+          <td><%= room.name %></td>
+          <td><%= room.description.presence || "-" %></td>
+          <td class="num"><%= room.max_participants %></td>
+          <td class="num"><%= room.max_items %></td>
+          <td>
+            <div class="ui-actions">
+              <%= ui_link_button "แก้ไข", edit_admin_room_path(room), variant: :secondary, size: :sm %>
+              <% unless room.archived? %>
+                <%= ui_confirm_button "เก็บถาวร", archive_admin_room_path(room), method: :patch, trigger_variant: :secondary, size: :sm,
+                      title: "เก็บถาวรห้องนี้?",
+                      message: "“#{room.name}” จะเลือกตอนสร้างการประมูลใหม่ไม่ได้ การประมูลเดิมยังอ้างถึงได้" %>
+              <% end %>
+              <%= ui_confirm_button "ลบ", admin_room_path(room), trigger_variant: :danger_outline, size: :sm,
+                    title: "ลบห้องนี้?", message: "ลบห้อง “#{room.name}” ถาวร กู้คืนไม่ได้ (ห้องที่มีการประมูลอ้างถึงลบไม่ได้ ให้เก็บถาวรแทน)" %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

@@ -1,0 +1,9 @@
+<% content_for :title, "รหัสผ่านชั่วคราว" %>
+<div class="ui-auth">
+  <%= ui_card title: "รีเซ็ตรหัสผ่านของ “#{@target.username}” แล้ว" do %>
+    <p>แจ้งรหัสผ่านชั่วคราวนี้ให้เจ้าของบัญชี ผู้ใช้จะต้องตั้งรหัสผ่านใหม่ในการเข้าสู่ระบบครั้งถัดไป</p>
+    <code class="ui-secret"><%= @temporary_password %></code>
+    <%= ui_alert "รหัสนี้แสดงครั้งเดียว ปิดหน้านี้แล้วจะดูอีกไม่ได้ (ถ้าลืมให้รีเซ็ตใหม่)", tone: :warning, class: "ui-actions" %>
+    <p><%= @target.admin? ? ui_link_button("กลับรายการ admin", admin_admins_path, variant: :secondary) : ui_link_button("กลับหน้าผู้ใช้", admin_user_path(@target), variant: :secondary) %></p>
+  <% end %>
+</div>

@@ -1,0 +1,6 @@
+<% content_for :title, "แก้ไขห้องประมูล" %>
+<div class="ui-auth">
+  <%= ui_card title: "แก้ไขห้อง “#{@room.name_was}”" do %>
+    <%= render "form", room: @room %>
+  <% end %>
+</div>

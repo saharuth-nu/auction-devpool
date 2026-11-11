@@ -1,0 +1,38 @@
+<% content_for :title, "วิธีการประมูล" %>
+<%= ui_page_header "วิธีการประมูล", description: "วิธีที่ปิดใช้งานหรือยังไม่รองรับ จะเลือกตอนสร้างการประมูลใหม่ไม่ได้" do %>
+  <%= ui_link_button "เพิ่มวิธีประมูล", new_admin_auction_method_path %>
+<% end %>
+
+<%= ui_table_card title: "วิธีประมูลทั้งหมด (#{@auction_methods.size})" do %>
+  <table class="ui-table">
+    <thead><tr><th>ชื่อ</th><th>รหัส</th><th class="num">ระยะเวลายื่นราคา</th><th>สถานะ</th><th></th></tr></thead>
+    <tbody>
+      <% if @auction_methods.empty? %>
+        <%= ui_table_message 5, "ยังไม่มีวิธีประมูล" %>
+      <% end %>
+      <% @auction_methods.each do |method| %>
+        <tr>
+          <td><%= method.name %></td>
+          <td><code><%= method.code %></code></td>
+          <td class="num"><%= method.bidding_seconds %> วินาที</td>
+          <td>
+            <%= method.enabled? ? ui_badge("เปิดใช้งาน", tone: :success) : ui_badge("ปิดใช้งาน", tone: :neutral) %>
+            <%= ui_badge("ยังไม่รองรับ", tone: :muted) unless method.implemented? %>
+          </td>
+          <td>
+            <div class="ui-actions">
+              <% if method.enabled? %>
+                <%= ui_confirm_button "ปิดใช้งาน", disable_admin_auction_method_path(method), method: :patch,
+                      trigger_variant: :danger_outline, size: :sm, title: "ปิดใช้งานวิธีประมูลนี้?",
+                      message: "“#{method.name}” จะเลือกตอนสร้างการประมูลใหม่ไม่ได้ การประมูลเดิมไม่กระทบ (เปิดกลับได้ภายหลัง)" %>
+              <% else %>
+                <%= ui_button_to "เปิดใช้งาน", enable_admin_auction_method_path(method), method: :patch,
+                      variant: :secondary, size: :sm %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
