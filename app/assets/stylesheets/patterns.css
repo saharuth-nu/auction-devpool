@@ -38,6 +38,19 @@ input[type="file"].ui-input { height: auto; padding: 10px 14px; border-radius: v
 
 .ui-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; } /* แถวการ์ดตัวเลข: เรียงตามความกว้างจอ */
 
+/* ---------- เมนูหลักฝั่งผู้ใช้ / การประมูลของฉัน (USR-16, USR-17) ---------- */
+.ui-header__link { padding: 6px 10px; color: var(--color-zinc-700); font-weight: 500; text-decoration: none; border-radius: var(--radius-full); }
+.ui-header__link:hover { background: var(--color-zinc-100); }
+.ui-header__link[aria-current="page"] { color: var(--color-primary-700); background: var(--color-primary-50); }
+.ui-my-section { display: flex; flex-direction: column; gap: 12px; }
+.ui-my-section .ui-section-title { display: flex; align-items: center; gap: 8px; margin: 0; }
+.ui-my-lots { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.ui-my-lots__item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 0; border-top: 1px solid var(--color-zinc-100); }
+.ui-my-lots__name { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.ui-countdown { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--color-primary-700); }
+.ui-my-section .ui-card + .ui-card { margin-top: 0; }
+.ui-my-section .ui-actions { margin-top: 12px; }
+
 /* ---------- Responsive (NFR-12) ---------- */
 img, video { max-width: 100%; height: auto; }
 .ui-main > * { min-width: 0; } /* ตาราง/ข้อความยาวหดได้ ไม่ดันหน้าล้นจอ */

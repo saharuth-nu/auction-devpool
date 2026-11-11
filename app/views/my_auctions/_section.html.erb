@@ -1,0 +1,47 @@
+<%# หนึ่งกลุ่มของ "การประมูลของฉัน" (USR-16): phase = :upcoming / :live / :finished · groups = MyAuctions::Group %>
+<section class="ui-my-section" id="<%= id %>" aria-labelledby="<%= id %>-title">
+  <h2 id="<%= id %>-title" class="ui-section-title"><%= title %> <%= ui_badge(groups.size, tone: :muted) %></h2>
+  <% if groups.empty? %>
+    <p class="ui-field__hint">ไม่มีรายการ</p>
+  <% else %>
+    <% groups.each do |group| %>
+      <%= ui_card title: group.event.name do %>
+        <dl class="ui-dl">
+          <dt>ห้อง</dt><dd><%= group.event.room.name %></dd>
+          <dt>เวลาประมูล</dt><dd><%= display_time group.event.starts_at %></dd>
+          <% if phase == :upcoming %>
+            <dt>เริ่มในอีก</dt><dd><%= countdown_to group.event.starts_at %></dd>
+          <% end %>
+        </dl>
+
+        <ul class="ui-my-lots">
+          <% group.participations.each do |participation| %>
+            <% lot = participation.lot %>
+            <li class="ui-my-lots__item">
+              <span class="ui-my-lots__name">
+                <% if @linkable_lot_ids.include?(lot.id) %>
+                  <%= link_to lot.item.name, lot_path(lot) %>
+                <% else %>
+                  <%= lot.item.name %>
+                <% end %>
+                <%= my_lot_badge(lot, phase) %>
+              </span>
+              <% if phase == :upcoming && participation.cancellable? && @linkable_lot_ids.include?(lot.id) %>
+                <%= ui_confirm_button "ยกเลิกการเข้าร่วม", lot_participation_path(lot), method: :delete,
+                      variant: :danger, trigger_variant: :secondary, size: :sm,
+                      title: "ยกเลิกการเข้าร่วม “#{lot.item.name}”?",
+                      message: "ที่นั่งของคุณจะว่างให้ผู้อื่น เข้าร่วมใหม่ได้ถ้าห้องยังไม่เต็มและยังไม่เริ่มประมูล" %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+
+        <% if phase == :live %>
+          <%= render "shared/enter_room_button", event: group.event %>
+        <% elsif phase == :finished %>
+          <%= render "shared/results_link", event: group.event %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</section>

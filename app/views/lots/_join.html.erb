@@ -26,6 +26,7 @@
 <% when :open %>
   <% if participation %>
     <%= ui_alert "คุณเข้าร่วมประมูลสินค้านี้แล้ว (ยกเลิกไม่ได้หลังเริ่มประมูล)", tone: :success %>
+    <%= render "shared/enter_room_button", event: event %>
   <% else %>
     <%= ui_alert "การประมูลนี้เริ่มแล้ว", tone: :info %>
   <% end %>

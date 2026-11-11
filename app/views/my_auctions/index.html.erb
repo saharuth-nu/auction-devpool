@@ -1,0 +1,12 @@
+<% content_for :title, "การประมูลของฉัน" %>
+<%= ui_page_header "การประมูลของฉัน", description: "การประมูลที่คุณเข้าร่วม แยกตามช่วงเวลา" %>
+
+<% if @auctions.empty? %>
+  <%= ui_empty_state "คุณยังไม่ได้เข้าร่วมการประมูลใด", description: "เลือกสินค้าที่สนใจจากหน้าแรกแล้วกดเข้าร่วมประมูล" do %>
+    <%= ui_link_button "ดูสินค้าที่เปิดประมูล", root_path %>
+  <% end %>
+<% else %>
+  <%= render "my_auctions/section", id: "upcoming", title: "ยังไม่เริ่ม", phase: :upcoming, groups: @auctions.upcoming %>
+  <%= render "my_auctions/section", id: "live", title: "กำลังประมูล", phase: :live, groups: @auctions.live %>
+  <%= render "my_auctions/section", id: "finished", title: "จบแล้ว", phase: :finished, groups: @auctions.finished %>
+<% end %>

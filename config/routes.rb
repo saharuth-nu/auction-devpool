@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 
   # ---- ผู้ใช้ (bidder)
   root "home#show"
+  get "my-auctions", to: "my_auctions#index", as: :my_auctions # การประมูลของฉัน (USR-16)
   resources :lots, only: :show do # หน้ารายละเอียดสินค้าในการประมูล (USR-04)
     resource :participation, only: %i[create destroy] # เข้าร่วม / ยกเลิกก่อนเริ่ม (USR-05..07)
   end

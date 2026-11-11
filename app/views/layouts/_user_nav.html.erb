@@ -1,0 +1,6 @@
+<%# เมนูหลักฝั่งผู้ใช้ (USR-17): แสดงทุกหน้าให้ผู้ประมูลที่ผ่านการตรวจคุณสมบัติแล้ว
+    (ผู้ที่ยังไม่ผ่านเข้าหน้าเหล่านี้ไม่ได้ จึงไม่แสดงลิงก์) · ลิงก์ "ผลการประมูล" เพิ่มเมื่อมีหน้าผล (#61) %>
+<% if current_user.bidder? && current_user.qualified? %>
+  <%= link_to "การประมูลของฉัน", my_auctions_path, class: "ui-header__link",
+        "aria-current": (current_page?(my_auctions_path) ? "page" : nil) %>
+<% end %>

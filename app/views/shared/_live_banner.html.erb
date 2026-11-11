@@ -1,0 +1,7 @@
+<%# USR-17: event ที่ผู้ใช้เข้าร่วมกำลังเปิดรับราคา แสดงปุ่ม "เข้าห้องประมูล" บนหน้าแรก · events = Event ที่กำลังประมูล %>
+<% events.each do |event| %>
+  <%= ui_card title: "กำลังประมูล: #{event.name}" do %>
+    <p>การประมูลที่คุณเข้าร่วมกำลังเปิดรับราคา เข้าห้องประมูลเพื่อยื่นราคา</p>
+    <%= render "shared/enter_room_button", event: event %>
+  <% end %>
+<% end %>

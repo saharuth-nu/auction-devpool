@@ -1,5 +1,6 @@
 <% content_for :title, "หน้าแรก" %>
 <%= render "home/banner" %>
+<%= render "shared/live_banner", events: @live_events %>
 
 <section aria-labelledby="listings-title">
   <h2 id="listings-title" class="ui-section-title">สินค้าประมูล</h2>
