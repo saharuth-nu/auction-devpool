@@ -30,4 +30,10 @@ class StatusHelperTest < ActionView::TestCase
     assert_equal({ label: "รออนุมัติ", tone: :warning }, status_style(:item, "awaiting_approval"))
     assert_equal "พร้อมขาย", status_style(:item, :available)[:label]
   end
+
+  test "สถานะ event การประมูลตรงกับ AuctionEvent.statuses (EVT-10)" do
+    assert_equal AuctionEvent.statuses.keys.sort, StatusHelper::STATUSES[:auction_event].keys.sort
+    assert_equal({ label: "เปิดรับราคา", tone: :success }, status_style(:auction_event, "bidding"))
+    assert_equal :danger, status_style(:auction_event, :cancelled)[:tone]
+  end
 end

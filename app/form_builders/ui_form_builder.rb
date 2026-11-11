@@ -92,6 +92,28 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
+  # กลุ่ม checkbox เลือกได้หลายค่า ส่งเป็น array (เช่น เลือกสินค้าใส่การประมูล)
+  #   f.ui_check_boxes :selected_item_ids, items.map { |i| [ i.name, i.id, baht(i.starting_price) ] },
+  #                    label: "สินค้า", checked: event.current_item_ids, empty_message: "ไม่มีสินค้าที่เลือกได้"
+  #   choices: [ข้อความ, ค่า] หรือ [ข้อความ, ค่า, รายละเอียดรอง] · ไม่ติ๊กเลยจะส่ง [""] (ฝั่ง model ใช้ compact_blank)
+  def ui_check_boxes(method, choices, label: nil, hint: nil, checked: [], empty_message: nil)
+    error = object.respond_to?(:errors) ? object.errors[method].first : nil
+    message_id = "#{object_name}_#{method}_message".parameterize(separator: "_")
+    name = "#{object_name}[#{method}][]"
+    checked_values = Array(checked).map(&:to_s)
+    fieldset_options = { class: "ui-field ui-fieldset" }
+    fieldset_options[:"aria-describedby"] = message_id if error || hint
+    fieldset_options[:"aria-invalid"] = true if error
+
+    @template.content_tag(:fieldset, **fieldset_options) do
+      @template.safe_join([
+        @template.content_tag(:legend, ui_label_text(method, label), class: "ui-field__label"),
+        ui_check_box_list(name, method, choices, checked_values, empty_message),
+        ui_field_message(message_id, error, hint)
+      ].compact)
+    end
+  end
+
   # ปุ่มบันทึกหลักของฟอร์ม (primary ขนาด xl) ปรับได้ผ่าน variant/size
   # submitting: ข้อความบนปุ่มระหว่างส่ง (Turbo ปิดปุ่มให้) เช่น submitting: "กำลังส่งราคา..."
   def ui_submit(text = nil, variant: :primary, size: :xl, submitting: "กำลังบันทึก...", **options)
@@ -119,6 +141,27 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
         message
       ].compact)
     end
+  end
+
+  def ui_check_box_list(name, method, choices, checked_values, empty_message)
+    return @template.content_tag(:p, empty_message, class: "ui-text-muted") if choices.empty? && empty_message
+
+    items = choices.map do |text, value, detail|
+      id = "#{object_name}_#{method}_#{value}".parameterize(separator: "_")
+      @template.content_tag(:li) do
+        @template.content_tag(:label, class: "ui-check", for: id) do
+          @template.safe_join([
+            @template.check_box_tag(name, value, checked_values.include?(value.to_s), id:, class: "ui-checkbox"),
+            @template.content_tag(:span, text, class: "ui-check__text"),
+            (@template.content_tag(:span, detail, class: "ui-text-muted") if detail)
+          ].compact)
+        end
+      end
+    end
+    @template.safe_join([
+      @template.hidden_field_tag(name, "", id: nil),
+      @template.content_tag(:ul, @template.safe_join(items), class: "ui-check-list")
+    ])
   end
 
   # ชื่อช่องภาษาไทย: label: ที่ส่งมา → ชื่อใน locale (activerecord.attributes...) → raise ใน dev/test

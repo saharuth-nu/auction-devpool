@@ -89,6 +89,7 @@
 | `baht` / `baht_symbol` / `display_time` | จาก `FormatHelper`: `baht(1800)` → `1,800 บาท` · `baht_symbol(1800)` → `฿1,800` · `display_time(t)` → `13/11/2026 20:00` (ปี ค.ศ. ตามที่ทีมใช้) (ดู `.claude/knowledge/locale-time-money.md`) |
 | `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
 | `f.ui_select` | `f.ui_select :status, [["ผ่าน", "approved"]], include_blank: "ทั้งหมด", selected: params[:status]` (native select หน้าตาเดียวกับ `ui-input`) |
+| `f.ui_check_boxes` | `f.ui_check_boxes :selected_item_ids, items.map { \|i\| [i.name, i.id, baht(i.starting_price)] }, label: "สินค้า", checked: ids` — เลือกได้หลายค่า (fieldset + legend + error ใต้กลุ่ม) |
 | `ui_pagination` | `ui_pagination(@pagination)` คู่กับ `Paginated#paginate` ใน controller (ก่อนหน้า / หน้า X จาก Y / ถัดไป คงค่าตัวกรอง) วางใน `footer:` ของ `ui_table_card` |
 
 - ชนิดช่องของ `f.ui_field`: `as:` `:text` `:email` `:password` `:number` `:url` `:tel` `:search` `:date` `:datetime_local` `:textarea` `:select` (ส่ง `choices:`) `:checkbox` `:file` (`multiple: true`, `accept:`) · ทุกช่องมี label เสมอ: ส่ง `label:` หรือเพิ่มชื่อช่องภาษาไทยใน `config/locales` (`activerecord.attributes.<model>.<ช่อง>`) ไม่งั้น dev/test จะ raise · `f.ui_submit` ปิดตัวเองและแสดง "กำลังบันทึก..." ระหว่างส่ง (เปลี่ยนด้วย `submitting:`)
@@ -134,7 +135,7 @@
 
 ### สถานะของโดเมน
 
-ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ปรับให้ตรง enum จริงเมื่อสร้าง model) · domain ที่มีแล้ว: `:qualification` (รอกรอกทรัพย์สิน→`neutral`, รอ admin ตรวจ→`warning`, ผ่าน→`success`, ไม่ผ่าน→`danger`), `:submission`, `:suspension` (`"active"`/`"suspended"`), `:suspension_event` สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
+ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ป้ายแบบดูจากเวลาของการ์ดสินค้า) · `:auction_event` = สถานะ event ในหน้า admin (EVT-10): `scheduled` ยังไม่เริ่ม→`warning`, `bidding` เปิดรับราคา→`success`, `settled` สรุปผลแล้ว→`neutral`, `cancelled` ยกเลิก→`danger` · domain ที่มีแล้ว: `:qualification` (รอกรอกทรัพย์สิน→`neutral`, รอ admin ตรวจ→`warning`, ผ่าน→`success`, ไม่ผ่าน→`danger`), `:submission`, `:suspension` (`"active"`/`"suspended"`), `:suspension_event` สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
 
 ## 4. หลักการเขียนหน้า
 

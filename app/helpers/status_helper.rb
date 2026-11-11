@@ -33,6 +33,14 @@ module StatusHelper
       "suspend" => { label: "ระงับ", tone: :danger },
       "unsuspend" => { label: "ยกเลิกระงับ", tone: :success }
     },
+    # ตรงกับ AuctionEvent.statuses (EVT-10) ใช้ในหน้า admin
+    # (:auction ด้านบนเป็นป้ายแบบดูจากเวลาของการ์ดสินค้าฝั่งผู้ใช้)
+    auction_event: {
+      "scheduled" => { label: "ยังไม่เริ่ม", tone: :warning },
+      "bidding" => { label: "เปิดรับราคา", tone: :success },
+      "settled" => { label: "สรุปผลแล้ว", tone: :neutral },
+      "cancelled" => { label: "ยกเลิก", tone: :danger }
+    },
     # ตรงกับ Item.statuses (ITEM-02)
     item: {
       "awaiting_approval" => { label: "รออนุมัติ", tone: :warning },

@@ -1,0 +1,6 @@
+<% content_for :title, "สร้างการประมูลใหม่" %>
+<%= ui_page_header "สร้างการประมูลใหม่" %>
+
+<%= ui_card title: "ข้อมูลการประมูล" do %>
+  <%= render "form", event: @event %>
+<% end %>
