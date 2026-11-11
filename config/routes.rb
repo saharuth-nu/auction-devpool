@@ -9,7 +9,9 @@ Rails.application.routes.draw do
 
   # ---- ผู้ใช้ (bidder)
   root "home#show"
-  resources :lots, only: :show # หน้ารายละเอียดสินค้าในการประมูล (USR-04)
+  resources :lots, only: :show do # หน้ารายละเอียดสินค้าในการประมูล (USR-04)
+    resource :participation, only: %i[create destroy] # เข้าร่วม / ยกเลิกก่อนเริ่ม (USR-05..07)
+  end
 
   # หน้าตัวอย่าง component ของ Design System ไว้ดูบนมือถือ/เดสก์ท็อป (เฉพาะ development/test)
   match "styleguide", to: "styleguide#show", via: %i[get post patch delete] if Rails.env.local?

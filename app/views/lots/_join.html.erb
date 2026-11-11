@@ -1,13 +1,34 @@
-<%# USR-05: ปุ่ม "เข้าร่วมประมูล" มีเฉพาะก่อนถึงเวลาเริ่ม (ตัดสินด้วย Clock ที่ server)
-    ปุ่มยังกดไม่ได้ (disabled) การเข้าร่วมจริงทำใน issue #59 (Participation) เปลี่ยนเป็นฟอร์มส่งไป participation ของ lot นั้น %>
+<%# เข้าร่วมประมูล (USR-05..07) · ช่วงเวลาตัดสินด้วย Clock ที่ server (NFR-03)
+    - ก่อนเริ่ม: เข้าร่วมได้ (ถ้าห้องไม่เต็ม) / ยกเลิกการเข้าร่วมได้
+    - เริ่มแล้ว: ยกเลิกไม่ได้ ผู้ที่ยังไม่เข้าร่วมเข้าร่วมเพิ่มได้จากห้องประมูล (USR-10 ใน #60)
+    - เกินเวลารับราคา: ปิดรับ %>
 <% case lot_phase(event) %>
 <% when :upcoming %>
-  <%= ui_card do %>
-    <%= ui_button "เข้าร่วมประมูล", size: :xl, block: true, disabled: true %>
-    <p class="ui-field__hint">ยื่นราคาได้เฉพาะสินค้าที่เข้าร่วมไว้ก่อนเริ่มประมูล</p>
+  <% if participation %>
+    <%= ui_card do %>
+      <%= ui_alert "คุณเข้าร่วมประมูลสินค้านี้แล้ว", tone: :success %>
+      <%= ui_confirm_button "ยกเลิกการเข้าร่วม", lot_participation_path(lot), method: :delete,
+            variant: :danger, trigger_variant: :secondary, size: :xl, block: true,
+            title: "ยกเลิกการเข้าร่วมประมูลสินค้านี้?",
+            message: "ที่นั่งของคุณจะว่างให้ผู้อื่น เข้าร่วมใหม่ได้ถ้าห้องยังไม่เต็มและยังไม่เริ่มประมูล" %>
+    <% end %>
+  <% elsif full %>
+    <%= ui_card do %>
+      <%= ui_button "เต็มแล้ว", size: :xl, block: true, disabled: true %>
+      <p class="ui-field__hint">ห้องนี้มีผู้เข้าร่วมครบแล้ว ถ้ามีคนยกเลิกจะกลับมาเข้าร่วมได้</p>
+    <% end %>
+  <% else %>
+    <%= ui_card do %>
+      <%= ui_button_to "เข้าร่วมประมูล", lot_participation_path(lot), method: :post, size: :xl, block: true %>
+      <p class="ui-field__hint">ยื่นราคาได้เฉพาะสินค้าที่เข้าร่วมไว้ก่อนเริ่มประมูล</p>
+    <% end %>
   <% end %>
 <% when :open %>
-  <%= ui_alert "การประมูลนี้เริ่มแล้ว", tone: :info %>
+  <% if participation %>
+    <%= ui_alert "คุณเข้าร่วมประมูลสินค้านี้แล้ว (ยกเลิกไม่ได้หลังเริ่มประมูล)", tone: :success %>
+  <% else %>
+    <%= ui_alert "การประมูลนี้เริ่มแล้ว", tone: :info %>
+  <% end %>
 <% else %>
   <%= ui_alert "ปิดรับราคาแล้ว กำลังสรุปผล", tone: :info %>
 <% end %>

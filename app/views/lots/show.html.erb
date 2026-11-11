@@ -17,10 +17,11 @@
         <dt>การประมูล</dt><dd><%= @event.name %></dd>
         <dt>วิธีประมูล</dt><dd><%= @event.auction_method.name %></dd>
         <dt>ยื่นราคาได้ภายใน</dt><dd><%= bidding_window_text(@event.auction_method) %></dd>
+        <dt>ผู้เข้าร่วม</dt><dd><%= @participants %> / <%= @event.room.max_participants %> คน</dd>
       </dl>
     <% end %>
 
-    <%= render "lots/join", event: @event %>
+    <%= render "lots/join", lot: @lot, event: @event, participation: @participation, full: @full %>
   </div>
 </div>
 

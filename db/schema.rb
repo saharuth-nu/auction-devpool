@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_100002) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_110000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -129,6 +129,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_100002) do
     t.check_constraint "winning_price IS NULL OR winning_price > 0", name: "lots_winning_price_positive"
   end
 
+  create_table "participations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "lot_id", null: false
+    t.datetime "cancelled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lot_id"], name: "index_participations_on_lot_id"
+    t.index ["user_id", "lot_id"], name: "index_participations_one_active_per_user_lot", unique: true, where: "cancelled_at IS NULL"
+    t.index ["user_id"], name: "index_participations_on_user_id"
+  end
+
   create_table "qualification_submissions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "status", default: "pending", null: false
@@ -208,6 +219,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_100002) do
   add_foreign_key "items", "users", column: "approved_by_id"
   add_foreign_key "lots", "auction_events", on_delete: :restrict
   add_foreign_key "lots", "items", on_delete: :restrict
+  add_foreign_key "participations", "lots", on_delete: :restrict
+  add_foreign_key "participations", "users", on_delete: :restrict
   add_foreign_key "qualification_submissions", "users"
   add_foreign_key "qualification_submissions", "users", column: "reviewed_by_id"
   add_foreign_key "sessions", "users"

@@ -101,6 +101,7 @@ class LotsTest < ActionDispatch::IntegrationTest
       show_lot
       button = page.css("button").find { |b| b.text == "เข้าร่วมประมูล" }
       assert button, "ต้องมีปุ่มเข้าร่วมประมูล"
+      assert_not button["disabled"], "ปุ่มเข้าร่วมต้องกดได้ (USR-05)"
       assert_equal "รอเริ่ม", page.at_css(".ui-page-header .ui-badge").text
       assert_nil page.at_css(".ui-alert")
     end
