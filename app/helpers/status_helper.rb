@@ -9,6 +9,13 @@ module StatusHelper
       "active" => { label: "กำลังประมูล", tone: :success },
       "closed" => { label: "ปิดประมูล", tone: :neutral },
       "cancelled" => { label: "ยกเลิก", tone: :danger }
+    },
+    # ตรงกับ Item.statuses (ITEM-02)
+    item: {
+      "awaiting_approval" => { label: "รออนุมัติ", tone: :warning },
+      "available" => { label: "พร้อมขาย", tone: :success },
+      "in_auction" => { label: "อยู่ระหว่างการประมูล", tone: :info },
+      "sold" => { label: "ขายได้แล้ว", tone: :neutral }
     }
   }.freeze
 

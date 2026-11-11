@@ -1,0 +1,14 @@
+<% content_for :title, "เพิ่มวิธีประมูล" %>
+<div class="ui-auth">
+  <%= ui_card title: "เพิ่มวิธีประมูล" do %>
+    <%= ui_form_with model: [ :admin, @auction_method ] do |f| %>
+      <%= f.ui_field :name, label: "ชื่อ", autofocus: true, required: true %>
+      <%= f.ui_field :code, label: "รหัส", hint: "a-z 0-9 และ _ เช่น english, dutch (ใช้ได้จริงเมื่อเขียนกติกาของรหัสนั้นแล้ว)", required: true %>
+      <%= f.ui_field :bidding_seconds, as: :number, label: "ระยะเวลายื่นราคา (วินาที)", min: 1, step: 1, required: true %>
+      <div class="ui-actions">
+        <%= f.ui_submit "เพิ่มวิธีประมูล" %>
+        <%= ui_link_button "ยกเลิก", admin_auction_methods_path, variant: :secondary, size: :xl %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

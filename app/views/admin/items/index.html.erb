@@ -1,0 +1,35 @@
+<% content_for :title, "สินค้าประมูล" %>
+<%= ui_page_header "สินค้าประมูล", description: "สินค้าใหม่ต้องอนุมัติก่อนจึงจะนำไปใส่การประมูลได้" do %>
+  <%= ui_link_button "เพิ่มสินค้า", new_admin_item_path %>
+<% end %>
+
+<div class="ui-actions">
+  <% filter = ->(status) { { status: status, archived: (1 if @show_archived) }.compact } %>
+  <%= ui_link_button "ทั้งหมด (#{@total_count})", admin_items_path(filter.(nil)),
+        variant: (@status.nil? ? :primary : :secondary), size: :sm %>
+  <% Item.statuses.each_key do |status| %>
+    <%= ui_link_button "#{status_style(:item, status)[:label]} (#{@status_counts.fetch(status, 0)})",
+          admin_items_path(filter.(status)), variant: (@status == status ? :primary : :secondary), size: :sm %>
+  <% end %>
+  <%= ui_link_button (@show_archived ? "กลับไปสินค้าที่ใช้งานอยู่" : "ดูสินค้าที่เก็บถาวร"),
+        (@show_archived ? admin_items_path : admin_items_path(archived: 1)), variant: :ghost, size: :sm %>
+</div>
+
+<%= ui_table_card title: "#{@show_archived ? 'สินค้าที่เก็บถาวร' : 'สินค้า'} (#{@items.size})" do %>
+  <table class="ui-table">
+    <thead><tr><th>ชื่อสินค้า</th><th>สถานะ</th><th class="num">ราคาเริ่มต้น</th><th class="num">ราคาขั้นต่ำ</th></tr></thead>
+    <tbody>
+      <% if @items.empty? %>
+        <%= ui_table_message 4, "ไม่มีสินค้าในหมวดนี้" %>
+      <% end %>
+      <% @items.each do |item| %>
+        <tr>
+          <td><%= link_to item.name, admin_item_path(item) %></td>
+          <td><%= status_badge :item, item.status %></td>
+          <td class="num"><%= number_to_currency item.starting_price, unit: "฿" %></td>
+          <td class="num"><%= number_to_currency item.reserve_price, unit: "฿" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

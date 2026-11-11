@@ -22,4 +22,12 @@ class StatusHelperTest < ActionView::TestCase
     assert_includes html, "ui-badge--warning"
     assert_includes html, "รอเริ่ม"
   end
+
+  test "สถานะสินค้าครบทุกค่าของ Item และไม่มีค่าไหนเป็น ไม่ทราบ (ITEM-02)" do
+    Item.statuses.each_key do |status|
+      assert_not_equal UNKNOWN_STATUS, status_style(:item, status), "ขาด label ของ #{status}"
+    end
+    assert_equal({ label: "รออนุมัติ", tone: :warning }, status_style(:item, "awaiting_approval"))
+    assert_equal "พร้อมขาย", status_style(:item, :available)[:label]
+  end
 end

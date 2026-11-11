@@ -133,4 +133,16 @@ class UiFormBuilderTest < ActionView::TestCase
     button = form_with_field { |f| f.ui_submit("ยื่นราคา", submitting: "กำลังส่งราคา...") }.at_css("button[type=submit]")
     assert_equal "กำลังส่งราคา...", button["data-turbo-submits-with"]
   end
+
+  test "as: :file ออกเป็นช่องเลือกไฟล์ที่มี label และรับหลายไฟล์ได้" do
+    html = ui_form_with(model: Sample.new, url: "/samples", scope: :sample) do |f|
+      f.ui_field(:title, as: :file, label: "รูป", multiple: true, accept: "image/png")
+    end
+    doc = Nokogiri::HTML.fragment(html)
+    input = doc.at_css("input[type=file].ui-input")
+    assert input
+    assert_equal "sample[title][]", input["name"]
+    assert_equal "image/png", input["accept"]
+    assert_equal "รูป", doc.at_css("label.ui-field__label").text
+  end
 end

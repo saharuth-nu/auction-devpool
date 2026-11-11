@@ -1,0 +1,11 @@
+first_price:
+  code: first_price
+  name: ประมูลราคาปิด (First-Price Sealed)
+  bidding_seconds: 30
+  enabled: true
+
+english:
+  code: english
+  name: ประมูลแบบอังกฤษ
+  bidding_seconds: 60
+  enabled: true

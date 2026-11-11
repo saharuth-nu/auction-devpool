@@ -35,5 +35,23 @@ Rails.application.routes.draw do
     resources :users, only: [] do
       resource :password_reset, only: :create
     end
+
+    # ข้อมูลหลัก (#43-#51)
+    resources :auction_methods, only: %i[index new create] do
+      member do
+        patch :enable
+        patch :disable
+      end
+    end
+    resources :rooms, except: :show do
+      patch :archive, on: :member
+    end
+    resources :items do
+      member do
+        patch :approve
+        patch :archive
+      end
+      resources :images, only: :destroy, controller: "item_images"
+    end
   end
 end
