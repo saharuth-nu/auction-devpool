@@ -28,6 +28,12 @@ class AdminAuctionMethodsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "ปิดใช้งานต้องผ่านหน้าต่างยืนยันที่บอกผลกระทบ" do
+    get admin_auction_methods_path
+    assert_select ".ui-confirm dialog form[action=?]", disable_admin_auction_method_path(auction_methods(:first_price))
+    assert_select "[data-turbo-confirm]", count: 0
+  end
+
   test "METH-02: เพิ่มวิธีประมูลได้ และเริ่มที่เปิดใช้งาน" do
     get new_admin_auction_method_path
     assert_response :success

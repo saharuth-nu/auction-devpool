@@ -65,7 +65,9 @@ Rails.application.routes.draw do
         patch :approve
         patch :archive
       end
-      resources :images, only: :destroy, controller: "item_images"
+      resources :images, only: :destroy, controller: "item_images" do
+        patch :move, on: :member
+      end
     end
   end
 end

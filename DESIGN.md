@@ -65,6 +65,7 @@
 | **Pagination** | `ui-pagination` + `__info` | ชิดขวา ปุ่ม secondary sm · ข้อความ 14px `zinc-500` `tabular-nums` |
 | **Form row / Filter bar** | `ui-form-row` `ui-filter-bar` | `ui-form-row` = แถวกรอกหลายช่อง (2:1) ยุบเป็นคอลัมน์เดียวบนมือถือ · `ui-filter-bar` = แถบตัวกรองเหนือตาราง ช่องละ ≥ 180px ขึ้นบรรทัดใหม่อัตโนมัติ |
 | **Table** | `ui-table-card` `ui-table` `ui-table__message` | การ์ด มุม 16px · หัวคอลัมน์สูง 44px พื้น `zinc-50` ตัวอักษร 14px semibold `zinc-500` · แถวสูง ~72px padding ข้าง 24px · คอลัมน์แรกเด่น (`zinc-900` medium) · เส้นคั่นแถว `zinc-200` · ตัวเลขใส่ class `num` (ชิดขวา, `tabular-nums`) |
+| **Thumbs** | `ui-thumbs` + `__item` | รายการรูปย่อแบบ grid (เช่น รูปสินค้า) รูปสี่เหลี่ยมจัตุรัส `object-fit: cover` ขอบ `zinc-200` มุม `radius-lg` · ใช้ `<ul>`/`<ol>` และ `image_tag` ต้องมี `alt` |
 
 ### วิธีใช้ใน view (component กลาง)
 
@@ -86,7 +87,7 @@
 | `ui_empty_state` | `ui_empty_state("ยังไม่มีการประมูล", description: "...") { ui_link_button("ดูสินค้า", root_path) }` — สถานะว่างของรายการที่ไม่ใช่ตาราง |
 | `ui_loading` | `ui_loading("กำลังโหลด...")` — placeholder ใน `<turbo-frame>` ที่โหลดทีหลัง |
 | `baht` / `baht_symbol` / `display_time` | จาก `FormatHelper`: `baht(1800)` → `1,800 บาท` · `baht_symbol(1800)` → `฿1,800` · `display_time(t)` → `13/11/2026 20:00` (ปี ค.ศ. ตามที่ทีมใช้) (ดู `.claude/knowledge/locale-time-money.md`) |
-| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ · `as:` ได้แก่ `:text :email :password :number :url :tel :search :date :datetime_local :textarea :file` |
+| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
 | `f.ui_select` | `f.ui_select :status, [["ผ่าน", "approved"]], include_blank: "ทั้งหมด", selected: params[:status]` (native select หน้าตาเดียวกับ `ui-input`) |
 | `ui_pagination` | `ui_pagination(@pagination)` คู่กับ `Paginated#paginate` ใน controller (ก่อนหน้า / หน้า X จาก Y / ถัดไป คงค่าตัวกรอง) วางใน `footer:` ของ `ui_table_card` |
 

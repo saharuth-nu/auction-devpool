@@ -20,6 +20,14 @@ class AdminRoomsTest < ActionDispatch::IntegrationTest
     assert_select "td", text: "ห้องเก่า", count: 0
   end
 
+  test "NFR-13: ลบและเก็บถาวรห้องต้องผ่านหน้าต่างยืนยัน" do
+    room = rooms(:main_hall)
+    get admin_rooms_path
+    assert_select ".ui-confirm dialog form[action=?]", admin_room_path(room)
+    assert_select ".ui-confirm dialog form[action=?]", archive_admin_room_path(room)
+    assert_select "[data-turbo-confirm]", count: 0
+  end
+
   test "ROOM-05: ดูห้องที่เก็บถาวรได้แยกต่างหาก" do
     get admin_rooms_path(archived: 1)
     assert_response :success
@@ -61,6 +69,16 @@ class AdminRoomsTest < ActionDispatch::IntegrationTest
   test "ROOM-01: แก้ไขด้วยข้อมูลผิดแสดง error" do
     patch admin_room_path(rooms(:main_hall)), params: room_params(max_items: -1)
     assert_response :unprocessable_entity
+    assert_equal 10, rooms(:main_hall).reload.max_items
+  end
+
+  test "ROOM-04: ลดจำนวนสินค้าสูงสุดต่ำกว่าที่การประมูลที่ยังไม่จบใช้อยู่ไม่ได้ แสดงเหตุผลใต้ช่อง" do
+    event = auction_events(:upcoming)
+    event.lots.create!(item: Item.create!(name: "ของเพิ่ม", starting_price: 100, reserve_price: 100, status: :available))
+
+    patch admin_room_path(rooms(:main_hall)), params: room_params(name: "ห้องใหญ่", max_items: 1)
+    assert_response :unprocessable_entity
+    assert_select ".ui-field__error", /ใช้อยู่ 2 ชิ้น/
     assert_equal 10, rooms(:main_hall).reload.max_items
   end
 

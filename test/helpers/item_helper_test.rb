@@ -83,4 +83,13 @@ class ItemHelperTest < ActionView::TestCase
   test "เวลาที่เป็น nil raise ไม่ตีความเงียบๆ" do
     assert_raises(ArgumentError) { item_card(@item, starts_at: nil) }
   end
+
+  test "ITEM-07 รูปบนการ์ดเป็นรูปแรกตามลำดับที่ admin จัด ไม่ใช่รูปที่อัปโหลดก่อน" do
+    @item.images.attach(io: File.open(file_fixture("photo.png")), filename: "first.png", content_type: "image/png")
+    @item.images.attach(io: File.open(file_fixture("photo.png")), filename: "second.png", content_type: "image/png")
+    @item.reload
+    @item.move_image!(@item.ordered_images.last.id, :up)
+
+    assert_includes card(@item.reload).at_css("img.ui-item-card__image")["src"], "second.png"
+  end
 end
