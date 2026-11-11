@@ -1,0 +1,117 @@
+/*
+ * Design tokens (ดู DESIGN.md) — ย้ายมาจาก mmm-admin-fe (src/app/globals.css)
+ * ใช้ชื่อตามความหมาย (primary / success / warning / danger / info) ห้ามอ้างชื่อสีตรงๆ ใน view
+ * เปลี่ยนสีทั้งแอปได้ที่ไฟล์นี้จุดเดียว
+ */
+:root {
+  /* ฟอนต์: Noto Sans Thai (โหลดใน layout ผ่าน Google Fonts) */
+  --font-sans: "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+
+  /* primary: สีแบรนด์ #A80689 = เฉด 600 (ปุ่มหลัก) */
+  --color-primary-50: #FFF4FB;
+  --color-primary-100: #FDE7F5;
+  --color-primary-200: #FCD3EE;
+  --color-primary-300: #F9AFE2;
+  --color-primary-400: #DA6CBC;
+  --color-primary-500: #C13DA1;
+  --color-primary-600: #A80689;
+  --color-primary-700: #8B0371;
+  --color-primary-800: #71025B;
+  --color-primary-900: #580047;
+
+  /* secondary: ทอง #E2A727 = เฉด 600 เป็นสีเน้นเท่านั้น ไม่ใช่สีสถานะ
+     ตัวอักษรบนพื้น 600 ใช้ --color-zinc-900 (ห้ามขาว ความต่าง 2.1:1) */
+  --color-secondary-50: #FEFAF2;
+  --color-secondary-100: #FBF2E3;
+  --color-secondary-200: #F7E6C7;
+  --color-secondary-300: #F5D49C;
+  --color-secondary-400: #EDBD67;
+  --color-secondary-500: #E8B042;
+  --color-secondary-600: #E2A727;
+  --color-secondary-700: #BE8906;
+  --color-secondary-800: #99711A;
+  --color-secondary-900: #775920;
+
+  /* ข้อความ/ขอบ/ไอคอนที่เน้นแบรนด์ (ปุ่ม outline) และขอบช่องกรอกตอน hover/focus */
+  --color-brand-tertiary: #E200B0;
+  --color-brand-border: #CB00A1;
+
+  /* success = สำเร็จ/ผ่าน (Tailwind green) */
+  --color-success-50: #F0FDF4;
+  --color-success-100: #DCFCE7;
+  --color-success-200: #BBF7D0;
+  --color-success-600: #16A34A;
+  --color-success-700: #15803D;
+
+  /* warning = รอดำเนินการ/ระวัง (Tailwind amber) */
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-200: #FDE68A;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+
+  /* danger = error/ไม่ผ่าน/ลบ (Tailwind red) */
+  --color-danger-50: #FEF2F2;
+  --color-danger-100: #FEE2E2;
+  --color-danger-200: #FECACA;
+  --color-danger-300: #FCA5A5;
+  --color-danger-500: #EF4444;
+  --color-danger-600: #DC2626;
+  --color-danger-700: #B91C1C;
+  --color-danger-800: #991B1B;
+
+  /* info = ข้อมูลทั่วไป/กำลังดำเนินการ (Tailwind blue) */
+  --color-info-50: #EFF6FF;
+  --color-info-100: #DBEAFE;
+  --color-info-200: #BFDBFE;
+  --color-info-600: #2563EB;
+  --color-info-700: #1D4ED8;
+
+  /* neutral (Tailwind zinc) */
+  --color-white: #FFFFFF;
+  --color-zinc-50: #FAFAFA;
+  --color-zinc-100: #F4F4F5;
+  --color-zinc-200: #E4E4E7;
+  --color-zinc-300: #D4D4D8;
+  --color-zinc-400: #A1A1AA;
+  --color-zinc-500: #71717A;
+  --color-zinc-600: #52525B;
+  --color-zinc-700: #3F3F46;
+  --color-zinc-800: #27272A;
+  --color-zinc-900: #18181B;
+
+  /* type scale: ขยายจากค่าปกติ 1 ขั้น เพราะฟอนต์ไทยที่ 12–14px เล็กเกินไป */
+  --text-2xs: 0.75rem;   /* 12px ป้ายเล็ก / Badge */
+  --text-2xs-lh: 1rem;
+  --text-xs: 0.875rem;   /* 14px หัวคอลัมน์ ข้อความรอง */
+  --text-xs-lh: 1.25rem;
+  --text-sm: 1rem;       /* 16px เนื้อหา (body) */
+  --text-sm-lh: 1.5rem;
+  --text-base: 1.125rem; /* 18px หัวข้อย่อย */
+  --text-base-lh: 1.75rem;
+  --text-lg: 1.25rem;    /* 20px ชื่อการ์ด/ตาราง */
+  --text-lg-lh: 1.75rem;
+  --text-xl: 1.5rem;     /* 24px ชื่อหน้า */
+  --text-xl-lh: 2rem;
+  --text-2xl: 1.875rem;  /* 30px ตัวเลขเด่น */
+  --text-2xl-lh: 2.25rem;
+
+  /* รัศมีมุม */
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-lh);
+  color: var(--color-zinc-900);
+  background: var(--color-zinc-50);
+  -webkit-font-smoothing: antialiased;
+}
