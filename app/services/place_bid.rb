@@ -57,8 +57,7 @@ class PlaceBid
     return failure(:closed) unless @lot.pending?
     return failure(:not_started) if @event.scheduled?
 
-    now = Clock.now
-    return failure(:closed) if now > @event.bidding_ends_at # ปิดรับแล้ว (BID-02)
+    return failure(:closed) if Clock.passed?(@event.bidding_ends_at) # ปิดรับแล้ว (BID-02)
 
     return failure(:not_joined) unless Participation.active.exists?(user_id: @user.id, lot_id: @lot.id)
 
@@ -71,13 +70,22 @@ class PlaceBid
     ceiling = @user.bid_ceiling
     return failure(:invalid_amount, "ราคาต้องไม่เกินวงเงินของคุณ #{baht(ceiling)}") if amount > ceiling
 
-    save(amount, now)
+    save(amount)
   end
 
   private
 
-  def save(amount, placed_at)
-    Result.new(bid: Bid.create!(user: @user, lot: @lot, amount:, placed_at:), error: nil, message: nil)
+  # ล็อกแถว event เดียวกับ AuctionEvent#settle!/cancel! แล้วตรวจสถานะและเวลาซ้ำก่อนบันทึก
+  # ราคาที่ยื่นพร้อมกันพอดีกับการสรุปผลจึงเรียงคิวกัน: ใครได้ล็อกก่อนเป็นฝ่ายชนะ ไม่มีราคาที่เข้ามาหลังสรุปแล้วหายเงียบ
+  # เวลาที่ใช้ตัดสินและเวลาที่บันทึก (placed_at) เป็นค่าเดียวกัน อ่านจากนาฬิกาเซิร์ฟเวอร์
+  def save(amount)
+    Bid.transaction do
+      @event.lock!
+      placed_at = Clock.now
+      return failure(:closed) unless @event.bidding? && @lot.reload.pending? && placed_at <= @event.bidding_ends_at
+
+      Result.new(bid: Bid.create!(user: @user, lot: @lot, amount:, placed_at:), error: nil, message: nil)
+    end
   rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
     # ยื่นซ้ำ (รวมการยิงพร้อมกัน): unique index ให้สำเร็จได้ครั้งเดียว (NFR-05)
     failure(:already_bid)

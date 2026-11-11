@@ -48,10 +48,20 @@ class AuctionEvent < ApplicationRecord
   after_save :sync_lots, unless: -> { selected_item_ids.nil? }
   # ตั้ง job เริ่มการประมูลไว้ที่ starts_at ทุกครั้งที่สร้างหรือเลื่อนเวลา (job เก่าที่เวลาไม่ตรงจะไม่ทำอะไร)
   after_commit :schedule_start, on: %i[create update], if: -> { scheduled? && saved_change_to_starts_at? }
+  # เริ่มรับราคาแล้ว → ตั้ง job สรุปผลไว้ที่เวลาปิดรับราคา (NFR-06) job ที่หลุดมี SettleDueAuctionEventsJob กวาดซ้ำ
+  after_commit :schedule_settlement, on: :update, if: -> { bidding? && saved_change_to_status? }
 
   scope :unfinished, -> { where(status: %w[scheduled bidding]) }
   # ถึงเวลาเริ่มแล้วแต่ยังไม่ได้เริ่ม (ให้ job กวาดซ้ำเก็บตก)
   scope :due_to_start, -> { scheduled.where(starts_at: ..Clock.now) }
+
+  # หลัง job ปิดรับราคาที่ตั้งไว้ รอเพิ่มอีกเล็กน้อยให้เลยเส้นตายแน่ๆ ก่อนสรุป (เส้นตายเองยังนับว่ายื่นทัน)
+  SETTLEMENT_DELAY = 1.second
+
+  # เปิดรับราคาอยู่และเลยเวลาปิดรับราคาแล้ว (ต้องดูระยะเวลาจากวิธีประมูลของแต่ละ event จึงกรองในโค้ด)
+  def self.due_to_settle
+    bidding.includes(:auction_method).select { |event| Clock.passed?(event.bidding_ends_at) }
+  end
 
   def selected_item_ids=(ids)
     @selected_item_ids = Array(ids).compact_blank.map(&:to_i).uniq
@@ -127,9 +137,43 @@ class AuctionEvent < ApplicationRecord
     started
   end
 
+  # BID-06..10, BID-14: เมื่อเลยเวลาปิดรับราคา คัดผู้ชนะทุก lot แล้วสรุปผล event ใน transaction เดียว
+  #   - ราคาสูงสุดชนะ เท่ากันให้ผู้ยื่นก่อน (BID-06, BID-07) จ่ายตามราคาที่ตนยื่น
+  #   - ต้องไม่ต่ำกว่าราคาขั้นต่ำ (BID-08): ถึง → lot ขายได้ สินค้า "ขายได้แล้ว" (BID-10)
+  #     ไม่มีผู้ยื่น/ต่ำกว่าขั้นต่ำ → lot ไม่ขาย สินค้ากลับเป็น "พร้อมขาย" นำไปใส่ event ใหม่ได้ (BID-09, ITEM-11)
+  #   - ราคาของผู้ที่ถูกระงับภายหลังนับตามปกติ (BID-17, SUSP-04) · การระงับไม่เปลี่ยนผลที่สรุปแล้ว (SUSP-05)
+  # รันซ้ำได้ผลเดิม (BID-14): ยังไม่ถึงเวลา / สรุปไปแล้ว / ยกเลิก → ไม่ทำอะไร คืน false (สรุปสำเร็จคืน true)
+  # ล็อกแถว event ไว้ ราคาที่ยื่นพร้อมกันพอดีกับการสรุปจึงเรียงคิวกัน (PlaceBid ล็อกแถวเดียวกัน)
+  def settle!
+    settled = false
+    with_lock do
+      next unless bidding? && Clock.passed?(bidding_ends_at)
+
+      lots.pending.includes(:item).find_each { |lot| settle_lot(lot) }
+      transition_to!(:settled, settled_at: Clock.now)
+      settled = true
+    end
+    settled
+  end
+
   private
     def schedule_start
       StartAuctionEventJob.set(wait_until: starts_at).perform_later(id)
+    end
+
+    def schedule_settlement
+      SettleAuctionEventJob.set(wait_until: bidding_ends_at + SETTLEMENT_DELAY).perform_later(id)
+    end
+
+    def settle_lot(lot)
+      winner = lot.bids.for_settlement.first
+      if winner && winner.amount >= lot.item.reserve_price
+        lot.update!(status: :sold, winning_price: winner.amount, winning_bid: winner)
+        lot.item.update!(status: :sold)
+      else
+        lot.update!(status: :unsold)
+        lot.item.update!(status: :available)
+      end
     end
 
     # EVT-05: เวลาสิ้นสุด ≥ เวลาเริ่ม + ระยะเวลายื่นราคา
