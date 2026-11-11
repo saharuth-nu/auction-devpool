@@ -1,7 +1,7 @@
 <% content_for :title, "ผู้ดูแลระบบ" %>
 <%= ui_page_header "ผู้ดูแลระบบ", description: "เลือก module ที่ต้องการใช้งาน" %>
 <%= ui_card title: "Module" do %>
-  <ul class="ui-dl" style="list-style:none;padding:0;grid-template-columns:1fr">
+  <ul class="ui-link-list">
     <li><%= link_to "ตรวจสอบผู้ใช้", admin_qualification_submissions_path %>
         <% pending = QualificationSubmission.pending.count %><%= ui_badge("รอตรวจ #{pending}", tone: :warning) if pending.positive? %></li>
     <li><%= link_to "ผู้ใช้ทั้งหมด", admin_users_path %></li>
