@@ -29,6 +29,18 @@
   </head>
 
   <body>
-    <%= yield %>
+    <header class="ui-header">
+      <%= link_to "Auction Devpool", (authenticated? && current_user.admin? ? admin_root_path : root_path), class: "ui-header__brand" %>
+      <% if authenticated? %>
+        <nav class="ui-header__nav">
+          <%= link_to current_user.fullname.presence || current_user.username, profile_path, class: "ui-header__user" %>
+          <%= ui_button_to "ออกจากระบบ", logout_path, method: :delete, variant: :ghost, size: :sm %>
+        </nav>
+      <% end %>
+    </header>
+    <main class="ui-main">
+      <%= ui_flash %>
+      <%= yield %>
+    </main>
   </body>
 </html>

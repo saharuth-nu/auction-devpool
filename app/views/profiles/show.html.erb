@@ -1,0 +1,15 @@
+<% content_for :title, "โปรไฟล์" %>
+<%= ui_page_header "โปรไฟล์ของฉัน" do %>
+  <%= ui_link_button "เปลี่ยนรหัสผ่าน", edit_password_path, variant: :secondary %>
+<% end %>
+<%= ui_card do %>
+  <dl class="ui-dl">
+    <dt>ชื่อผู้ใช้</dt><dd><%= current_user.username %> <small>(แก้ไขไม่ได้)</small></dd>
+    <% if current_user.bidder? %>
+      <dt>ชื่อ-นามสกุล</dt><dd><%= current_user.fullname %></dd>
+      <dt>อีเมล</dt><dd><%= current_user.email %></dd>
+    <% else %>
+      <dt>บทบาท</dt><dd>ผู้ดูแลระบบ</dd>
+    <% end %>
+  </dl>
+<% end %>

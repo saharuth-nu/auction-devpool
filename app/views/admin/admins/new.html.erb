@@ -1,0 +1,14 @@
+<% content_for :title, "สร้างบัญชี admin" %>
+<div class="ui-auth">
+  <%= ui_card title: "สร้างบัญชี admin" do %>
+    <%= ui_form_with model: @admin, url: admin_admins_path do |f| %>
+      <%= f.ui_field :username, label: "ชื่อผู้ใช้", hint: "a-z 0-9 และ _ ยาว 4–30 ตัวอักษร", autofocus: true, required: true %>
+      <%= f.ui_field :password, as: :password, label: "รหัสผ่าน", hint: "อย่างน้อย 8 ตัวอักษร", autocomplete: "new-password", required: true %>
+      <%= f.ui_field :password_confirmation, as: :password, label: "ยืนยันรหัสผ่าน", autocomplete: "new-password", required: true %>
+      <div class="ui-actions">
+        <%= f.ui_submit "สร้างบัญชี" %>
+        <%= ui_link_button "ยกเลิก", admin_admins_path, variant: :secondary, size: :xl %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

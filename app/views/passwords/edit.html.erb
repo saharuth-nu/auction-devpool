@@ -1,0 +1,14 @@
+<% content_for :title, "เปลี่ยนรหัสผ่าน" %>
+<div class="ui-auth">
+  <%= ui_card title: "เปลี่ยนรหัสผ่าน" do %>
+    <%= ui_form_with model: (@user || current_user), url: password_path, method: :patch do |f| %>
+      <%= f.ui_field :current_password, as: :password, label: "รหัสผ่านเดิม", autocomplete: "current-password", autofocus: true, required: true %>
+      <%= f.ui_field :password, as: :password, label: "รหัสผ่านใหม่", hint: "อย่างน้อย 8 ตัวอักษร ไม่ซ้ำรหัสเดิม", autocomplete: "new-password", required: true %>
+      <%= f.ui_field :password_confirmation, as: :password, label: "ยืนยันรหัสผ่านใหม่", autocomplete: "new-password", required: true %>
+      <div class="ui-actions">
+        <%= f.ui_submit "บันทึก" %>
+        <%= ui_link_button "ยกเลิก", profile_path, variant: :secondary, size: :xl %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
