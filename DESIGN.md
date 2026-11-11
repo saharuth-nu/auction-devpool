@@ -64,25 +64,71 @@
 | **Checkbox / Radio** | `ui-checkbox` `ui-radio` | 16px สี `primary-600` · ต้องมี `<label>` หรือ `aria-label` |
 | **Table** | `ui-table-card` `ui-table` `ui-table__message` | การ์ด มุม 16px · หัวคอลัมน์สูง 44px พื้น `zinc-50` ตัวอักษร 14px semibold `zinc-500` · แถวสูง ~72px padding ข้าง 24px · คอลัมน์แรกเด่น (`zinc-900` medium) · เส้นคั่นแถว `zinc-200` · ตัวเลขใส่ class `num` (ชิดขวา, `tabular-nums`) |
 
-ตัวอย่าง:
+### วิธีใช้ใน view (component กลาง)
+
+ทีมไม่ต้องเขียน class `ui-*` เอง ใช้ helper ได้ทุก view โดยไม่ต้อง include:
+
+| Helper | ตัวอย่าง |
+|---|---|
+| `ui_button` | `ui_button("บันทึก", type: "submit", size: :xl)` |
+| `ui_link_button` | `ui_link_button("สร้างการประมูล", new_auction_path)` |
+| `ui_button_to` | `ui_button_to("ลบ", auction_path(a), method: :delete, variant: :danger, data: { turbo_confirm: "ยืนยันลบ?" })` |
+| `ui_badge` | `ui_badge("ผ่าน", tone: :success)` |
+| `status_badge` | `status_badge(:auction, auction.status)` (สถานะโดเมน ดูด้านล่าง) |
+| `ui_alert` / `ui_flash` | `ui_alert("บันทึกแล้ว", tone: :success)` · `ui_flash` แสดง flash ทั้งหมด |
+| `ui_card` | `ui_card(title: "รายละเอียด", actions: ui_link_button(...)) { ... }` |
+| `ui_page_header` | `ui_page_header("รายการประมูล", description: "...") { ui_link_button(...) }` (block = ปุ่มชิดขวา) |
+| `ui_stat_card` | `ui_stat_card("เปิดอยู่", 12, hint: "รายการ")` |
+| `ui_table_card` / `ui_table_message` | ดูตัวอย่างด้านล่าง |
+| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
+
+- ตัวเลือก: `variant:` (`:primary :secondary :outline :danger :danger_outline :ghost :link`), `size:` (`:sm :md :xl`), `shape:` (`:round :square`), `block: true`, `icon_left:` / `icon_right:` (HTML ของ SVG)
+- ส่งค่าที่ไม่อยู่ในมาตรฐาน (เช่น `variant: :purple`) จะ **raise ArgumentError** ทันที
+- ทุก helper รับ `class:` เพิ่มเติมและ attribute HTML อื่นได้ (`data:`, `id:`, `aria-*`)
+- โค้ด: [`app/helpers/ui_helper.rb`](app/helpers/ui_helper.rb), [`app/helpers/status_helper.rb`](app/helpers/status_helper.rb), [`app/form_builders/ui_form_builder.rb`](app/form_builders/ui_form_builder.rb) · test ที่ `test/helpers/`
 
 ```erb
-<div class="ui-page-header">
-  <h1 class="ui-page-header__title">รายการประมูล</h1>
-  <%= link_to "สร้างการประมูล", new_auction_path, class: "ui-btn ui-btn--primary" %>
-</div>
+<%= ui_page_header "รายการประมูล", description: "การประมูลทั้งหมดในระบบ" do %>
+  <%= ui_link_button "สร้างการประมูล", new_auction_path %>
+<% end %>
 
-<span class="ui-badge ui-badge--success">กำลังประมูล</span>
-<%= button_to "ลบ", auction_path(a), method: :delete, class: "ui-btn ui-btn--danger" %>
+<%= ui_flash %>
+
+<%= ui_table_card title: "การประมูลทั้งหมด" do %>
+  <table class="ui-table">
+    <thead><tr><th>ชื่อ</th><th>สถานะ</th><th class="num">ราคาปัจจุบัน</th></tr></thead>
+    <tbody>
+      <% if @auctions.empty? %>
+        <%= ui_table_message 3, "ยังไม่มีการประมูล" %>
+      <% end %>
+      <% @auctions.each do |a| %>
+        <tr>
+          <td><%= link_to a.title, a %></td>
+          <td><%= status_badge :auction, a.status %></td>
+          <td class="num"><%= number_with_delimiter(a.current_price) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<%= ui_form_with model: @auction do |f| %>
+  <%= f.ui_field :title %>
+  <%= f.ui_field :description, as: :textarea, hint: "รายละเอียดสินค้า" %>
+  <%= f.ui_field :starting_price, as: :number, label: "ราคาเริ่มต้น (บาท)" %>
+  <%= f.ui_submit "บันทึก" %>
+<% end %>
 ```
+
+ถ้าไม่ได้ผ่าน helper (เช่น ทำ HTML เอง) ใช้ class ตามตารางด้านบนได้โดยตรง
 
 ### สถานะของโดเมน
 
-ห้ามกำหนดสี badge ในแต่ละหน้า ให้ทำ helper กลางที่เดียว (เช่น `app/helpers/status_helper.rb`) แมปสถานะ → `{label, tone}` เหมือน `src/lib/status.ts` ของต้นทาง เช่น สถานะประมูล: เปิด→`success`, รอเริ่ม→`warning`, ปิด→`neutral`, ยกเลิก→`danger`
+ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ปรับให้ตรง enum จริงเมื่อสร้าง model) สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
 
 ## 4. หลักการเขียนหน้า
 
-1. ใช้ class `ui-*` ก่อนเสมอ ถ้าต้องการ component ใหม่ที่ใช้ซ้ำ ≥ 2 หน้า ให้เพิ่มใน `components.css` และเอกสารนี้ (ไม่ copy style ไปวางหน้าอื่น)
+1. ใช้ helper `ui_*` ก่อนเสมอ ถ้าต้องการ component ใหม่ที่ใช้ซ้ำ ≥ 2 หน้า ให้เพิ่ม CSS ใน `components.css` + helper ใน `UiHelper` + test + แถวในเอกสารนี้ (ไม่ copy style ไปวางหน้าอื่น)
 2. หนึ่งส่วนมีปุ่ม `primary` ได้ปุ่มเดียว ปุ่มอื่นเป็น `secondary`/`ghost`
 3. การกระทำที่ย้อนกลับไม่ได้ (ลบ, ปิดประมูล, ยืนยันผู้ชนะ) ต้องมีขั้นยืนยันที่แสดงสิ่งที่จะเกิด ใช้ Turbo confirm หรือ modal แทนการปล่อยกดทีเดียว
 4. ทุกช่องกรอกต้องมี label, ปุ่มไอคอนล้วนต้องมี `aria-label`
@@ -92,7 +138,7 @@
 ## 5. Checklist ก่อนส่งงาน
 
 - [ ] ไม่มี hex สีหรือ `font-size` เป็น px ฝังใน view/CSS (ใช้ token)
-- [ ] ใช้ `ui-btn`/`ui-badge`/`ui-alert`/`ui-input` แทน style เขียนเอง
+- [ ] ใช้ `ui_button`/`ui_badge`/`ui_alert`/`f.ui_field` แทน style เขียนเอง
 - [ ] สถานะของโดเมนมาจาก helper กลาง
 - [ ] เปิดดูหน้าจริงทั้งแบบไม่มีข้อมูล / error
 
