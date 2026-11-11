@@ -1,5 +1,5 @@
 <%# ปุ่ม "เข้าห้องประมูล" (USR-16, USR-17) ใช้ที่ การประมูลของฉัน / หน้าแรก / หน้ารายละเอียดสินค้า
-    ยังกดไม่ได้ (disabled) ห้องประมูลเป็น issue #60 เมื่อทำแล้วเปลี่ยนเป็นลิงก์ไปห้องของ event นั้น (ui_link_button) %>
+    ห้องเปิดเมื่อถึงเวลาเริ่ม (ห้องตรวจเวลาเองอีกครั้งที่เซิร์ฟเวอร์) · event = AuctionEvent %>
 <div class="ui-actions">
-  <%= ui_button "เข้าห้องประมูล", size: :xl, disabled: true %>
+  <%= ui_link_button "เข้าห้องประมูล", auction_event_room_path(event), size: :xl %>
 </div>
