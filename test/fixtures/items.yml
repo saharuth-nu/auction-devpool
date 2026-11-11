@@ -1,0 +1,28 @@
+watch:
+  name: นาฬิกาข้อมือ
+  description: นาฬิกามือสอง สภาพดี
+  starting_price: 1000.00
+  reserve_price: 1500.00
+  status: awaiting_approval
+
+car:
+  name: รถยนต์
+  starting_price: 300000.00
+  reserve_price: 350000.00
+  status: available
+  approved_at: <%= 1.day.ago.to_fs(:db) %>
+
+painting:
+  name: ภาพวาด
+  starting_price: 5000.00
+  reserve_price: 8000.00
+  status: in_auction
+  approved_at: <%= 2.days.ago.to_fs(:db) %>
+
+vase:
+  name: แจกันโบราณ
+  starting_price: 2000.00
+  reserve_price: 2000.00
+  status: available
+  approved_at: <%= 5.days.ago.to_fs(:db) %>
+  archived_at: <%= 1.day.ago.to_fs(:db) %>
