@@ -1,0 +1,11 @@
+main_hall:
+  name: ห้องใหญ่
+  description: ห้องหลักสำหรับสินค้าทั่วไป
+  max_participants: 50
+  max_items: 10
+
+old_room:
+  name: ห้องเก่า
+  max_participants: 10
+  max_items: 2
+  archived_at: <%= 3.days.ago.to_fs(:db) %>

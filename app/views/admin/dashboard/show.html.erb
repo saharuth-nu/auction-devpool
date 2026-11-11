@@ -6,7 +6,10 @@
         <% pending = QualificationSubmission.pending.count %><%= ui_badge("รอตรวจ #{pending}", tone: :warning) if pending.positive? %></li>
     <li><%= link_to "ผู้ใช้ทั้งหมด", admin_users_path %></li>
     <li><%= link_to "บัญชี admin", admin_admins_path %></li>
+    <li><%= link_to "สินค้าประมูล", admin_items_path %></li>
+    <li><%= link_to "วิธีการประมูล", admin_auction_methods_path %></li>
+    <li><%= link_to "ห้องประมูล", admin_rooms_path %></li>
     <li><%= link_to "ประวัติการกระทำ (audit log)", admin_audit_logs_path %></li>
-    <li>สินค้าประมูล · วิธีการประมูล · ห้องประมูล · การประมูล (อยู่ระหว่างพัฒนา)</li>
+    <li>การประมูล (event) (อยู่ระหว่างพัฒนา)</li>
   </ul>
 <% end %>

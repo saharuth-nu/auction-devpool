@@ -32,6 +32,13 @@ module StatusHelper
     suspension_event: {
       "suspend" => { label: "ระงับ", tone: :danger },
       "unsuspend" => { label: "ยกเลิกระงับ", tone: :success }
+    },
+    # ตรงกับ Item.statuses (ITEM-02)
+    item: {
+      "awaiting_approval" => { label: "รออนุมัติ", tone: :warning },
+      "available" => { label: "พร้อมขาย", tone: :success },
+      "in_auction" => { label: "อยู่ระหว่างการประมูล", tone: :info },
+      "sold" => { label: "ขายได้แล้ว", tone: :neutral }
     }
   }.freeze
 

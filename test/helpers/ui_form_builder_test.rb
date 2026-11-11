@@ -61,4 +61,16 @@ class UiFormBuilderTest < ActionView::TestCase
       ui_form_with(model: Sample.new, url: "/samples", scope: :sample) { |f| f.ui_field(:title, as: :color) }
     end
   end
+
+  test "as: :file ออกเป็นช่องเลือกไฟล์ที่มี label และรับหลายไฟล์ได้" do
+    html = ui_form_with(model: Sample.new, url: "/samples", scope: :sample) do |f|
+      f.ui_field(:title, as: :file, label: "รูป", multiple: true, accept: "image/png")
+    end
+    doc = Nokogiri::HTML.fragment(html)
+    input = doc.at_css("input[type=file].ui-input")
+    assert input
+    assert_equal "sample[title][]", input["name"]
+    assert_equal "image/png", input["accept"]
+    assert_equal "รูป", doc.at_css("label.ui-field__label").text
+  end
 end

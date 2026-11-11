@@ -11,6 +11,34 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "assets", force: :cascade do |t|
     t.integer "qualification_submission_id", null: false
     t.string "name", null: false
@@ -19,6 +47,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["qualification_submission_id"], name: "index_assets_on_qualification_submission_id"
+  end
+
+  create_table "auction_methods", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "name", null: false
+    t.integer "bidding_seconds", null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_auction_methods_on_code", unique: true
+    t.check_constraint "bidding_seconds > 0", name: "auction_methods_bidding_seconds_positive"
   end
 
   create_table "audit_logs", force: :cascade do |t|
@@ -35,6 +74,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
     t.index ["target_type", "target_id"], name: "index_audit_logs_on_target"
   end
 
+  create_table "items", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.decimal "starting_price", precision: 15, scale: 2, null: false
+    t.decimal "reserve_price", precision: 15, scale: 2, null: false
+    t.string "status", default: "awaiting_approval", null: false
+    t.datetime "approved_at"
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "approved_by_id"
+    t.index ["approved_by_id"], name: "index_items_on_approved_by_id"
+    t.index ["archived_at"], name: "index_items_on_archived_at"
+    t.index ["status"], name: "index_items_on_status"
+    t.check_constraint "reserve_price >= starting_price", name: "items_reserve_not_below_starting"
+    t.check_constraint "starting_price > 0", name: "items_starting_price_positive"
+    t.check_constraint "status IN ('awaiting_approval', 'available', 'in_auction', 'sold')", name: "items_status_valid"
+  end
+
   create_table "qualification_submissions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "status", default: "pending", null: false
@@ -49,6 +107,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
     t.index ["user_id", "submitted_at"], name: "index_qualification_submissions_on_user_id_and_submitted_at"
     t.index ["user_id"], name: "index_qualification_submissions_on_user_id"
     t.index ["user_id"], name: "index_qualification_submissions_one_pending_per_user", unique: true, where: "status = 'pending'"
+  end
+
+  create_table "rooms", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.integer "max_participants", null: false
+    t.integer "max_items", null: false
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["archived_at"], name: "index_rooms_on_archived_at"
+    t.check_constraint "max_items > 0", name: "rooms_max_items_positive"
+    t.check_constraint "max_participants > 0", name: "rooms_max_participants_positive"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -92,8 +163,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "assets", "qualification_submissions"
   add_foreign_key "audit_logs", "users", column: "admin_id"
+  add_foreign_key "items", "users", column: "approved_by_id"
   add_foreign_key "qualification_submissions", "users"
   add_foreign_key "qualification_submissions", "users", column: "reviewed_by_id"
   add_foreign_key "sessions", "users"

@@ -82,7 +82,7 @@
 | `ui_page_header` | `ui_page_header("รายการประมูล", description: "...") { ui_link_button(...) }` (block = ปุ่มชิดขวา) |
 | `ui_stat_card` | `ui_stat_card("เปิดอยู่", 12, hint: "รายการ")` |
 | `ui_table_card` / `ui_table_message` | ดูตัวอย่างด้านล่าง |
-| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
+| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ · `as:` ได้แก่ `:text :email :password :number :url :tel :search :date :datetime_local :textarea :file` |
 | `f.ui_select` | `f.ui_select :status, [["ผ่าน", "approved"]], include_blank: "ทั้งหมด", selected: params[:status]` (native select หน้าตาเดียวกับ `ui-input`) |
 | `ui_pagination` | `ui_pagination(@pagination)` คู่กับ `Paginated#paginate` ใน controller (ก่อนหน้า / หน้า X จาก Y / ถัดไป คงค่าตัวกรอง) วางใน `footer:` ของ `ui_table_card` |
 

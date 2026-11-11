@@ -1,0 +1,18 @@
+<%= ui_form_with model: [ :admin, item ] do |f| %>
+  <%= f.ui_field :name, label: "ชื่อสินค้า", autofocus: true, required: true %>
+  <%= f.ui_field :description, as: :textarea, label: "รายละเอียด", rows: 4 %>
+  <%= f.ui_field :starting_price, as: :number, label: "ราคาเริ่มต้น (บาท)", min: 0.01, step: 0.01, required: true,
+        disabled: item.in_auction? && item.persisted? %>
+  <%= f.ui_field :reserve_price, as: :number, label: "ราคาขั้นต่ำ / reserve (บาท)", min: 0.01, step: 0.01, required: true,
+        hint: "ต้องไม่ต่ำกว่าราคาเริ่มต้น · ผู้ใช้ไม่เห็นราคานี้", disabled: item.in_auction? && item.persisted? %>
+  <% item.images.attachments.select(&:persisted?).each do |image| %>
+    <%= f.hidden_field :images, multiple: true, value: image.signed_id %>
+  <% end %>
+  <%= f.ui_field :images, as: :file, label: item.persisted? ? "เพิ่มรูป" : "รูปสินค้า", multiple: true,
+        accept: Item::IMAGE_CONTENT_TYPES.join(","), include_hidden: false,
+        hint: "JPG, PNG หรือ WebP ไม่เกิน 5 MB ต่อรูป รวมไม่เกิน #{Item::MAX_IMAGES} รูป" %>
+  <div class="ui-actions">
+    <%= f.ui_submit item.new_record? ? "เพิ่มสินค้า" : "บันทึก" %>
+    <%= ui_link_button "ยกเลิก", item.new_record? ? admin_items_path : admin_item_path(item), variant: :secondary, size: :xl %>
+  </div>
+<% end %>
