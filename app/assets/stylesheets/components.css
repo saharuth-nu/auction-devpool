@@ -104,3 +104,13 @@ textarea.ui-input { height: auto; min-height: 96px; padding: 12px 14px; border-r
 .ui-table td:first-child { font-weight: 500; color: var(--color-zinc-900); }
 .ui-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .ui-table__message { padding: 48px 0; text-align: center; color: var(--color-zinc-500); }
+
+/* ---------- ส่วนเสริมที่ helper ใช้ ---------- */
+.ui-btn__icon { display: inline-flex; flex-shrink: 0; width: 20px; height: 20px; }
+.ui-btn__icon > svg { width: 100%; height: 100%; }
+.ui-btn--xl .ui-btn__icon { width: 24px; height: 24px; }
+.ui-inline-form { display: inline; margin: 0; }
+.ui-card__actions, .ui-table-card__actions, .ui-page-header__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.ui-page-header__desc { margin: 4px 0 0; color: var(--color-zinc-500); }
+.ui-stat__hint { margin: 2px 0 0; font-size: var(--text-xs); color: var(--color-zinc-500); }
+.ui-field { margin-bottom: 16px; }

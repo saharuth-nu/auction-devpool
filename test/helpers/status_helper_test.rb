@@ -1,0 +1,25 @@
+require "test_helper"
+
+class StatusHelperTest < ActionView::TestCase
+  include UiHelper
+
+  test "สถานะประมูลแมปเป็น label และ tone" do
+    assert_equal({ label: "กำลังประมูล", tone: :success }, status_style(:auction, "active"))
+    assert_equal :danger, status_style(:auction, :cancelled)[:tone]
+  end
+
+  test "สถานะที่ไม่รู้จักเป็น muted ไม่ error" do
+    assert_equal({ label: "ไม่ทราบ", tone: :muted }, status_style(:auction, "???"))
+    assert_equal({ label: "ไม่ทราบ", tone: :muted }, status_style(:auction, nil))
+  end
+
+  test "โดเมนที่ไม่มีต้อง raise" do
+    assert_raises(KeyError) { status_style(:nope, "x") }
+  end
+
+  test "status_badge ออกเป็น Badge" do
+    html = status_badge(:auction, "scheduled")
+    assert_includes html, "ui-badge--warning"
+    assert_includes html, "รอเริ่ม"
+  end
+end
