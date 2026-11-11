@@ -64,6 +64,16 @@ class AdminRoomsTest < ActionDispatch::IntegrationTest
     assert_equal 10, rooms(:main_hall).reload.max_items
   end
 
+  test "ROOM-04: ลดจำนวนสินค้าสูงสุดต่ำกว่าที่การประมูลที่ยังไม่จบใช้อยู่ไม่ได้ แสดงเหตุผลใต้ช่อง" do
+    event = auction_events(:upcoming)
+    event.lots.create!(item: Item.create!(name: "ของเพิ่ม", starting_price: 100, reserve_price: 100, status: :available))
+
+    patch admin_room_path(rooms(:main_hall)), params: room_params(name: "ห้องใหญ่", max_items: 1)
+    assert_response :unprocessable_entity
+    assert_select ".ui-field__error", /ใช้อยู่ 2 ชิ้น/
+    assert_equal 10, rooms(:main_hall).reload.max_items
+  end
+
   test "ROOM-01: ลบห้องที่ไม่มีประวัติได้" do
     room = Room.create!(name: "ห้องว่าง", max_participants: 5, max_items: 1)
     assert_difference -> { Room.count }, -1 do

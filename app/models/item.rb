@@ -49,6 +49,24 @@ class Item < ApplicationRecord
     super
   end
 
+  # รูปที่บันทึกแล้วตามลำดับที่ admin จัด (ITEM-07) · รูปใหม่ที่ยังไม่ถูกจัดต่อท้ายตามลำดับอัปโหลด
+  # หน้าที่แสดงรูปสินค้าควรใช้ตัวนี้แทน images
+  def ordered_images
+    rank = image_order.each_with_index.to_h
+    images.attachments.select(&:persisted?).sort_by { |attachment| [ rank.fetch(attachment.id, image_order.size), attachment.id ] }
+  end
+
+  # เลื่อนรูปขึ้น (:up) หรือลง (:down) หนึ่งตำแหน่ง · ขอบบน/ล่างไม่เปลี่ยน
+  def move_image!(attachment_id, direction)
+    ids = ordered_images.map(&:id)
+    index = ids.index(attachment_id.to_i) or raise ActiveRecord::RecordNotFound, "ไม่พบรูปนี้ในสินค้า"
+    target = direction.to_s == "up" ? index - 1 : index + 1
+    return false unless target.between?(0, ids.size - 1)
+
+    ids[index], ids[target] = ids[target], ids[index]
+    update!(image_order: ids)
+  end
+
   private
     def locked_for_auction?
       status_in_database == "in_auction"

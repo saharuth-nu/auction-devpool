@@ -167,6 +167,16 @@ class AdminItemsTest < ActionDispatch::IntegrationTest
     assert_equal 1, item.reload.images.count
   end
 
+  test "ITEM-07: เลื่อนลำดับรูปได้" do
+    item = items(:car)
+    item.images.attach(photo, photo)
+    first, second = item.reload.ordered_images
+
+    patch move_admin_item_image_path(item, second, direction: "up")
+    assert_redirected_to edit_admin_item_path(item)
+    assert_equal [ second.id, first.id ], item.reload.ordered_images.map(&:id)
+  end
+
   # ---- สิทธิ์ (NFR-08)
 
   test "ผู้ใช้ทั่วไปเข้าหน้าและสั่งการสินค้าไม่ได้" do

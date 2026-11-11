@@ -1,8 +1,9 @@
 # สินค้าประมูล: ดู / กรองสถานะ / เพิ่ม / แก้ / ลบ / อนุมัติ / เก็บถาวร (ITEM-01/03/04/09/12)
 # รูปส่งเป็น signed_id ของรูปเดิม + ไฟล์ใหม่ในช่องเดียวกัน (ไม่ส่งรูปเดิม = ลบ) ลบทีละรูปผ่าน ItemImagesController
-# TODO(ITEM-12): ห้ามลบจริงเมื่อมีประวัติ lot/การเข้าร่วม/ราคาที่ยื่น (รอโมเดล Lot #53)
-# TODO(NFR-17): บันทึก audit log รวมราคาเดิม→ใหม่ (งาน #71)
+# ทุกการเปลี่ยนแปลงลง audit log ใน transaction เดียวกัน: ลง log ไม่สำเร็จ = การกระทำถูกยกเลิก (NFR-17)
 class Admin::ItemsController < Admin::BaseController
+  include ItemAuditing
+
   before_action :set_item, except: %i[index new create]
 
   def index
@@ -22,7 +23,14 @@ class Admin::ItemsController < Admin::BaseController
 
   def create
     @item = Item.new(item_params)
-    if @item.save
+    saved = Item.transaction do
+      next false unless @item.save
+
+      audit_item!("item.create", @item.attributes.slice(*AUDITED_ATTRIBUTES).merge("images" => @item.images.count))
+      true
+    end
+
+    if saved
       redirect_to admin_item_path(@item), notice: "เพิ่มสินค้า “#{@item.name}” แล้ว (รออนุมัติ)"
     else
       render :new, status: :unprocessable_entity
@@ -32,7 +40,18 @@ class Admin::ItemsController < Admin::BaseController
   def edit; end
 
   def update
-    if @item.update(item_params)
+    images_before = @item.images.count
+    saved = Item.transaction do
+      next false unless @item.update(item_params)
+
+      changes = @item.saved_changes.slice(*AUDITED_ATTRIBUTES)
+      images_after = @item.images.count
+      changes["images"] = [ images_before, images_after ] if images_after != images_before
+      audit_item!("item.update", changes) if changes.any?
+      true
+    end
+
+    if saved
       redirect_to admin_item_path(@item), notice: "บันทึกสินค้า “#{@item.name}” แล้ว"
     else
       render :edit, status: :unprocessable_entity
@@ -40,7 +59,15 @@ class Admin::ItemsController < Admin::BaseController
   end
 
   def destroy
-    if @item.destroy
+    snapshot = @item.attributes.slice(*AUDITED_ATTRIBUTES, "status")
+    destroyed = Item.transaction do
+      next false unless @item.destroy
+
+      audit_item!("item.destroy", snapshot)
+      true
+    end
+
+    if destroyed
       redirect_to admin_items_path, notice: "ลบสินค้า “#{@item.name}” แล้ว"
     else
       redirect_to admin_item_path(@item), alert: @item.errors.full_messages.to_sentence
@@ -48,14 +75,20 @@ class Admin::ItemsController < Admin::BaseController
   end
 
   def approve
-    @item.approve!(by: current_user)
+    Item.transaction do
+      @item.approve!(by: current_user)
+      audit_item!("item.approve", @item.saved_changes.slice("status"))
+    end
     redirect_to admin_item_path(@item), notice: "อนุมัติ “#{@item.name}” แล้ว สินค้าพร้อมขาย"
   rescue Item::InvalidTransition => e
     redirect_to admin_item_path(@item), alert: e.message
   end
 
   def archive
-    @item.archive!
+    Item.transaction do
+      @item.archive!
+      audit_item!("item.archive", @item.saved_changes.slice("archived_at"))
+    end
     redirect_to admin_items_path, notice: "เก็บถาวรสินค้า “#{@item.name}” แล้ว"
   rescue Item::InvalidTransition => e
     redirect_to admin_item_path(@item), alert: e.message
