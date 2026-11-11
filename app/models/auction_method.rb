@@ -4,6 +4,8 @@ class AuctionMethod < ApplicationRecord
   # รหัสที่มีกติกาเขียนไว้จริงแล้ว วิธีใหม่ (english, dutch) เพิ่มรหัสที่นี่เมื่อเขียนกติกาเสร็จ (METH-04/05)
   IMPLEMENTED_CODES = %w[first_price].freeze
 
+  has_many :auction_events, dependent: :restrict_with_error
+
   validates :code, presence: true, uniqueness: true,
     format: { with: /\A[a-z][a-z0-9_]*\z/, message: "ใช้ได้เฉพาะ a-z, 0-9 และ _ (ขึ้นต้นด้วยตัวอักษร)" }
   validates :name, presence: true

@@ -18,6 +18,7 @@ class Item < ApplicationRecord
   }
 
   has_many_attached :images
+  has_many :lots, dependent: :restrict_with_error
 
   validates :name, presence: true
   validates :starting_price, :reserve_price, presence: true

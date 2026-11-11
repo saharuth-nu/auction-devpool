@@ -1,0 +1,25 @@
+# ยังไม่เริ่ม / เปิดรับราคา / สรุปผลแล้ว (EVT-10)
+upcoming:
+  name: ประมูลเครื่องประดับ
+  room: main_hall
+  auction_method: first_price
+  starts_at: <%= 1.day.from_now.to_fs(:db) %>
+  ends_at: <%= (1.day.from_now + 2.hours).to_fs(:db) %>
+  status: scheduled
+
+live:
+  name: ประมูลงานศิลปะ
+  room: main_hall
+  auction_method: first_price
+  starts_at: <%= 10.seconds.ago.to_fs(:db) %>
+  ends_at: <%= 2.hours.from_now.to_fs(:db) %>
+  status: bidding
+
+finished:
+  name: ประมูลของเก่า
+  room: main_hall
+  auction_method: first_price
+  starts_at: <%= 3.days.ago.to_fs(:db) %>
+  ends_at: <%= (3.days.ago + 2.hours).to_fs(:db) %>
+  status: settled
+  settled_at: <%= 3.days.ago.to_fs(:db) %>

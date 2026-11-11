@@ -1,0 +1,15 @@
+upcoming_necklace:
+  auction_event: upcoming
+  item: necklace
+  status: pending
+
+live_painting:
+  auction_event: live
+  item: painting
+  status: pending
+
+finished_lamp:
+  auction_event: finished
+  item: lamp
+  status: sold
+  winning_price: 4200.00

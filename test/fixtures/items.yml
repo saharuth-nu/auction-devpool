@@ -26,3 +26,17 @@ vase:
   status: available
   approved_at: <%= 5.days.ago.to_fs(:db) %>
   archived_at: <%= 1.day.ago.to_fs(:db) %>
+
+necklace:
+  name: สร้อยคอทองคำ
+  starting_price: 20000.00
+  reserve_price: 25000.00
+  status: available
+  approved_at: <%= 1.day.ago.to_fs(:db) %>
+
+lamp:
+  name: โคมไฟโบราณ
+  starting_price: 3000.00
+  reserve_price: 3500.00
+  status: sold
+  approved_at: <%= 10.days.ago.to_fs(:db) %>
