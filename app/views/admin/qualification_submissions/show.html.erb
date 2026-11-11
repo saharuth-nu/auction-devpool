@@ -27,14 +27,8 @@
     </div>
     <%= ui_form_with url: reject_admin_qualification_submission_path(@submission), scope: :rejection,
                      data: { turbo_confirm: "ยืนยันว่า “#{user.username}” ไม่ผ่าน? ผู้ใช้จะเห็นเหตุผลนี้" } do |f| %>
-      <div class="ui-field">
-        <%= f.label :reason, "เหตุผลที่ไม่ผ่าน (บังคับ ผู้ใช้จะเห็นข้อความนี้)", class: "ui-field__label" %>
-        <%= f.text_area :reason, value: params.dig(:rejection, :reason), rows: 3, required: true,
-              maxlength: QualificationSubmission::REJECTION_REASON_MAX,
-              class: class_names("ui-input", "ui-input--invalid" => @rejection_error),
-              "aria-invalid": (@rejection_error.present? || nil), "aria-describedby": ("rejection_reason_message" if @rejection_error) %>
-        <% if @rejection_error %><p id="rejection_reason_message" class="ui-field__error"><%= @rejection_error %></p><% end %>
-      </div>
+      <%= f.ui_field :reason, as: :textarea, label: "เหตุผลที่ไม่ผ่าน (บังคับ ผู้ใช้จะเห็นข้อความนี้)", error: @rejection_error.presence,
+            value: params.dig(:rejection, :reason), rows: 3, required: true, maxlength: QualificationSubmission::REJECTION_REASON_MAX %>
       <%= f.ui_submit "ไม่ผ่าน", variant: :danger_outline %>
     <% end %>
   <% end %>

@@ -21,7 +21,12 @@ module AuctionDevpool
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # ภาษาไทย + เวลาไทย (NFR-01, NFR-02)
+    # - เวลาเก็บใน DB เป็น UTC เสมอ (ค่าเริ่มต้นของ Rails) แสดงผลเป็นเวลาไทย (Time.zone = Asia/Bangkok)
+    # - :en ยังโหลดไว้เป็นตาข่ายรองให้ gem ภายใน แต่ผู้ใช้ไม่เห็น: locale เริ่มต้นคือ :th
+    config.time_zone = "Bangkok"
+    config.i18n.default_locale = :th
+    config.i18n.available_locales = %i[th en]
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end

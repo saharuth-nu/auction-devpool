@@ -1,6 +1,7 @@
-<%# หน้าแรกชั่วคราว: งาน #57 (สาย E) จะแทนด้วย banner และรายการสินค้า %>
 <% content_for :title, "หน้าแรก" %>
-<%= ui_page_header "สวัสดี #{current_user.fullname}" %>
-<%= ui_card do %>
-  <p>ยินดีต้อนรับสู่ระบบประมูล รายการสินค้าจะแสดงที่นี่</p>
-<% end %>
+<%= render "home/banner" %>
+
+<section aria-labelledby="listings-title">
+  <h2 id="listings-title" class="ui-section-title">สินค้าประมูล</h2>
+  <%= render "home/listings", listings: @listings %>
+</section>
