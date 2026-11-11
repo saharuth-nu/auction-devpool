@@ -1,0 +1,8 @@
+<%# ลิงก์ไปหน้าผลการประมูล (USR-16 กลุ่มจบแล้ว, USR-11) · event ที่ปิดรับราคาแล้วแต่ยังไม่สรุปผล กดไม่ได้ชั่วคราว %>
+<div class="ui-actions">
+  <% if event.settled? %>
+    <%= ui_link_button "ดูผลการประมูล", auction_event_results_path(event), variant: :secondary %>
+  <% else %>
+    <%= ui_button "กำลังสรุปผล", variant: :secondary, disabled: true %>
+  <% end %>
+</div>

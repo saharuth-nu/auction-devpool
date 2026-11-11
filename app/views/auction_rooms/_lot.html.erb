@@ -1,0 +1,24 @@
+<%# สินค้าหนึ่งชิ้นในห้อง (USR-09) + เข้าร่วมเพิ่ม (USR-10) · ราคาที่แสดงคือราคาเริ่มต้น ห้ามแสดง reserve (BID-18)
+    ฟอร์มยื่นราคา (#65) ใส่ตรงนี้ เฉพาะ lot ที่ joined และ phase == :open %>
+<% item = lot.item %>
+<li class="ui-room-lot">
+  <% if (cover = item.ordered_images.first) %>
+    <%= image_tag cover, alt: item.name, loading: "lazy", decoding: "async", class: "ui-room-lot__thumb" %>
+  <% else %>
+    <span class="ui-room-lot__thumb ui-room-lot__thumb--empty" role="img" aria-label="ไม่มีรูปสินค้า <%= item.name %>">ไม่มีรูป</span>
+  <% end %>
+  <div class="ui-room-lot__info">
+    <%= link_to item.name, lot_path(lot), class: "ui-room-lot__name" %>
+    <span class="ui-room-lot__price">ราคาเริ่มต้น <%= baht item.starting_price %></span>
+  </div>
+  <div class="ui-room-lot__action">
+    <% if joined %>
+      <%= ui_badge "เข้าร่วมแล้ว", tone: :success %>
+      <%= render "bids/slot", lot: lot, phase: phase, my_bid: my_bid, ceiling: ceiling %>
+    <% elsif phase == :open && full %>
+      <%= ui_button "เต็มแล้ว", size: :sm, disabled: true %>
+    <% elsif phase == :open %>
+      <%= ui_button_to "เข้าร่วมประมูล", lot_participation_path(lot), method: :post, size: :sm %>
+    <% end %>
+  </div>
+</li>

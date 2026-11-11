@@ -6,5 +6,6 @@ class HomeController < ApplicationController
     return redirect_to admin_root_path if Current.user.admin?
 
     @listings = AuctionListing.entries
+    @live_events = MyAuctions.for(current_user).live.map(&:event) # USR-17
   end
 end

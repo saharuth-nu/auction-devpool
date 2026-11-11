@@ -1,0 +1,45 @@
+<% content_for :title, "ห้องประมูล: #{@event.name}" %>
+<% phase = lot_phase(@event) %>
+<%# NFR-21: ห้องรับการอัปเดตเมื่อการประมูลเริ่ม/สรุปผลแบบเรียลไทม์ ถ้าการเชื่อมต่อหลุดจะมีแบนเนอร์และต่อใหม่เอง
+    การยื่นราคาเป็น POST ปกติ ไม่พึ่งการเชื่อมต่อนี้ %>
+<div data-controller="connection-status">
+  <%= turbo_stream_from @event %>
+  <div class="ui-alert ui-alert--warning" role="alert" data-connection-status-target="banner" hidden>
+    การเชื่อมต่อแบบเรียลไทม์ขาดหาย กำลังเชื่อมต่อใหม่… (ยังยื่นราคาได้ตามปกติ)
+  </div>
+</div>
+
+<%= ui_page_header @event.name, description: "ห้องประมูล #{@event.room.name}" do %>
+  <%= lot_phase_badge(@event) %>
+<% end %>
+
+<%= ui_card title: "สถานะการประมูล" do %>
+  <dl class="ui-dl">
+    <dt>เวลาเริ่ม</dt><dd><%= display_time @event.starts_at %></dd>
+    <dt>วิธีประมูล</dt><dd><%= @event.auction_method.name %></dd>
+    <dt>ผู้เข้าร่วม</dt><dd><%= @participants %> / <%= @event.room.max_participants %> คน</dd>
+    <% if phase == :open %>
+      <dt>ปิดรับราคาใน</dt><dd><%= countdown_to @event.bidding_ends_at %></dd>
+    <% end %>
+  </dl>
+  <% if phase != :open %>
+    <%= ui_alert "ปิดรับราคาแล้ว กำลังสรุปผล", tone: :info %>
+  <% end %>
+<% end %>
+
+<%= ui_card title: "สินค้าในห้อง (#{@lots.size})" do %>
+  <% if @lots.empty? %>
+    <%= ui_empty_state "ไม่มีสินค้าในห้องนี้ตอนนี้" %>
+  <% else %>
+    <ul class="ui-room-lots">
+      <% @lots.each do |lot| %>
+        <%= render "auction_rooms/lot", lot: lot, joined: @joined_lot_ids.include?(lot.id), phase: phase, full: @full,
+                                        my_bid: @my_bids[lot.id], ceiling: @ceiling %>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>
+
+<div class="ui-actions">
+  <%= ui_link_button "การประมูลของฉัน", my_auctions_path, variant: :ghost %>
+</div>

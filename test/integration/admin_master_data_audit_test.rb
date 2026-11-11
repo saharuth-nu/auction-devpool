@@ -19,7 +19,7 @@ class AdminMasterDataAuditTest < ActionDispatch::IntegrationTest
 
   test "สร้างสินค้าลง log" do
     assert_difference -> { AuditLog.count }, 1 do
-      post admin_items_path, params: { item: { name: "พัดลม", starting_price: "100", reserve_price: "150" } }
+      post admin_items_path, params: { item: { name: "พัดลม", description: "พัดลมตั้งโต๊ะ", starting_price: "100", reserve_price: "150" } }
     end
     log = assert_logged("item.create", Item.order(:id).last)
     assert_equal "พัดลม", log.change_set["name"]

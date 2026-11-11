@@ -1,0 +1,27 @@
+<% content_for :title, "ผลการประมูล" %>
+<%= ui_page_header "ผลการประมูลของฉัน", description: "การประมูลที่คุณเข้าร่วมและสรุปผลแล้ว" %>
+
+<% if @events.empty? %>
+  <%= ui_card do %>
+    <%= ui_empty_state "ยังไม่มีผลการประมูล", description: "เมื่อการประมูลที่คุณเข้าร่วมสรุปผลแล้ว ผลจะแสดงที่นี่" do %>
+      <%= ui_link_button "การประมูลของฉัน", my_auctions_path, variant: :secondary %>
+    <% end %>
+  <% end %>
+<% else %>
+  <% @events.each do |event| %>
+    <% tally = @outcomes.fetch(event.id, {}) %>
+    <%= ui_card title: event.name, actions: ui_link_button("ดูผล", auction_event_results_path(event), size: :sm) do %>
+      <dl class="ui-dl">
+        <dt>ห้อง</dt><dd><%= event.room.name %></dd>
+        <dt>เวลาประมูล</dt><dd><%= display_time event.starts_at %></dd>
+        <dt>สรุปผลเมื่อ</dt><dd><%= display_time event.settled_at %></dd>
+        <dt>ผลของคุณ</dt>
+        <dd>
+          <%= ui_badge("ชนะ #{tally.fetch(:won, 0)}", tone: :success) %>
+          <%= ui_badge("ไม่ชนะ #{tally.fetch(:lost, 0)}", tone: :neutral) %>
+          <%= ui_badge("ไม่ขาย #{tally.fetch(:unsold, 0)}", tone: :muted) %>
+        </dd>
+      </dl>
+    <% end %>
+  <% end %>
+<% end %>

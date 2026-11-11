@@ -1,5 +1,5 @@
 # เข้าร่วม / ยกเลิกการเข้าร่วมประมูลสินค้าหนึ่งชิ้น (USR-05, 06, 07, issue #59)
-# กติกาอยู่ที่ Participation ที่นี่แค่แปลงผลเป็นข้อความบนหน้ารายละเอียดสินค้า
+# กติกาอยู่ที่ Participation ที่นี่แค่แปลงผลเป็นข้อความ แล้วกลับไปหน้าที่กดมา (หน้ารายละเอียดสินค้า หรือ การประมูลของฉัน)
 class ParticipationsController < ApplicationController
   allow_roles :bidder
   before_action :set_lot
@@ -7,19 +7,19 @@ class ParticipationsController < ApplicationController
   def create
     participation = Participation.new(user: current_user, lot: @lot)
     if participation.save
-      redirect_to lot_path(@lot), notice: "เข้าร่วมประมูลเรียบร้อย"
+      redirect_back_or_to lot_path(@lot), notice: "เข้าร่วมประมูลเรียบร้อย"
     else
-      redirect_to lot_path(@lot), alert: participation.errors.map(&:message).to_sentence
+      redirect_back_or_to lot_path(@lot), alert: participation.errors.map(&:message).to_sentence
     end
   rescue ActiveRecord::RecordNotUnique # ยิงซ้ำพร้อมกัน: unique index กันไว้
-    redirect_to lot_path(@lot), alert: "คุณเข้าร่วมสินค้านี้แล้ว"
+    redirect_back_or_to lot_path(@lot), alert: "คุณเข้าร่วมสินค้านี้แล้ว"
   end
 
   def destroy
     Participation.active.find_by!(user: current_user, lot: @lot).cancel!
-    redirect_to lot_path(@lot), notice: "ยกเลิกการเข้าร่วมแล้ว"
+    redirect_back_or_to lot_path(@lot), notice: "ยกเลิกการเข้าร่วมแล้ว"
   rescue Participation::NotCancellable => error
-    redirect_to lot_path(@lot), alert: error.message
+    redirect_back_or_to lot_path(@lot), alert: error.message
   end
 
   private

@@ -160,3 +160,4 @@ select.ui-input { padding-right: 36px; cursor: pointer; }
 .ui-fieldset { margin: 0 0 16px; padding: 0; border: 0; min-width: 0; }
 .ui-check-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 12px 16px; list-style: none; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); }
 .ui-check-list label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; cursor: pointer; }
+.ui-alert[hidden] { display: none; }

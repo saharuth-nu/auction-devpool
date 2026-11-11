@@ -1,0 +1,28 @@
+<%# ฟอร์มยื่นราคา (BID-20, BID-21): แสดงช่วงราคาที่ยื่นได้ ตรวจช่วงราคาที่เบราว์เซอร์ก่อนส่ง แล้วขึ้นหน้าต่างยืนยัน
+    ยื่นแล้วแก้ไขหรือถอนไม่ได้ · ขั้นยืนยันไม่ขยายเวลา เซิร์ฟเวอร์ตรวจเวลาและช่วงราคาซ้ำทุกครั้ง %>
+<% floor = lot.item.starting_price %>
+<% if ceiling < floor %>
+  <span class="ui-bid-mine ui-bid-mine--none">วงเงินของคุณต่ำกว่าราคาเริ่มต้น <%= baht floor %> ยื่นราคาสินค้านี้ไม่ได้</span>
+<% else %>
+  <%= ui_form_with url: lot_bid_path(lot), scope: :bid, class: "ui-bid-form",
+                   data: { controller: "bid-form", bid_form_min_value: floor.to_f, bid_form_max_value: ceiling.to_f } do |f| %>
+    <p class="ui-bid-form__range">ยื่นได้ตั้งแต่ <strong><%= baht floor %></strong> ถึง <strong><%= baht ceiling %></strong></p>
+    <%= f.ui_field :amount, label: "ราคาที่ยื่น (บาท)", inputmode: "decimal", autocomplete: "off", required: true,
+                            id: "bid_amount_#{lot.id}", data: { bid_form_target: "amount" } %>
+    <p class="ui-field__error" role="alert" hidden data-bid-form-target="error"></p>
+    <%= ui_button "ตรวจสอบและยื่นราคา", data: { action: "bid-form#review" } %>
+
+    <dialog class="ui-dialog" aria-labelledby="bid-confirm-<%= lot.id %>" data-bid-form-target="dialog" data-action="click->bid-form#backdrop">
+      <div class="ui-dialog__body">
+        <h2 class="ui-dialog__title" id="bid-confirm-<%= lot.id %>">ยืนยันการยื่นราคา</h2>
+        <p class="ui-bid-confirm__item"><%= lot.item.name %></p>
+        <p class="ui-bid-confirm__amount" data-bid-form-target="confirmAmount"></p>
+        <p class="ui-dialog__message">ยื่นแล้วแก้ไขหรือถอนไม่ได้</p>
+      </div>
+      <div class="ui-dialog__actions">
+        <%= ui_button "แก้ไขราคา", variant: :secondary, autofocus: true, data: { action: "bid-form#close" } %>
+        <%= f.ui_submit "ยืนยันยื่นราคา", size: :md %>
+      </div>
+    </dialog>
+  <% end %>
+<% end %>

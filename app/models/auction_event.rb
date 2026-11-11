@@ -2,7 +2,7 @@
 #
 # สถานะ (EVT-10): ยังไม่เริ่ม → เปิดรับราคา → สรุปผลแล้ว · ยกเลิกได้เฉพาะก่อนเริ่ม (EVT-08)
 # เปลี่ยนสถานะผ่าน transition_to! / cancel! เท่านั้น การเปลี่ยนข้ามขั้นถูกปฏิเสธทั้งที่ model
-# ส่วนการเริ่ม (สินค้าเป็น "อยู่ระหว่างการประมูล") อยู่ใน #55 และการปิด/คัดผู้ชนะอยู่ใน #66
+# การเริ่ม: start! (EVT-07, #55) · การปิด/คัดผู้ชนะอยู่ใน #66
 class AuctionEvent < ApplicationRecord
   class InvalidTransition < StandardError; end
 
@@ -46,8 +46,25 @@ class AuctionEvent < ApplicationRecord
   validate :items_selection_valid, unless: -> { selected_item_ids.nil? }
 
   after_save :sync_lots, unless: -> { selected_item_ids.nil? }
+  # ตั้ง job เริ่มการประมูลไว้ที่ starts_at ทุกครั้งที่สร้างหรือเลื่อนเวลา (job เก่าที่เวลาไม่ตรงจะไม่ทำอะไร)
+  after_commit :schedule_start, on: %i[create update], if: -> { scheduled? && saved_change_to_starts_at? }
+  # เริ่มรับราคาแล้ว → ตั้ง job สรุปผลไว้ที่เวลาปิดรับราคา (NFR-06) job ที่หลุดมี SettleDueAuctionEventsJob กวาดซ้ำ
+  # NFR-21: เมื่อสถานะเปลี่ยน (เริ่ม/สรุปผล/ยกเลิก) สั่งให้หน้าห้องของผู้ที่เปิดอยู่รีเฟรชเอง
+  # ส่งแค่สัญญาณให้โหลดหน้าใหม่ ไม่มีข้อมูลราคาหรือ reserve ในข้อความ
+  after_commit :broadcast_room_refresh, on: :update, if: :saved_change_to_status?
+  after_commit :schedule_settlement, on: :update, if: -> { bidding? && saved_change_to_status? }
 
   scope :unfinished, -> { where(status: %w[scheduled bidding]) }
+  # ถึงเวลาเริ่มแล้วแต่ยังไม่ได้เริ่ม (ให้ job กวาดซ้ำเก็บตก)
+  scope :due_to_start, -> { scheduled.where(starts_at: ..Clock.now) }
+
+  # หลัง job ปิดรับราคาที่ตั้งไว้ รอเพิ่มอีกเล็กน้อยให้เลยเส้นตายแน่ๆ ก่อนสรุป (เส้นตายเองยังนับว่ายื่นทัน)
+  SETTLEMENT_DELAY = 1.second
+
+  # เปิดรับราคาอยู่และเลยเวลาปิดรับราคาแล้ว (ต้องดูระยะเวลาจากวิธีประมูลของแต่ละ event จึงกรองในโค้ด)
+  def self.due_to_settle
+    bidding.includes(:auction_method).select { |event| Clock.passed?(event.bidding_ends_at) }
+  end
 
   def selected_item_ids=(ids)
     @selected_item_ids = Array(ids).compact_blank.map(&:to_i).uniq
@@ -93,14 +110,79 @@ class AuctionEvent < ApplicationRecord
   end
 
   # ยกเลิกก่อนเริ่ม: lot ที่ยังไม่จบเป็น cancelled เพื่อปล่อยสินค้าไปใส่ event อื่นได้ (ITEM-10)
+  # ล็อกแถวไว้ กันชนกับ start! ที่อาจรันพร้อมกันพอดีตอนถึงเวลาเริ่ม
   def cancel!
-    transaction do
+    with_lock do
       transition_to!(:cancelled, cancelled_at: Clock.now)
       lots.pending.find_each { |lot| lot.update!(status: :cancelled) }
     end
   end
 
+  # EVT-07: เมื่อถึงเวลาเริ่ม สถานะเป็น "เปิดรับราคา" และสินค้าทุกชิ้นเป็น "อยู่ระหว่างการประมูล" พร้อมกัน (BID-16)
+  # รันซ้ำได้ผลเดิม: ยังไม่ถึงเวลา / เริ่มไปแล้ว / ถูกยกเลิก → ไม่ทำอะไร คืน false (เริ่มสำเร็จคืน true)
+  # สินค้าที่ไม่อยู่ในสถานะ "พร้อมขาย" แล้ว (เช่น ถูกเก็บถาวรหลังใส่ event) ถูกถอนออกจากรอบนี้ (lot = cancelled)
+  # เรียกจาก StartAuctionEventJob (ตั้งเวลาไว้ที่ starts_at) และ StartDueAuctionEventsJob (กวาดซ้ำ)
+  def start!
+    started = false
+    with_lock do
+      next unless scheduled? && Clock.reached?(starts_at)
+
+      lots.pending.includes(:item).find_each do |lot|
+        if lot.item.available? && !lot.item.archived?
+          lot.item.update!(status: :in_auction)
+        else
+          lot.update!(status: :cancelled)
+        end
+      end
+      transition_to!(:bidding)
+      started = true
+    end
+    started
+  end
+
+  # BID-06..10, BID-14: เมื่อเลยเวลาปิดรับราคา คัดผู้ชนะทุก lot แล้วสรุปผล event ใน transaction เดียว
+  #   - ราคาสูงสุดชนะ เท่ากันให้ผู้ยื่นก่อน (BID-06, BID-07) จ่ายตามราคาที่ตนยื่น
+  #   - ต้องไม่ต่ำกว่าราคาขั้นต่ำ (BID-08): ถึง → lot ขายได้ สินค้า "ขายได้แล้ว" (BID-10)
+  #     ไม่มีผู้ยื่น/ต่ำกว่าขั้นต่ำ → lot ไม่ขาย สินค้ากลับเป็น "พร้อมขาย" นำไปใส่ event ใหม่ได้ (BID-09, ITEM-11)
+  #   - ราคาของผู้ที่ถูกระงับภายหลังนับตามปกติ (BID-17, SUSP-04) · การระงับไม่เปลี่ยนผลที่สรุปแล้ว (SUSP-05)
+  # รันซ้ำได้ผลเดิม (BID-14): ยังไม่ถึงเวลา / สรุปไปแล้ว / ยกเลิก → ไม่ทำอะไร คืน false (สรุปสำเร็จคืน true)
+  # ล็อกแถว event ไว้ ราคาที่ยื่นพร้อมกันพอดีกับการสรุปจึงเรียงคิวกัน (PlaceBid ล็อกแถวเดียวกัน)
+  def settle!
+    settled = false
+    with_lock do
+      next unless bidding? && Clock.passed?(bidding_ends_at)
+
+      lots.pending.includes(:item).find_each { |lot| settle_lot(lot) }
+      transition_to!(:settled, settled_at: Clock.now)
+      settled = true
+    end
+    settled
+  end
+
   private
+
+  def broadcast_room_refresh
+    Turbo::StreamsChannel.broadcast_refresh_to(self)
+  end
+    def schedule_start
+      StartAuctionEventJob.set(wait_until: starts_at).perform_later(id)
+    end
+
+    def schedule_settlement
+      SettleAuctionEventJob.set(wait_until: bidding_ends_at + SETTLEMENT_DELAY).perform_later(id)
+    end
+
+    def settle_lot(lot)
+      winner = lot.bids.for_settlement.first
+      if winner && winner.amount >= lot.item.reserve_price
+        lot.update!(status: :sold, winning_price: winner.amount, winning_bid: winner)
+        lot.item.update!(status: :sold)
+      else
+        lot.update!(status: :unsold)
+        lot.item.update!(status: :available)
+      end
+    end
+
     # EVT-05: เวลาสิ้นสุด ≥ เวลาเริ่ม + ระยะเวลายื่นราคา
     def ends_after_bidding_window
       return if starts_at.blank? || ends_at.blank? || auction_method.blank?
@@ -158,10 +240,26 @@ class AuctionEvent < ApplicationRecord
     # สร้าง lot ของสินค้าที่เพิ่ม และลบ lot ของสินค้าที่เอาออก (ทำได้เฉพาะก่อนเริ่ม ตรวจไว้ใน items_selection_valid)
     def sync_lots
       current = lots.pending.to_a
-      current.reject { |lot| selected_item_ids.include?(lot.item_id) }.each(&:destroy!)
-      (selected_item_ids - current.map(&:item_id)).each { |item_id| lots.create!(item_id: item_id) }
+      current.reject { |lot| selected_item_ids.include?(lot.item_id) }.each { |lot| remove_lot(lot) }
+      (selected_item_ids - current.map(&:item_id)).each { |item_id| add_lot(item_id) }
       lots.reset
       @selected_item_ids = nil
+    end
+
+    # เอาสินค้าออกจาก event: lot ที่มีประวัติการเข้าร่วมลบไม่ได้ (NFR-19, FK restrict ของ participations)
+    # จึงยกเลิกการเข้าร่วมที่ยังค้างอยู่ (คืนที่นั่ง) แล้วตั้ง lot เป็น cancelled เก็บแถวเป็นประวัติ · ไม่มีประวัติลบได้ตามปกติ
+    def remove_lot(lot)
+      return lot.destroy! unless Participation.exists?(lot_id: lot.id)
+
+      Participation.active.where(lot_id: lot.id).update_all(cancelled_at: Time.current, updated_at: Time.current)
+      lot.update!(status: :cancelled)
+    end
+
+    # เพิ่มสินค้า: ถ้าเคยเอาสินค้านี้ออกจาก event นี้ (lot เป็น cancelled, unique index ของ event+สินค้า) ใช้ lot เดิมกลับมา
+    # ผู้ที่เคยเข้าร่วมถูกยกเลิกไปแล้วตอนเอาออก ต้องกดเข้าร่วมใหม่
+    def add_lot(item_id)
+      revived = lots.cancelled.find_by(item_id: item_id)
+      revived ? revived.update!(status: :pending) : lots.create!(item_id: item_id)
     end
 
     def status_transition_allowed

@@ -158,7 +158,7 @@ class AuctionEventTest < ActiveSupport::TestCase
 
   test "จำนวนสินค้าต้องไม่เกินที่ห้องรองรับ (EVT-03)" do
     small = Room.create!(name: "ห้องจิ๋ว", max_participants: 5, max_items: 1)
-    extra = Item.create!(name: "ชิ้นที่สอง", starting_price: 100, reserve_price: 100, status: :available)
+    extra = Item.create!(description: "รายละเอียด", name: "ชิ้นที่สอง", starting_price: 100, reserve_price: 100, status: :available)
     event = build(room: small, selected_item_ids: [ items(:car).id, extra.id ])
     assert_not event.valid?
     assert event.errors.of_kind?(:selected_item_ids, :too_many)
@@ -215,5 +215,69 @@ class AuctionEventTest < ActiveSupport::TestCase
     event = build(room: rooms(:old_room))
     assert_not event.valid?
     assert event.errors.of_kind?(:room, :archived)
+  end
+
+  # --- เริ่มการประมูล (#55 EVT-07) ---
+
+  test "ถึงเวลาเริ่ม: event เป็นเปิดรับราคา และสินค้าเป็นอยู่ระหว่างการประมูล (EVT-07)" do
+    event = auction_events(:upcoming)
+    travel_to event.starts_at do
+      assert event.start!
+    end
+    assert event.reload.bidding?
+    assert items(:necklace).reload.in_auction?
+    assert lots(:upcoming_necklace).reload.pending?
+  end
+
+  test "สินค้าทุกชิ้นใน event เริ่มพร้อมกัน (BID-16)" do
+    event = auction_events(:upcoming)
+    event.update!(selected_item_ids: [ items(:necklace).id, items(:car).id ])
+    travel_to(event.starts_at) { event.start! }
+    assert items(:necklace).reload.in_auction?
+    assert items(:car).reload.in_auction?
+  end
+
+  test "ยังไม่ถึงเวลาไม่เริ่ม (NFR-03)" do
+    event = auction_events(:upcoming)
+    travel_to event.starts_at - 1.second do
+      assert_not event.start!
+    end
+    assert event.reload.scheduled?
+    assert items(:necklace).reload.available?
+  end
+
+  test "เริ่มซ้ำได้ผลเดิม ไม่ error (EVT-07 ทำซ้ำได้)" do
+    event = auction_events(:upcoming)
+    travel_to event.starts_at + 1.second do
+      assert event.start!
+      assert_not event.start!
+      assert_not AuctionEvent.find(event.id).start!
+    end
+    assert event.reload.bidding?
+  end
+
+  test "event ที่ยกเลิกแล้วไม่เริ่ม และสินค้าไม่ถูกล็อก" do
+    event = auction_events(:upcoming)
+    event.cancel!
+    travel_to(event.starts_at) { assert_not event.start! }
+    assert event.reload.cancelled?
+    assert items(:necklace).reload.available?
+  end
+
+  test "สินค้าที่ไม่พร้อมขายแล้วตอนเริ่ม ถูกถอนออกจากรอบนี้" do
+    event = auction_events(:upcoming)
+    event.update!(selected_item_ids: [ items(:necklace).id, items(:car).id ])
+    items(:car).archive!
+    travel_to(event.starts_at) { event.start! }
+
+    assert items(:necklace).reload.in_auction?
+    assert items(:car).reload.available?, "สินค้าที่ถูกถอนไม่เปลี่ยนสถานะ"
+    assert event.lots.find_by(item: items(:car)).cancelled?
+  end
+
+  test "เริ่มแล้วยกเลิกไม่ได้" do
+    event = auction_events(:upcoming)
+    travel_to(event.starts_at) { event.start! }
+    assert_raises(AuctionEvent::InvalidTransition) { event.reload.cancel! }
   end
 end

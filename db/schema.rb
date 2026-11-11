@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_114005) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -93,6 +93,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_110000) do
     t.index ["target_type", "target_id"], name: "index_audit_logs_on_target"
   end
 
+  create_table "bids", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "lot_id", null: false
+    t.decimal "amount", precision: 15, scale: 2, null: false
+    t.datetime "placed_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lot_id", "amount", "placed_at"], name: "index_bids_for_settlement"
+    t.index ["lot_id"], name: "index_bids_on_lot_id"
+    t.index ["user_id", "lot_id"], name: "index_bids_on_user_id_and_lot_id", unique: true
+    t.index ["user_id"], name: "index_bids_on_user_id"
+    t.check_constraint "amount > 0", name: "bids_amount_positive"
+  end
+
   create_table "items", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -120,10 +134,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_110000) do
     t.decimal "winning_price", precision: 15, scale: 2
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "winning_bid_id"
     t.index ["auction_event_id", "item_id"], name: "index_lots_on_auction_event_id_and_item_id", unique: true
     t.index ["auction_event_id"], name: "index_lots_on_auction_event_id"
     t.index ["item_id"], name: "index_lots_on_item_id"
     t.index ["item_id"], name: "index_lots_one_pending_per_item", unique: true, where: "status = 'pending'"
+    t.index ["winning_bid_id"], name: "index_lots_on_winning_bid_id", unique: true
     t.check_constraint "status <> 'sold' OR winning_price IS NOT NULL", name: "lots_sold_has_winning_price"
     t.check_constraint "status IN ('pending', 'sold', 'unsold', 'cancelled')", name: "lots_status_valid"
     t.check_constraint "winning_price IS NULL OR winning_price > 0", name: "lots_winning_price_positive"
@@ -203,6 +219,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_110000) do
     t.text "disabled_reason"
     t.integer "disabled_by_id"
     t.string "qualification_status"
+    t.datetime "consented_at"
+    t.string "terms_version"
     t.index ["disabled_by_id"], name: "index_users_on_disabled_by_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["qualification_status"], name: "index_users_on_qualification_status"
@@ -216,8 +234,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_110000) do
   add_foreign_key "auction_events", "auction_methods", on_delete: :restrict
   add_foreign_key "auction_events", "rooms", on_delete: :restrict
   add_foreign_key "audit_logs", "users", column: "admin_id"
+  add_foreign_key "bids", "lots", on_delete: :restrict
+  add_foreign_key "bids", "users", on_delete: :restrict
   add_foreign_key "items", "users", column: "approved_by_id"
   add_foreign_key "lots", "auction_events", on_delete: :restrict
+  add_foreign_key "lots", "bids", column: "winning_bid_id", on_delete: :restrict
   add_foreign_key "lots", "items", on_delete: :restrict
   add_foreign_key "participations", "lots", on_delete: :restrict
   add_foreign_key "participations", "users", on_delete: :restrict

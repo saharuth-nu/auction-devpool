@@ -20,3 +20,8 @@ th:
             base:
               restrict_dependent_destroy:
                 has_many: "ลบวิธีประมูลที่มีการประมูล (event) อ้างถึงอยู่ไม่ได้ ให้ปิดใช้งานแทน"
+        lot:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: "ลบสินค้าในการประมูลที่มีราคาที่ยื่นไว้แล้วไม่ได้"

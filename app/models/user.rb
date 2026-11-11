@@ -7,6 +7,7 @@ class User < ApplicationRecord
 
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :bids, dependent: :restrict_with_exception # ประวัติราคาที่ยื่นลบไม่ได้ (NFR-19)
   belongs_to :disabled_by, class_name: "User", optional: true
 
   enum :role, { admin: "admin", bidder: "bidder" }, default: :bidder
@@ -38,6 +39,14 @@ class User < ApplicationRecord
   validates :password, length: { minimum: PASSWORD_MIN }, allow_nil: true
   validate :password_within_bcrypt_limit
   validates :password_confirmation, presence: true, if: -> { password.present? }
+
+  # AUTH-19: ตอนสมัครผ่านหน้า register ต้องติ๊กยอมรับเงื่อนไข/นโยบาย (PDPA) แล้วบันทึกเวลาและเวอร์ชันที่ยินยอม
+  # เปิดเฉพาะตอนสมัคร (require_terms = true จาก RegistrationsController) บัญชีที่สร้างทางอื่น (admin, seed) ไม่ต้องยินยอม
+  attr_accessor :require_terms, :accept_terms
+  validates :accept_terms, acceptance: { accept: [ "1", true, "true" ], allow_nil: false,
+                                          message: "ต้องยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัวก่อนสมัคร" },
+                           if: :require_terms
+  before_validation :record_consent, if: -> { require_terms && [ "1", true, "true" ].include?(accept_terms) }
 
   before_destroy :prevent_admin_destroy, prepend: true
 
@@ -112,6 +121,11 @@ class User < ApplicationRecord
   end
 
   private
+
+  def record_consent
+    self.consented_at = Clock.now
+    self.terms_version = Terms::VERSION
+  end
 
   def password_within_bcrypt_limit
     return if password.blank? || password.bytesize <= PASSWORD_MAX_BYTES

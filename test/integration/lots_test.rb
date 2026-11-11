@@ -52,7 +52,8 @@ class LotsTest < ActionDispatch::IntegrationTest
   end
 
   test "NFR-11 ไม่มีรายละเอียดแสดงข้อความ ยังไม่มีรายละเอียด" do
-    @item.update!(description: nil)
+    # ITEM-13 บังคับกรอกรายละเอียดแล้ว แต่ข้อมูลเก่าที่ว่างอยู่ต้องยังแสดงข้อความสำรอง (จำลองด้วยการเขียนตรง ข้าม validation)
+    @item.update_column(:description, nil)
     show_lot
     assert_includes page.text, "ยังไม่มีรายละเอียด"
   end
@@ -111,15 +112,16 @@ class LotsTest < ActionDispatch::IntegrationTest
     travel_to @event.starts_at do
       show_lot
       assert_nil page.css("button").find { |b| b.text == "เข้าร่วมประมูล" }
-      assert_equal "การประมูลนี้เริ่มแล้ว", page.at_css(".ui-alert").text.strip
+      assert_equal "การประมูลนี้เริ่มแล้ว เข้าห้องประมูลเพื่อเข้าร่วมได้จนปิดรับราคา", page.at_css(".ui-alert").text.strip
       assert_equal "กำลังประมูล", page.at_css(".ui-page-header .ui-badge").text
+      assert page.at_css("a[href='#{auction_event_room_path(@event)}']"), "เริ่มแล้ว: ไปห้องประมูลเพื่อเข้าร่วมได้ (USR-10)"
     end
   end
 
   test "NFR-03 เลยเวลารับราคา (เริ่ม + ระยะเวลาของวิธีประมูล) แสดงปิดรับราคา" do
     travel_to @event.bidding_ends_at do # ครบพอดียังรับราคาอยู่
       show_lot
-      assert_equal "การประมูลนี้เริ่มแล้ว", page.at_css(".ui-alert").text.strip
+      assert_equal "การประมูลนี้เริ่มแล้ว เข้าห้องประมูลเพื่อเข้าร่วมได้จนปิดรับราคา", page.at_css(".ui-alert").text.strip
     end
     travel_to @event.bidding_ends_at + 1.second do
       show_lot

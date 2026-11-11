@@ -17,6 +17,13 @@ class StatusHelperTest < ActionView::TestCase
     assert_raises(KeyError) { status_style(:nope, "x") }
   end
 
+  test "สถานะของ lot ครบทุกค่าและไม่มีค่าไหนเป็น ไม่ทราบ" do
+    Lot.statuses.each_key do |status|
+      assert_not_equal UNKNOWN_STATUS, status_style(:lot, status), "ขาด label ของ #{status}"
+    end
+    assert_equal "ไม่ขาย", status_style(:lot, "unsold")[:label]
+  end
+
   test "status_badge ออกเป็น Badge" do
     html = status_badge(:auction, "scheduled")
     assert_includes html, "ui-badge--warning"
