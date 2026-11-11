@@ -124,6 +124,14 @@ class HomeTest < ActionDispatch::IntegrationTest
     assert_equal 2, doc.css("ul.ui-item-grid > li").size
   end
 
+  test "USR-04 การ์ดสินค้าบนหน้าแรกคลิกไปหน้ารายละเอียดของ lot นั้น" do
+    sign_in create_approved_bidder
+    get root_path
+    links = page.css("a.ui-item-card__link").to_h { |a| [ a.text, a["href"] ] }
+    assert_equal lot_path(lots(:live_painting)), links.fetch("ภาพวาด")
+    assert_equal lot_path(lots(:upcoming_necklace)), links.fetch("สร้อยคอทองคำ")
+  end
+
   test "NFR-11 ไม่มี entry แสดงสถานะว่าง ไม่แสดงตารางเปล่า" do
     doc = render_listings([])
     assert doc.at_css(".ui-empty")
@@ -131,7 +139,7 @@ class HomeTest < ActionDispatch::IntegrationTest
   end
 
   test "AuctionListing.entries คืน Entry (contract ที่หน้าแรกพึ่งพา)" do
-    assert_equal [ :item, :starts_at ], AuctionListing::Entry.members
+    assert_equal [ :item, :starts_at, :lot ], AuctionListing::Entry.members
     assert_equal [ AuctionListing::Entry ], AuctionListing.entries.map(&:class).uniq
   end
 end

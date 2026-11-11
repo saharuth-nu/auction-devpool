@@ -1,0 +1,16 @@
+/*
+ * หน้ารายละเอียดสินค้าในการประมูล (USR-04) · ใช้ token จาก tokens.css เท่านั้น
+ * มือถือ: เรียงแนวตั้ง (รูป → รายละเอียดการประมูล) · ≥768px: สองคอลัมน์
+ */
+.ui-lot { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+.ui-lot__info { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ui-lot__price { font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 700; color: var(--color-primary-700); font-variant-numeric: tabular-nums; }
+
+.ui-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.ui-gallery__item--main { grid-column: 1 / -1; }
+.ui-gallery__image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-zinc-100); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); }
+.ui-gallery__empty { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; color: var(--color-zinc-500); background: var(--color-zinc-100); border: 1px dashed var(--color-zinc-300); border-radius: var(--radius-2xl); }
+
+@media (min-width: 768px) {
+  .ui-lot { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; }
+}

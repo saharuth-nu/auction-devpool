@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 
   # ---- ผู้ใช้ (bidder)
   root "home#show"
+  resources :lots, only: :show # หน้ารายละเอียดสินค้าในการประมูล (USR-04)
 
   # หน้าตัวอย่าง component ของ Design System ไว้ดูบนมือถือ/เดสก์ท็อป (เฉพาะ development/test)
   match "styleguide", to: "styleguide#show", via: %i[get post patch delete] if Rails.env.local?
