@@ -19,6 +19,7 @@ class Item < ApplicationRecord
 
   belongs_to :approved_by, class_name: "User", optional: true
   has_many_attached :images
+  has_many :lots, dependent: :restrict_with_error
 
   validates :name, presence: true
   validates :starting_price, :reserve_price, presence: true
@@ -28,7 +29,8 @@ class Item < ApplicationRecord
   validate :prices_locked_during_auction
   validate :images_acceptable
 
-  before_destroy :prevent_destroy_during_auction
+  # prepend: ให้ข้อความ "อยู่ระหว่างการประมูล" (ITEM-09) ขึ้นก่อนข้อห้ามเพราะมี lot (NFR-19) ของ has_many :lots
+  before_destroy :prevent_destroy_during_auction, prepend: true
 
   # ค่าว่างหรือสถานะที่ไม่รู้จัก → ทั้งหมด (ITEM-03)
   scope :filter_by_status, ->(status) { statuses.key?(status.to_s) ? where(status: status) : all }

@@ -140,6 +140,14 @@ class AdminItemsTest < ActionDispatch::IntegrationTest
     assert_match(/ระหว่างการประมูล/, flash[:alert])
   end
 
+  test "NFR-19/ITEM-12: สินค้าที่เคยอยู่ใน event (มี lot) ลบไม่ได้ แจ้งให้เก็บถาวรแทนเป็นภาษาไทย" do
+    assert_no_difference -> { Item.count } do
+      delete admin_item_path(items(:lamp)) # lamp ขายแล้วใน event ที่จบ ไม่ได้อยู่ระหว่างประมูล
+    end
+    assert_redirected_to admin_item_path(items(:lamp))
+    assert_match(/เก็บถาวรแทน/, flash[:alert])
+  end
+
   test "ITEM-12: เก็บถาวรได้ แต่สินค้าที่อยู่ระหว่างการประมูลเก็บไม่ได้" do
     patch archive_admin_item_path(items(:car))
     assert items(:car).reload.archived?

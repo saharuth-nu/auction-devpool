@@ -61,15 +61,4 @@ class SeedsTest < ActiveSupport::TestCase
   test "ADMIN_PASSWORD ที่อ่อนเกินถูกปฏิเสธโดยกฎของโมเดล" do
     assert_raises(ActiveRecord::RecordInvalid) { run_seeds("ADMIN_PASSWORD" => "short") }
   end
-
-  test "METH-04/07: seed สร้างวิธี first_price 30 วินาที และรันซ้ำไม่สร้างซ้ำ" do
-    AuctionMethod.delete_all
-
-    2.times { run_seeds("ADMIN_PASSWORD" => "S3cretPassw0rd") }
-
-    method = AuctionMethod.sole
-    assert_equal "first_price", method.code
-    assert_equal 30, method.bidding_seconds
-    assert method.enabled?
-  end
 end

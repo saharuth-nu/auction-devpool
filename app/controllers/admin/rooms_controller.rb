@@ -33,8 +33,12 @@ class Admin::RoomsController < Admin::BaseController
   end
 
   def destroy
-    @room.destroy!
-    redirect_to admin_rooms_path, notice: "ลบห้อง “#{@room.name}” แล้ว"
+    if @room.destroy
+      redirect_to admin_rooms_path, notice: "ลบห้อง “#{@room.name}” แล้ว"
+    else
+      # มี event อ้างถึงอยู่ (NFR-19 / ROOM-05): ใช้เก็บถาวรแทน
+      redirect_to admin_rooms_path, alert: @room.errors.full_messages.to_sentence
+    end
   end
 
   def archive

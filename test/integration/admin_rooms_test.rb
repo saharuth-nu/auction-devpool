@@ -65,10 +65,20 @@ class AdminRoomsTest < ActionDispatch::IntegrationTest
   end
 
   test "ROOM-01: ลบห้องที่ไม่มีประวัติได้" do
+    room = Room.create!(name: "ห้องว่าง", max_participants: 5, max_items: 1)
     assert_difference -> { Room.count }, -1 do
+      delete admin_room_path(room)
+    end
+    assert_redirected_to admin_rooms_path
+  end
+
+  test "ROOM-03/NFR-19: ห้องที่มี event อ้างถึงลบไม่ได้ แจ้งเหตุผลเป็นภาษาไทย (ไม่ใช่ error 500)" do
+    assert_no_difference -> { Room.count } do
       delete admin_room_path(rooms(:main_hall))
     end
     assert_redirected_to admin_rooms_path
+    assert_match(/เก็บถาวรแทน/, flash[:alert])
+    assert Room.exists?(rooms(:main_hall).id)
   end
 
   test "ROOM-05: เก็บถาวรห้องได้" do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_100001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -47,6 +47,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["qualification_submission_id"], name: "index_assets_on_qualification_submission_id"
+  end
+
+  create_table "auction_events", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "room_id", null: false
+    t.integer "auction_method_id", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "status", default: "scheduled", null: false
+    t.datetime "cancelled_at"
+    t.datetime "settled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["auction_method_id"], name: "index_auction_events_on_auction_method_id"
+    t.index ["room_id"], name: "index_auction_events_on_room_id"
+    t.index ["starts_at"], name: "index_auction_events_on_starts_at"
+    t.index ["status"], name: "index_auction_events_on_status"
+    t.check_constraint "ends_at > starts_at", name: "auction_events_ends_after_start"
+    t.check_constraint "status IN ('scheduled', 'bidding', 'settled', 'cancelled')", name: "auction_events_status_valid"
   end
 
   create_table "auction_methods", force: :cascade do |t|
@@ -91,6 +110,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
     t.check_constraint "reserve_price >= starting_price", name: "items_reserve_not_below_starting"
     t.check_constraint "starting_price > 0", name: "items_starting_price_positive"
     t.check_constraint "status IN ('awaiting_approval', 'available', 'in_auction', 'sold')", name: "items_status_valid"
+  end
+
+  create_table "lots", force: :cascade do |t|
+    t.integer "auction_event_id", null: false
+    t.integer "item_id", null: false
+    t.string "status", default: "pending", null: false
+    t.decimal "winning_price", precision: 15, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["auction_event_id", "item_id"], name: "index_lots_on_auction_event_id_and_item_id", unique: true
+    t.index ["auction_event_id"], name: "index_lots_on_auction_event_id"
+    t.index ["item_id"], name: "index_lots_on_item_id"
+    t.index ["item_id"], name: "index_lots_one_pending_per_item", unique: true, where: "status = 'pending'"
+    t.check_constraint "status <> 'sold' OR winning_price IS NOT NULL", name: "lots_sold_has_winning_price"
+    t.check_constraint "status IN ('pending', 'sold', 'unsold', 'cancelled')", name: "lots_status_valid"
+    t.check_constraint "winning_price IS NULL OR winning_price > 0", name: "lots_winning_price_positive"
   end
 
   create_table "qualification_submissions", force: :cascade do |t|
@@ -166,8 +201,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_090200) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "assets", "qualification_submissions"
+  add_foreign_key "auction_events", "auction_methods", on_delete: :restrict
+  add_foreign_key "auction_events", "rooms", on_delete: :restrict
   add_foreign_key "audit_logs", "users", column: "admin_id"
   add_foreign_key "items", "users", column: "approved_by_id"
+  add_foreign_key "lots", "auction_events", on_delete: :restrict
+  add_foreign_key "lots", "items", on_delete: :restrict
   add_foreign_key "qualification_submissions", "users"
   add_foreign_key "qualification_submissions", "users", column: "reviewed_by_id"
   add_foreign_key "sessions", "users"
