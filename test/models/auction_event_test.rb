@@ -158,7 +158,7 @@ class AuctionEventTest < ActiveSupport::TestCase
 
   test "จำนวนสินค้าต้องไม่เกินที่ห้องรองรับ (EVT-03)" do
     small = Room.create!(name: "ห้องจิ๋ว", max_participants: 5, max_items: 1)
-    extra = Item.create!(name: "ชิ้นที่สอง", starting_price: 100, reserve_price: 100, status: :available)
+    extra = Item.create!(description: "รายละเอียด", name: "ชิ้นที่สอง", starting_price: 100, reserve_price: 100, status: :available)
     event = build(room: small, selected_item_ids: [ items(:car).id, extra.id ])
     assert_not event.valid?
     assert event.errors.of_kind?(:selected_item_ids, :too_many)

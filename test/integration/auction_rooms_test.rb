@@ -15,7 +15,7 @@ class AuctionRoomsTest < ActionDispatch::IntegrationTest
     starts = @base + hours.hours
     event = AuctionEvent.create!(name: "รอบทดสอบ", room:, auction_method: auction_methods(:first_price),
                                  starts_at: starts, ends_at: starts + 1.hour)
-    lots = items.map { |name| Lot.create!(auction_event: event, item: Item.create!(name:, starting_price: 1000, reserve_price: 4321, status: :available)) }
+    lots = items.map { |name| Lot.create!(auction_event: event, item: Item.create!(description: "รายละเอียด", name:, starting_price: 1000, reserve_price: 4321, status: :available)) }
     [ event, *lots ]
   end
 

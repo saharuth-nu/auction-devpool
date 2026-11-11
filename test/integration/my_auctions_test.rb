@@ -17,7 +17,7 @@ class MyAuctionsPageTest < ActionDispatch::IntegrationTest
     starts = @base + hours.hours
     event = AuctionEvent.create!(name: "รอบ #{hours} ชม.", room:, auction_method: auction_methods(:first_price),
                                  starts_at: starts, ends_at: starts + 1.hour)
-    lot = Lot.create!(auction_event: event, item: Item.create!(name: item_name, starting_price: 100, reserve_price: 100, status: :available))
+    lot = Lot.create!(auction_event: event, item: Item.create!(description: "รายละเอียด", name: item_name, starting_price: 100, reserve_price: 100, status: :available))
     Participation.create!(user:, lot:)
     [ event, lot ]
   end

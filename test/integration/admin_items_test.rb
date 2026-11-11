@@ -90,6 +90,24 @@ class AdminItemsTest < ActionDispatch::IntegrationTest
     assert_equal 2, item.images.count
   end
 
+  test "ITEM-13: สร้างสินค้าโดยไม่กรอกรายละเอียด ถูกปฏิเสธและแสดง error ใต้ช่อง" do
+    assert_no_difference -> { Item.count } do
+      post admin_items_path, params: item_params(description: "")
+    end
+    assert_response :unprocessable_entity
+    assert_select ".ui-field__error", "ต้องกรอก"
+    assert_select "textarea[name=?]", "item[description]"
+  end
+
+  test "ITEM-13: รายละเอียดแสดงในหน้ารายละเอียดฝั่งผู้ใช้ (USR-04)" do
+    lot = lots(:upcoming_necklace)
+    lot.item.update!(description: "สร้อยคอทองคำลายโบราณ")
+    delete logout_path
+    sign_in(create_approved_bidder(admin: @admin))
+    get lot_path(lot)
+    assert_includes response.body, "สร้อยคอทองคำลายโบราณ"
+  end
+
   test "ITEM-06: ราคาขั้นต่ำต่ำกว่าราคาเริ่มต้นแสดง error และไม่บันทึก" do
     assert_no_difference -> { Item.count } do
       post admin_items_path, params: item_params(starting_price: "2000", reserve_price: "1999")

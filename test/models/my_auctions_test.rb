@@ -13,7 +13,7 @@ class MyAuctionsTest < ActiveSupport::TestCase
     starts = (@base + hours.hours)
     event = AuctionEvent.create!(name: "รอบ #{hours} ชม.", room:, auction_method: auction_methods(:first_price),
                                  starts_at: starts, ends_at: starts + 1.hour)
-    lot = Lot.create!(auction_event: event, item: Item.create!(name: "ของ #{hours}", starting_price: 100, reserve_price: 100, status: :available))
+    lot = Lot.create!(auction_event: event, item: Item.create!(description: "รายละเอียด", name: "ของ #{hours}", starting_price: 100, reserve_price: 100, status: :available))
     Participation.create!(user:, lot:)
     [ event, lot ]
   end
@@ -75,7 +75,7 @@ class MyAuctionsTest < ActiveSupport::TestCase
 
   test "event เดียวกันหลายสินค้า รวมเป็นกลุ่มเดียว" do
     event, lot_a = build_joined_event(hours: 3)
-    lot_b = Lot.create!(auction_event: event, item: Item.create!(name: "อีกชิ้น", starting_price: 100, reserve_price: 100, status: :available))
+    lot_b = Lot.create!(auction_event: event, item: Item.create!(description: "รายละเอียด", name: "อีกชิ้น", starting_price: 100, reserve_price: 100, status: :available))
     Participation.create!(user: @user, lot: lot_b)
     group = MyAuctions.for(@user).upcoming.sole
     assert_equal [ lot_a.id, lot_b.id ].sort, group.participations.map { |p| p.lot.id }.sort

@@ -2,7 +2,7 @@ require "test_helper"
 
 class ItemTest < ActiveSupport::TestCase
   def build(**attrs)
-    Item.new({ name: "กล้องถ่ายรูป", starting_price: 1000, reserve_price: 1200 }.merge(attrs))
+    Item.new({ name: "กล้องถ่ายรูป", description: "กล้องฟิล์มสภาพดี", starting_price: 1000, reserve_price: 1200 }.merge(attrs))
   end
 
   def image(name: "photo.jpg", content_type: "image/jpeg", bytes: 1.kilobyte)
@@ -205,5 +205,24 @@ class ItemTest < ActiveSupport::TestCase
   test "เลื่อนรูปที่ไม่ใช่ของสินค้านี้ไม่ได้" do
     item = item_with_images(1)
     assert_raises(ActiveRecord::RecordNotFound) { item.move_image!(-1, :up) }
+  end
+  # ---- ITEM-13: ชื่อและรายละเอียดบังคับทั้งคู่ ----
+  test "ITEM-13: ต้องมีรายละเอียด (ว่าง/ช่องว่างล้วน/ไม่ส่งค่า ถูกปฏิเสธ)" do
+    [ nil, "", "   " ].each do |blank|
+      item = build(description: blank)
+      assert_not item.valid?, "#{blank.inspect} ควรไม่ผ่าน"
+      assert_includes item.errors[:description], "ต้องกรอก"
+    end
+    assert build(description: "รายละเอียดครบ").valid?
+  end
+
+  test "ITEM-13: แก้รายละเอียดเป็นค่าว่างไม่ได้" do
+    item = build.tap(&:save!)
+    assert_not item.update(description: "")
+    assert_equal "กล้องฟิล์มสภาพดี", item.reload.description
+  end
+
+  test "ITEM-13: ชื่อยังบังคับเหมือนเดิม" do
+    assert_not build(name: "").valid?
   end
 end
