@@ -2,7 +2,7 @@
 #
 # สถานะ (EVT-10): ยังไม่เริ่ม → เปิดรับราคา → สรุปผลแล้ว · ยกเลิกได้เฉพาะก่อนเริ่ม (EVT-08)
 # เปลี่ยนสถานะผ่าน transition_to! / cancel! เท่านั้น การเปลี่ยนข้ามขั้นถูกปฏิเสธทั้งที่ model
-# ส่วนการเริ่ม (สินค้าเป็น "อยู่ระหว่างการประมูล") อยู่ใน #55 และการปิด/คัดผู้ชนะอยู่ใน #66
+# การเริ่ม: start! (EVT-07, #55) · การปิด/คัดผู้ชนะอยู่ใน #66
 class AuctionEvent < ApplicationRecord
   class InvalidTransition < StandardError; end
 
@@ -46,8 +46,12 @@ class AuctionEvent < ApplicationRecord
   validate :items_selection_valid, unless: -> { selected_item_ids.nil? }
 
   after_save :sync_lots, unless: -> { selected_item_ids.nil? }
+  # ตั้ง job เริ่มการประมูลไว้ที่ starts_at ทุกครั้งที่สร้างหรือเลื่อนเวลา (job เก่าที่เวลาไม่ตรงจะไม่ทำอะไร)
+  after_commit :schedule_start, on: %i[create update], if: -> { scheduled? && saved_change_to_starts_at? }
 
   scope :unfinished, -> { where(status: %w[scheduled bidding]) }
+  # ถึงเวลาเริ่มแล้วแต่ยังไม่ได้เริ่ม (ให้ job กวาดซ้ำเก็บตก)
+  scope :due_to_start, -> { scheduled.where(starts_at: ..Clock.now) }
 
   def selected_item_ids=(ids)
     @selected_item_ids = Array(ids).compact_blank.map(&:to_i).uniq
@@ -93,14 +97,41 @@ class AuctionEvent < ApplicationRecord
   end
 
   # ยกเลิกก่อนเริ่ม: lot ที่ยังไม่จบเป็น cancelled เพื่อปล่อยสินค้าไปใส่ event อื่นได้ (ITEM-10)
+  # ล็อกแถวไว้ กันชนกับ start! ที่อาจรันพร้อมกันพอดีตอนถึงเวลาเริ่ม
   def cancel!
-    transaction do
+    with_lock do
       transition_to!(:cancelled, cancelled_at: Clock.now)
       lots.pending.find_each { |lot| lot.update!(status: :cancelled) }
     end
   end
 
+  # EVT-07: เมื่อถึงเวลาเริ่ม สถานะเป็น "เปิดรับราคา" และสินค้าทุกชิ้นเป็น "อยู่ระหว่างการประมูล" พร้อมกัน (BID-16)
+  # รันซ้ำได้ผลเดิม: ยังไม่ถึงเวลา / เริ่มไปแล้ว / ถูกยกเลิก → ไม่ทำอะไร คืน false (เริ่มสำเร็จคืน true)
+  # สินค้าที่ไม่อยู่ในสถานะ "พร้อมขาย" แล้ว (เช่น ถูกเก็บถาวรหลังใส่ event) ถูกถอนออกจากรอบนี้ (lot = cancelled)
+  # เรียกจาก StartAuctionEventJob (ตั้งเวลาไว้ที่ starts_at) และ StartDueAuctionEventsJob (กวาดซ้ำ)
+  def start!
+    started = false
+    with_lock do
+      next unless scheduled? && Clock.reached?(starts_at)
+
+      lots.pending.includes(:item).find_each do |lot|
+        if lot.item.available? && !lot.item.archived?
+          lot.item.update!(status: :in_auction)
+        else
+          lot.update!(status: :cancelled)
+        end
+      end
+      transition_to!(:bidding)
+      started = true
+    end
+    started
+  end
+
   private
+    def schedule_start
+      StartAuctionEventJob.set(wait_until: starts_at).perform_later(id)
+    end
+
     # EVT-05: เวลาสิ้นสุด ≥ เวลาเริ่ม + ระยะเวลายื่นราคา
     def ends_after_bidding_window
       return if starts_at.blank? || ends_at.blank? || auction_method.blank?
