@@ -1,0 +1,7 @@
+<% content_for :title, "ไม่มีสิทธิ์เข้าถึง" %>
+<div class="ui-auth">
+  <%= ui_card title: "ไม่มีสิทธิ์เข้าถึงหน้านี้" do %>
+    <p>บัญชีของคุณไม่มีสิทธิ์ใช้งานหน้านี้</p>
+    <p><%= link_to "กลับหน้าแรก", (current_user&.admin? ? admin_root_path : root_path) %></p>
+  <% end %>
+</div>
