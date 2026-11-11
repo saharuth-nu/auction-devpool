@@ -26,6 +26,7 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
   resource :registration, only: %i[new create]
+  get "terms", to: "terms#show", as: :terms # เงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว (AUTH-19) เปิดได้โดยไม่ต้อง login
   # หน้าสถานะคุณสมบัติ + ส่ง/แก้ทรัพย์สิน (QUAL-02/04/05/06/09)
   resource :qualification, only: %i[show create]
 

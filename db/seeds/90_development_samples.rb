@@ -22,7 +22,8 @@ first_price = AuctionMethod.find_by(code: "first_price") or raise "ไม่พ�
 def sample_bidder(username, fullname)
   User.find_by(username: username) || User.create!(
     username: username, fullname: fullname, email: "#{username}@example.com",
-    password: SAMPLE_PASSWORD, password_confirmation: SAMPLE_PASSWORD
+    password: SAMPLE_PASSWORD, password_confirmation: SAMPLE_PASSWORD,
+    consented_at: Time.current, terms_version: Terms::VERSION # เหมือนสมัครผ่านหน้า register (AUTH-19)
   )
 end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_110002) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_114005) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -219,6 +219,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_110002) do
     t.text "disabled_reason"
     t.integer "disabled_by_id"
     t.string "qualification_status"
+    t.datetime "consented_at"
+    t.string "terms_version"
     t.index ["disabled_by_id"], name: "index_users_on_disabled_by_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["qualification_status"], name: "index_users_on_qualification_status"
