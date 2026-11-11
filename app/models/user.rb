@@ -7,6 +7,7 @@ class User < ApplicationRecord
 
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :bids, dependent: :restrict_with_exception # ประวัติราคาที่ยื่นลบไม่ได้ (NFR-19)
   belongs_to :disabled_by, class_name: "User", optional: true
 
   enum :role, { admin: "admin", bidder: "bidder" }, default: :bidder
