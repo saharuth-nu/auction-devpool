@@ -12,6 +12,7 @@ class Lot < ApplicationRecord
   belongs_to :item
   # ราคาที่ยื่น (BID-13): ลบ lot ที่มีราคาที่ยื่นไว้ไม่ได้ (NFR-19) · winning_bid คือราคาที่ชนะตอนปิดประมูล (#66)
   has_many :bids, dependent: :restrict_with_error
+  has_many :participations, dependent: :restrict_with_error # ประวัติการเข้าร่วมลบไม่ได้ (NFR-19)
   belongs_to :winning_bid, class_name: "Bid", optional: true
 
   validates :item_id, uniqueness: { scope: :auction_event_id, message: "อยู่ในการประมูลนี้แล้ว" }

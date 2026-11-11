@@ -1,0 +1,31 @@
+<% content_for :title, "ผลการประมูล: #{@event.name}" %>
+<%= ui_page_header "ผลการประมูล", description: "#{@event.name} · ห้อง #{@event.room.name} · #{display_time @event.starts_at}" do %>
+  <%= ui_link_button "ผลการประมูลทั้งหมด", results_path, variant: :secondary %>
+<% end %>
+
+<%# ผู้ชนะเห็นว่าชนะ แต่ยังไม่มีขั้นตอนชำระเงินใน M1 (USR-15) %>
+<% if @lots.any? { |lot| lot.outcome_for(current_user) == :won } %>
+  <%= ui_alert "ยินดีด้วย คุณชนะการประมูล ขั้นตอนชำระเงินและส่งมอบจะเปิดใช้งานในระยะถัดไป ผลการประมูลแจ้งที่หน้านี้เท่านั้น", tone: :success %>
+<% end %>
+
+<%= ui_table_card title: "สินค้าที่คุณเข้าร่วม (#{@lots.size})" do %>
+  <table class="ui-table">
+    <thead>
+      <tr><th>สินค้า</th><th>ผล</th><th class="num">ราคาที่ชนะ</th><th class="num">ราคาที่คุณยื่น</th></tr>
+    </thead>
+    <tbody>
+      <% @lots.each do |lot| %>
+        <% outcome = lot.outcome_for(current_user) %>
+        <% mine = @my_bids[lot.id] %>
+        <tr>
+          <td><%= lot.item.name %></td>
+          <td><%= status_badge(:outcome, outcome) %></td>
+          <td class="num"><%= lot.public_winning_price ? baht(lot.public_winning_price) : "-" %></td>
+          <td class="num"><%= mine ? baht(mine.amount) : "ไม่ได้ยื่นราคา" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<%= ui_alert "ราคาที่ชนะเปิดเผยเฉพาะสินค้าที่ขายได้ และไม่เปิดเผยตัวตนของผู้ชนะ", tone: :info %>

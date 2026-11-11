@@ -12,7 +12,9 @@ Rails.application.routes.draw do
   get "my-auctions", to: "my_auctions#index", as: :my_auctions # การประมูลของฉัน (USR-16)
   resources :auction_events, only: [], path: "events" do
     resource :room, only: :show, controller: "auction_rooms" # ห้องประมูล (USR-08..10)
+    resource :results, only: :show, controller: "auction_results" # ผลการประมูลของ event นี้ (USR-11..15, #61)
   end
+  get "results", to: "auction_results#index", as: :results # รายการผลการประมูลของฉัน (USR-17)
   resources :lots, only: :show do # หน้ารายละเอียดสินค้าในการประมูล (USR-04)
     resource :participation, only: %i[create destroy] # เข้าร่วม / ยกเลิกก่อนเริ่ม (USR-05..07)
     resource :bid, only: :create # ยื่นราคา ครั้งเดียว แก้/ถอนไม่ได้ (BID-01, #65)
