@@ -43,6 +43,9 @@ module DesignLint
     found = []
     each_match(code, COLOR_PROPERTY) { |m, line| found << violation(file, line, "hex-in-view", m, "ใช้ token สี เช่น var(--color-primary-600) ใน CSS (DESIGN.md หัวข้อ 1)") }
     each_match(code, INLINE_STYLE_LOOK) { |m, line| found << violation(file, line, "inline-style", m, "อย่าตั้งสี/ฟอนต์/ระยะห่าง/layout ใน style= ใช้ class ui-* หรือเพิ่ม class ใน CSS") }
+    each_match(code, /<(?:p|span|div)[^>]*class\s*=\s*["'][^"']*\bui-field__hint\b/) do |m, line|
+      found << violation(file, line, "misused-hint", m, "ui-field__hint ใช้ใต้ช่องกรอกเท่านั้น: สถานะว่างใช้ ui_empty_state, ข้อความรองใช้ ui-text-muted")
+    end
     each_match(code, RAW_TAG) do |m, line|
       next if m =~ /\btype\s*=\s*["']hidden["']/i
 

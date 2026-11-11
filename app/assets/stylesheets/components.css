@@ -170,3 +170,11 @@ select.ui-input { padding-right: 36px; cursor: pointer; }
 .ui-prose li + li { margin-top: 8px; }
 .ui-prose__heading { margin: 16px 0 4px; font-size: var(--text-base); font-weight: 600; color: var(--color-zinc-900); }
 .ui-prose__heading:first-child { margin-top: 0; }
+
+/* BackLink: ลิงก์ "กลับ" บนหน้ารายละเอียด */
+.ui-back-link { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 12px; font-size: var(--text-xs); line-height: var(--text-xs-lh); font-weight: 500; color: var(--color-zinc-600); text-decoration: none; }
+.ui-back-link:hover { color: var(--color-primary-700); }
+.ui-back-link svg { width: 20px; height: 20px; }
+
+/* SectionTitle: หัวข้อของส่วนที่ประกอบด้วยการ์ดหลายใบ (ขนาดเดียวกับชื่อการ์ด) */
+.ui-section-title { margin: 0 0 12px; font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; color: var(--color-zinc-900); }

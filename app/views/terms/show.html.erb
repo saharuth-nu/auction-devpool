@@ -1,4 +1,5 @@
 <% content_for :title, "เงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว" %>
+<%= ui_back_link "กลับ", (current_user ? root_path : new_registration_path) %>
 <%= ui_page_header "เงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว", description: "ฉบับ #{Terms::VERSION}" %>
 
 <%# ข้อความด้านล่างเป็นร่างเบื้องต้นจากการทำงานของระบบ ต้องให้เจ้าของโปรเจค/ฝ่ายกฎหมายตรวจและแก้ก่อนใช้งานจริง (issue #77)
@@ -28,4 +29,3 @@
   <p>ติดต่อผู้ดูแลระบบเพื่อขอแก้ไขข้อมูลของคุณ ระบบดาวน์โหลดข้อมูลและขอลบบัญชีด้วยตนเองจะเปิดใช้งานในระยะถัดไป</p>
 <% end %>
 
-<div class="ui-actions"><%= ui_link_button "กลับ", (current_user ? root_path : new_registration_path), variant: :secondary %></div>

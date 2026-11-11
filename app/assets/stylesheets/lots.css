@@ -8,8 +8,8 @@
 
 .ui-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
 .ui-gallery__item--main { grid-column: 1 / -1; }
-.ui-gallery__image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-zinc-100); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); }
-.ui-gallery__empty { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; color: var(--color-zinc-500); background: var(--color-zinc-100); border: 1px dashed var(--color-zinc-300); border-radius: var(--radius-2xl); }
+.ui-gallery__image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-zinc-100); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); }
+.ui-gallery__empty { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; color: var(--color-zinc-500); background: var(--color-zinc-100); border: 1px dashed var(--color-zinc-300); border-radius: var(--radius-lg); }
 
 @media (min-width: 768px) {
   .ui-lot { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; }

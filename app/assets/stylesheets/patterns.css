@@ -22,8 +22,8 @@ input[type="file"].ui-input { height: auto; padding: 10px 14px; border-radius: v
 .ui-dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; color: var(--color-zinc-900); background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xl); }
 .ui-dialog::backdrop { background: rgb(0 0 0 / 0.5); }
 .ui-dialog__body { padding: 24px 24px 16px; }
-.ui-dialog__title { margin: 0; font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; }
-.ui-dialog__message { margin: 8px 0 0; color: var(--color-zinc-600); }
+.ui-dialog__title { margin: 0; font-size: var(--text-xl); line-height: var(--text-xl-lh); font-weight: 700; }
+.ui-dialog__message { margin: 8px 0 0; font-size: var(--text-lg); line-height: var(--text-lg-lh); color: var(--color-zinc-600); }
 .ui-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 0 24px 24px; }
 
 /* ---------- Empty / Loading (NFR-11: แสดงสถานะว่างและกำลังโหลดเสมอ) ---------- */

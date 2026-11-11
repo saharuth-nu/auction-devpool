@@ -2,7 +2,6 @@
 <%= render "home/banner" %>
 <%= render "shared/live_banner", events: @live_events %>
 
-<section aria-labelledby="listings-title">
-  <h2 id="listings-title" class="ui-section-title">สินค้าประมูล</h2>
+<%= ui_card title: "สินค้าประมูล", id: "listings" do %>
   <%= render "home/listings", listings: @listings %>
-</section>
+<% end %>

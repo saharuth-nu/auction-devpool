@@ -1,7 +1,7 @@
 <%# รูปที่บันทึกแล้วของสินค้าตามลำดับ (removable: แสดงปุ่มเลื่อนและลบทีละรูป) %>
 <% images = item.ordered_images %>
 <% if images.empty? %>
-  <p class="ui-field__hint">ยังไม่มีรูป</p>
+  <%= ui_empty_state "ยังไม่มีรูป" %>
 <% else %>
   <ol class="ui-thumbs">
     <% images.each_with_index do |image, index| %>

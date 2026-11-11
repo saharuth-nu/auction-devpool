@@ -18,8 +18,8 @@ class HomeTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_equal 1, page.css("h1").size, "ต้องมี h1 เดียวต่อหน้า"
-    assert_equal "ประมูลสินค้าด้วยการยื่นราคาลับ", page.at_css("section.ui-banner h1").text
-    assert_equal "สินค้าประมูล", page.at_css("#listings-title").text
+    assert_equal "ประมูลสินค้าด้วยการยื่นราคาลับ", page.at_css(".ui-page-header h1").text
+    assert_equal "สินค้าประมูล", page.at_css("#listings .ui-card__title").text
   end
 
   def home_names

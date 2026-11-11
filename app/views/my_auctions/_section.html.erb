@@ -2,7 +2,7 @@
 <section class="ui-my-section" id="<%= id %>" aria-labelledby="<%= id %>-title">
   <h2 id="<%= id %>-title" class="ui-section-title"><%= title %> <%= ui_badge(groups.size, tone: :muted) %></h2>
   <% if groups.empty? %>
-    <p class="ui-field__hint">ไม่มีรายการ</p>
+    <%= ui_empty_state "ไม่มีรายการ" %>
   <% else %>
     <% groups.each do |group| %>
       <%= ui_card title: group.event.name do %>
