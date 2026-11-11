@@ -166,4 +166,30 @@ class UiFormBuilderTest < ActionView::TestCase
     assert_equal "image/png", input["accept"]
     assert_equal "รูป", doc.at_css("label.ui-field__label").text
   end
+
+  test "ui_check_boxes: legend, checkbox ต่อค่า, ติ๊กตามค่าเดิม และ hidden ว่างเมื่อไม่ติ๊กเลย" do
+    html = ui_form_with(url: "/events", scope: :event) do |f|
+      f.ui_check_boxes(:item_ids, [ [ "นาฬิกา", 1, "1,000 บาท" ], [ "รถ", 2 ] ], label: "สินค้า", checked: [ 2 ], hint: "เลือกได้หลายชิ้น")
+    end
+    doc = Nokogiri::HTML.fragment(html)
+    assert_equal "สินค้า", doc.at_css("fieldset legend").text
+    boxes = doc.css("input[type=checkbox].ui-checkbox")
+    assert_equal %w[1 2], boxes.map { |b| b["value"] }
+    assert_equal [ nil, "checked" ], boxes.map { |b| b["checked"] }
+    assert boxes.all? { |b| b["name"] == "event[item_ids][]" }
+    assert_equal boxes.first["id"], doc.at_css("label.ui-check")["for"]
+    assert_equal "1,000 บาท", doc.at_css("label .ui-text-muted").text
+    assert doc.at_css("input[type=hidden][name='event[item_ids][]'][value='']")
+    assert_equal doc.at_css(".ui-field__hint")["id"], doc.at_css("fieldset")["aria-describedby"]
+  end
+
+  test "ui_check_boxes: error ใต้กลุ่มพร้อม aria และข้อความเมื่อไม่มีตัวเลือก" do
+    record = Sample.new
+    record.errors.add(:title, :blank)
+    doc = form_with_field(record) { |f| f.ui_check_boxes(:title, [], label: "สินค้า", empty_message: "ไม่มีสินค้า") }
+    assert_equal "ไม่มีสินค้า", doc.at_css("p.ui-text-muted").text
+    assert_equal "ต้องกรอก", doc.at_css(".ui-field__error").text
+    assert_equal "true", doc.at_css("fieldset")["aria-invalid"]
+    assert_nil doc.at_css("input[type=checkbox]")
+  end
 end

@@ -1,0 +1,14 @@
+<%# รูปสินค้าทุกภาพตามลำดับที่ admin จัด (Item#ordered_images, ITEM-07) (USR-04): ภาพแรกเด่นเต็มแถว ที่เหลือเรียงเป็นตาราง · ไม่มีรูปแสดงกรอบ "ไม่มีรูป" (NFR-11) %>
+<% images = item.ordered_images %>
+<% if images.any? %>
+  <ul class="ui-gallery">
+    <% images.each_with_index do |image, index| %>
+      <li class="<%= "ui-gallery__item--main" if index.zero? %>">
+        <%= image_tag image, alt: "#{item.name} รูปที่ #{index + 1}", loading: (index.zero? ? "eager" : "lazy"),
+                             decoding: "async", class: "ui-gallery__image" %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <div class="ui-gallery__empty" role="img" aria-label="ไม่มีรูปสินค้า <%= item.name %>">ไม่มีรูป</div>
+<% end %>

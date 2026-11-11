@@ -4,7 +4,7 @@
 <% else %>
   <ul class="ui-item-grid">
     <% listings.each do |entry| %>
-      <li><%= item_card entry.item, starts_at: entry.starts_at %></li>
+      <li><%= item_card entry.item, starts_at: entry.starts_at, url: (lot_path(entry.lot) if entry.lot) %></li>
     <% end %>
   </ul>
 <% end %>

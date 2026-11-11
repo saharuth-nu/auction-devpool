@@ -1,0 +1,12 @@
+<% content_for :title, "แก้ไขการประมูล" %>
+<%= ui_page_header "แก้ไขการประมูล", description: @event.name do %>
+  <%= status_badge :auction_event, @event.status %>
+<% end %>
+
+<% unless @event.editable? %>
+  <%= ui_alert "การประมูลนี้เริ่มแล้ว แก้เวลา ห้อง วิธีประมูล และสินค้าไม่ได้ (แก้ได้เฉพาะชื่อ)", tone: :warning %>
+<% end %>
+
+<%= ui_card title: "ข้อมูลการประมูล" do %>
+  <%= render "form", event: @event %>
+<% end %>
