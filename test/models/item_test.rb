@@ -21,19 +21,26 @@ class ItemTest < ActiveSupport::TestCase
     assert_equal %w[awaiting_approval available in_auction sold], Item.statuses.keys
   end
 
-  test "อนุมัติแล้วเป็น พร้อมขาย และบันทึกเวลาอนุมัติ (ITEM-04)" do
+  test "อนุมัติแล้วเป็น พร้อมขาย และบันทึก admin กับเวลาที่อนุมัติ (ITEM-04)" do
     item = items(:watch)
+    admin = create_admin
     freeze_time do
-      item.approve!
+      item.approve!(by: admin)
       assert item.reload.available?
       assert_equal Time.current, item.approved_at
+      assert_equal admin, item.approved_by
     end
   end
 
   test "อนุมัติได้เฉพาะสินค้าที่ รออนุมัติ" do
     item = items(:car)
-    assert_raises(Item::InvalidTransition) { item.approve! }
+    assert_raises(Item::InvalidTransition) { item.approve!(by: create_admin) }
     assert item.reload.available?
+  end
+
+  test "ผู้อนุมัติต้องเป็น admin" do
+    assert_raises(Item::InvalidTransition) { items(:watch).approve!(by: create_bidder) }
+    assert items(:watch).reload.awaiting_approval?
   end
 
   # --- ราคา (ITEM-05, ITEM-06, NFR-09) ---

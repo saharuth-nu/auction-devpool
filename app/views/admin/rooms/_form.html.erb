@@ -1,0 +1,10 @@
+<%= ui_form_with model: [ :admin, room ] do |f| %>
+  <%= f.ui_field :name, label: "ชื่อห้อง", autofocus: true, required: true %>
+  <%= f.ui_field :description, as: :textarea, label: "รายละเอียด", rows: 3 %>
+  <%= f.ui_field :max_participants, as: :number, label: "จำนวนผู้เข้าร่วมประมูลสูงสุด (ทั้งหมด)", min: 1, step: 1, required: true %>
+  <%= f.ui_field :max_items, as: :number, label: "จำนวนสินค้าประมูลสูงสุด", min: 1, step: 1, required: true %>
+  <div class="ui-actions">
+    <%= f.ui_submit room.new_record? ? "เพิ่มห้อง" : "บันทึก" %>
+    <%= ui_link_button "ยกเลิก", admin_rooms_path, variant: :secondary, size: :xl %>
+  </div>
+<% end %>

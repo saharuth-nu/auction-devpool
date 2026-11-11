@@ -4,7 +4,8 @@ require "test_helper"
 class PasswordResetsTest < ActionDispatch::IntegrationTest
   setup do
     @admin = create_admin
-    @bidder = create_bidder
+    # ผ่านการตรวจคุณสมบัติแล้ว: ผู้ที่ยังไม่ผ่านเข้าได้เฉพาะหน้าสถานะ (QUAL-05) ดู qualification_gate_test.rb
+    @bidder = create_approved_bidder(admin: @admin)
     @other_admin = create_admin
     sign_in(@admin)
   end

@@ -5,7 +5,6 @@
   methods = AuctionMethod.selectable.order(:name).to_a
   methods |= [ event.auction_method ] if event.auction_method
   items = event.selectable_items.to_a
-  item_error = event.errors[:selected_item_ids].first
   locked = !event.new_record? && !event.editable? # EVT-08: เริ่มแล้วแก้ได้เฉพาะชื่อ
 %>
 <%= ui_form_with model: event, url: (event.persisted? ? admin_auction_event_path(event) : admin_auction_events_path) do |f| %>
@@ -24,37 +23,21 @@
           hint: "หลังเวลานี้ผู้ใช้เข้าห้องไม่ได้ ไม่ใช่เวลาปิดรับราคา" %>
   </div>
 
-  <fieldset class="ui-fieldset" aria-describedby="auction_event_selected_item_ids_message">
-    <legend class="ui-field__label">สินค้า</legend>
-    <% if locked %>
+  <% if locked %>
+    <%# เริ่มแล้ว: แสดงสินค้าอย่างเดียว ไม่มีช่องให้ส่ง (EVT-08) %>
+    <div class="ui-field">
+      <p class="ui-field__label">สินค้า</p>
       <ul class="ui-check-list">
         <% event.items.order(:name).each do |item| %>
           <li><%= item.name %></li>
         <% end %>
       </ul>
-    <% elsif items.empty? %>
-      <p class="ui-text-muted">ไม่มีสินค้าที่เลือกได้ (ต้องมีสถานะ "พร้อมขาย" และไม่อยู่ในการประมูลอื่น)</p>
-    <% else %>
-      <%= hidden_field_tag "auction_event[selected_item_ids][]", "", id: nil %>
-      <ul class="ui-check-list">
-        <% items.each do |item| %>
-          <li>
-            <label>
-              <%= check_box_tag "auction_event[selected_item_ids][]", item.id, event.current_item_ids.include?(item.id),
-                    id: "auction_event_item_#{item.id}", class: "ui-checkbox" %>
-              <span><%= item.name %></span>
-              <span class="ui-text-muted">ราคาเริ่มต้น <%= number_with_delimiter(item.starting_price) %> บาท</span>
-            </label>
-          </li>
-        <% end %>
-      </ul>
-    <% end %>
-    <% if item_error %>
-      <p id="auction_event_selected_item_ids_message" class="ui-field__error"><%= item_error %></p>
-    <% else %>
-      <p id="auction_event_selected_item_ids_message" class="ui-field__hint">จำนวนต้องไม่เกินที่ห้องรองรับ</p>
-    <% end %>
-  </fieldset>
+    </div>
+  <% else %>
+    <%= f.ui_check_boxes :selected_item_ids, items.map { |item| [ item.name, item.id, "ราคาเริ่มต้น #{baht(item.starting_price)}" ] },
+          label: "สินค้า", checked: event.current_item_ids, hint: "จำนวนต้องไม่เกินที่ห้องรองรับ",
+          empty_message: "ไม่มีสินค้าที่เลือกได้ (ต้องมีสถานะ \"พร้อมขาย\" และไม่อยู่ในการประมูลอื่น)" %>
+  <% end %>
 
   <div class="ui-actions">
     <%= f.ui_submit(event.persisted? ? "บันทึก" : "สร้างการประมูล") %>

@@ -38,12 +38,13 @@ class AdminAuctionEventsTest < ActionDispatch::IntegrationTest
     assert_select ".ui-badge", "สรุปผลแล้ว"
   end
 
-  test "EVT-08: แก้ไข/ยกเลิก/ลบ มีเฉพาะ event ที่ยังไม่เริ่ม และยกเลิก/ลบต้องยืนยันก่อน" do
+  test "EVT-08 NFR-13: แก้ไข/ยกเลิก/ลบ มีเฉพาะ event ที่ยังไม่เริ่ม และยกเลิก/ลบต้องยืนยันก่อน" do
     get admin_auction_events_path
     upcoming = auction_events(:upcoming)
     assert_select "a[href=?]", edit_admin_auction_event_path(upcoming)
-    assert_select "form[action=?] button[data-turbo-confirm]", cancel_admin_auction_event_path(upcoming)
-    assert_select "form[action=?] button[data-turbo-confirm]", admin_auction_event_path(upcoming)
+    # ปุ่มเปิดหน้าต่างยืนยันก่อน ฟอร์มส่งจริงอยู่ใน <dialog> (NFR-13)
+    assert_select ".ui-confirm dialog form[action=?]", cancel_admin_auction_event_path(upcoming)
+    assert_select ".ui-confirm dialog form[action=?]", admin_auction_event_path(upcoming)
 
     [ auction_events(:live), auction_events(:finished) ].each do |event|
       assert_select "a[href=?]", edit_admin_auction_event_path(event), count: 0

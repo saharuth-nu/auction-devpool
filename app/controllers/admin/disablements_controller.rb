@@ -1,6 +1,6 @@
 # ปิด / เปิดใช้งานบัญชี admin (ADM-05, 07, 08)
 # กฎ: ต้องมีเหตุผล · ปิดตัวเองไม่ได้ · ต้องเหลือ admin ที่ใช้งานได้อย่างน้อย 1 คน (ตรวจใน User#disable)
-# TODO(NFR-17): บันทึก audit log (งาน #71 ของสาย B)
+# NFR-17: ปิด/เปิดใช้งานลง audit log พร้อมเหตุผล
 class Admin::DisablementsController < Admin::BaseController
   before_action :set_admin
 
@@ -8,6 +8,7 @@ class Admin::DisablementsController < Admin::BaseController
 
   def create
     if @admin.disable(by: current_user, reason: params.dig(:disablement, :reason))
+      AuditLog.record!(admin: current_user, action: "admin.deactivate", target: @admin, reason: @admin.disabled_reason)
       redirect_to admin_admins_path, notice: "ปิดใช้งานบัญชี “#{@admin.username}” แล้ว"
     else
       flash.now[:alert] = @admin.errors.full_messages.to_sentence
@@ -17,6 +18,7 @@ class Admin::DisablementsController < Admin::BaseController
 
   def destroy
     @admin.enable
+    AuditLog.record!(admin: current_user, action: "admin.activate", target: @admin)
     redirect_to admin_admins_path, notice: "เปิดใช้งานบัญชี “#{@admin.username}” แล้ว"
   end
 

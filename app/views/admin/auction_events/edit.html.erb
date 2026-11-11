@@ -1,6 +1,6 @@
 <% content_for :title, "แก้ไขการประมูล" %>
 <%= ui_page_header "แก้ไขการประมูล", description: @event.name do %>
-  <%= status_badge :auction, @event.status %>
+  <%= status_badge :auction_event, @event.status %>
 <% end %>
 
 <% unless @event.editable? %>

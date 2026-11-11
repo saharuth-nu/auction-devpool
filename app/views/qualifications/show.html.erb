@@ -1,0 +1,44 @@
+<%# หน้าสถานะคุณสมบัติ (QUAL-06): รอกรอกทรัพย์สิน → ฟอร์ม · รอ admin ตรวจ → ข้อความ · ไม่ผ่าน → เหตุผล + ฟอร์มแก้ไข %>
+<% content_for :title, "ตรวจสอบคุณสมบัติ" %>
+<%= ui_page_header "ตรวจสอบคุณสมบัติ", description: "ต้องผ่านการตรวจสอบคุณสมบัติก่อนจึงเข้าร่วมการประมูลได้" do %>
+  <%= status_badge :qualification, @user.qualification_status %>
+<% end %>
+
+<% if @user.qualification_awaiting_review? %>
+  <%= ui_alert "อยู่ระหว่างการตรวจสอบคุณสมบัติ ผู้ดูแลระบบจะตรวจรายการทรัพย์สินของคุณ กรุณากลับมาดูผลที่หน้านี้", tone: :info %>
+  <% latest = @user.latest_qualification_submission %>
+  <%= render "qualifications/submitted_assets", submission: latest if latest %>
+<% else %>
+  <% if @user.qualification_rejected? %>
+    <%= ui_alert tone: :error do %>
+      <strong>ไม่ผ่านการตรวจสอบคุณสมบัติ</strong><br>
+      เหตุผล: <%= @user.latest_rejection_reason %><br>
+      แก้ไขรายการทรัพย์สินด้านล่างแล้วส่งตรวจใหม่ได้
+    <% end %>
+  <% end %>
+
+  <%= ui_card title: (@user.qualification_rejected? ? "แก้ไขและส่งทรัพย์สินใหม่" : "กรอกทรัพย์สินที่ครอบครอง") do %>
+    <p>
+      กรอกอย่างน้อย 1 รายการ (สูงสุด <%= QualificationSubmission::MAX_ASSETS %> รายการ) ไม่ต้องแนบเอกสาร ·
+      มูลค่ารวมของทรัพย์สินที่ผ่านการตรวจจะเป็นเพดานราคาที่คุณยื่นได้ · แถวที่ไม่ใช้ปล่อยว่างไว้
+    </p>
+
+    <% if @submission&.errors&.[](:base).present? || @submission&.errors&.[](:assets).present? %>
+      <%= ui_alert (@submission.errors[:base] + @submission.errors[:assets].map { |m| "รายการทรัพย์สิน#{m}" }).to_sentence, tone: :error %>
+    <% end %>
+
+    <%= ui_form_with url: qualification_path, scope: :submission do |f| %>
+      <% @rows.each_with_index do |asset, i| %>
+        <%= fields_for "submission[assets][#{i}]", asset, builder: UiFormBuilder do |af| %>
+          <div class="ui-form-row">
+            <%= af.ui_field :name, label: "รายการที่ #{i + 1}: ชื่อทรัพย์สิน", maxlength: Asset::NAME_MAX,
+                                   placeholder: (i.zero? ? "เช่น บ้านเดี่ยว, รถยนต์, เงินฝาก" : nil) %>
+            <%= af.ui_field :value, label: "มูลค่า (บาท)", inputmode: "decimal", placeholder: "0.00",
+                                    value: plain_amount(asset.value_before_type_cast) %>
+          </div>
+        <% end %>
+      <% end %>
+      <%= f.ui_submit "ส่งให้ตรวจสอบ", data: { turbo_confirm: "ยืนยันส่งรายการทรัพย์สิน? ระหว่างรอตรวจจะแก้ไขไม่ได้" } %>
+    <% end %>
+  <% end %>
+<% end %>

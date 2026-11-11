@@ -1,0 +1,12 @@
+<% content_for :title, "แก้ไขสินค้า" %>
+<div class="ui-auth">
+  <%= ui_card title: "แก้ไข “#{@item.name_was}”" do %>
+    <% if @item.in_auction? %>
+      <%= ui_alert "สินค้าอยู่ระหว่างการประมูล แก้ราคาไม่ได้", tone: :warning %>
+    <% end %>
+    <%= render "form", item: @item %>
+  <% end %>
+  <%= ui_card title: "รูปปัจจุบัน" do %>
+    <%= render "images", item: @item, removable: true %>
+  <% end %>
+</div>

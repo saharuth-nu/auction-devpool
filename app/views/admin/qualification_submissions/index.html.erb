@@ -1,0 +1,25 @@
+<% content_for :title, "ตรวจสอบผู้ใช้" %>
+<%= ui_page_header "ตรวจสอบผู้ใช้", description: "ผู้ใช้ที่ส่งทรัพย์สินแล้วและรอ admin ตรวจ เรียงจากส่งก่อน" do %>
+  <%= ui_link_button "ผู้ใช้ทั้งหมด", admin_users_path, variant: :secondary %>
+<% end %>
+
+<%= ui_table_card title: "รอตรวจ (#{@pagination.total_count})", footer: ui_pagination(@pagination).presence do %>
+  <table class="ui-table">
+    <thead><tr><th>ผู้ใช้</th><th>ชื่อ-นามสกุล</th><th>ส่งเมื่อ</th><th class="num">จำนวนรายการ</th><th class="num">มูลค่ารวม</th><th></th></tr></thead>
+    <tbody>
+      <% if @submissions.empty? %>
+        <%= ui_table_message 6, "ไม่มีผู้ใช้ที่รอตรวจ" %>
+      <% end %>
+      <% @submissions.each do |submission| %>
+        <tr>
+          <td><%= submission.user.username %></td>
+          <td><%= submission.user.fullname %></td>
+          <td><%= display_time(submission.submitted_at) %></td>
+          <td class="num"><%= submission.assets.size %></td>
+          <td class="num"><%= baht(submission.total_value) %></td>
+          <td><%= ui_link_button "ตรวจ", admin_qualification_submission_path(submission), size: :sm %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

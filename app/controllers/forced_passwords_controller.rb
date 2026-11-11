@@ -3,6 +3,7 @@
 class ForcedPasswordsController < ApplicationController
   allow_roles :admin, :bidder
   allow_pending_password_change
+  allow_unqualified_access # QUAL-05 (4) เปลี่ยนรหัสที่ถูกบังคับ
   before_action :redirect_unless_required
 
   def show

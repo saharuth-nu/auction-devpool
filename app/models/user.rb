@@ -11,6 +11,9 @@ class User < ApplicationRecord
 
   enum :role, { admin: "admin", bidder: "bidder" }, default: :bidder
 
+  # สถานะคุณสมบัติ/เพดานราคา (QUAL), ระงับบัญชี (SUSP), ค้นหาสำหรับ admin (ADM-01)
+  include Qualification, Suspension, Directory
+
   # ค่าที่เก็บเป็นตัวพิมพ์เล็กเสมอ: ทำให้ unique ไม่สนตัวพิมพ์ใหญ่/เล็ก (AUTH-04/05)
   normalizes :username, with: ->(v) { v.strip.downcase }
   normalizes :email, with: ->(v) { v.strip.downcase.presence }

@@ -1,0 +1,10 @@
+<%# รายการสินค้าในหน้าแรก (USR-02, USR-03) · listings = AuctionListing::Entry ทั้งหมดที่ยังไม่สรุปผล %>
+<% if listings.empty? %>
+  <%= ui_empty_state "ยังไม่มีสินค้าเปิดประมูล", description: "เมื่อมีการประมูลใหม่ รายการสินค้าจะแสดงที่นี่" %>
+<% else %>
+  <ul class="ui-item-grid">
+    <% listings.each do |entry| %>
+      <li><%= item_card entry.item, starts_at: entry.starts_at %></li>
+    <% end %>
+  </ul>
+<% end %>

@@ -20,17 +20,17 @@
 .ui-btn--square { border-radius: var(--radius-lg); }
 .ui-btn--block { width: 100%; }
 
-.ui-btn--primary { background: var(--color-primary-600); color: #fff; box-shadow: var(--shadow-xs); }
+.ui-btn--primary { background: var(--color-primary-600); color: var(--color-white); box-shadow: var(--shadow-xs); }
 .ui-btn--primary:hover { background: var(--color-primary-700); }
 .ui-btn--primary:active { background: var(--color-primary-800); }
-.ui-btn--secondary { background: #fff; color: var(--color-zinc-700); border-color: var(--color-zinc-300); box-shadow: var(--shadow-xs); }
+.ui-btn--secondary { background: var(--color-white); color: var(--color-zinc-700); border-color: var(--color-zinc-300); box-shadow: var(--shadow-xs); }
 .ui-btn--secondary:hover { background: var(--color-zinc-50); border-color: var(--color-zinc-400); }
-.ui-btn--outline { background: #fff; color: var(--color-brand-tertiary); border: 2px solid var(--color-brand-tertiary); box-shadow: var(--shadow-xs); }
+.ui-btn--outline { background: var(--color-white); color: var(--color-brand-tertiary); border: 2px solid var(--color-brand-tertiary); box-shadow: var(--shadow-xs); }
 .ui-btn--outline:hover { background: var(--color-primary-50); }
-.ui-btn--danger { background: var(--color-danger-600); color: #fff; box-shadow: var(--shadow-xs); }
+.ui-btn--danger { background: var(--color-danger-600); color: var(--color-white); box-shadow: var(--shadow-xs); }
 .ui-btn--danger:hover { background: var(--color-danger-700); }
 .ui-btn--danger:active { background: var(--color-danger-800); }
-.ui-btn--danger-outline { background: #fff; color: var(--color-danger-700); border-color: var(--color-danger-300); }
+.ui-btn--danger-outline { background: var(--color-white); color: var(--color-danger-700); border-color: var(--color-danger-300); }
 .ui-btn--danger-outline:hover { background: var(--color-danger-50); }
 .ui-btn--ghost { background: transparent; color: var(--color-zinc-600); }
 .ui-btn--ghost:hover { background: var(--color-zinc-100); }
@@ -59,7 +59,7 @@
 .ui-alert--info    { background: var(--color-info-50);    color: var(--color-info-700);    border-color: var(--color-info-200); }
 
 /* ---------- Card / PageHeader / StatCard ---------- */
-.ui-card { background: #fff; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-xs); }
+.ui-card { background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-xs); }
 .ui-card__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--color-zinc-100); }
 .ui-card__title { margin: 0; font-size: var(--text-sm); font-weight: 600; }
 .ui-card__body { padding: 20px; }
@@ -68,7 +68,7 @@
 .ui-page-header__title { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--text-xl); line-height: var(--text-xl-lh); font-weight: 600; }
 .ui-page-header__title::before { content: ""; width: 10px; height: 24px; border-radius: var(--radius-full); background: var(--color-primary-600); }
 
-.ui-stat { display: flex; gap: 16px; padding: 20px; background: #fff; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
+.ui-stat { display: flex; gap: 16px; padding: 20px; background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
 .ui-stat__label { margin: 0; font-weight: 500; color: var(--color-zinc-500); }
 .ui-stat__value { margin: 4px 0 0; font-size: var(--text-2xl); line-height: var(--text-2xl-lh); font-weight: 700; font-variant-numeric: tabular-nums; }
 
@@ -77,7 +77,7 @@
 .ui-input {
   box-sizing: border-box; width: 100%; height: 48px; padding: 0 14px;
   font: 400 var(--text-sm)/var(--text-sm-lh) var(--font-sans); color: var(--color-zinc-900);
-  background: #fff; border: 2px solid var(--color-zinc-300); border-radius: var(--radius-full); outline: none;
+  background: var(--color-white); border: 2px solid var(--color-zinc-300); border-radius: var(--radius-full); outline: none;
   transition: border-color .15s;
 }
 .ui-input::placeholder { color: var(--color-zinc-400); }
@@ -93,7 +93,7 @@ select.ui-input { padding-right: 36px; cursor: pointer; }
 .ui-checkbox, .ui-radio { width: 16px; height: 16px; accent-color: var(--color-primary-600); cursor: pointer; }
 
 /* ---------- Table ---------- */
-.ui-table-card { overflow: hidden; background: #fff; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
+.ui-table-card { overflow: hidden; background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
 .ui-table-card__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--color-zinc-200); }
 .ui-table-card__title { margin: 0; font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; }
 .ui-table-card__scroll { overflow-x: auto; }
@@ -117,7 +117,7 @@ select.ui-input { padding-right: 36px; cursor: pointer; }
 .ui-field { margin-bottom: 16px; }
 
 /* ---------- โครงหน้า (layout) และหน้า login/register ---------- */
-.ui-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--color-zinc-200); }
+.ui-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 24px; background: var(--color-white); border-bottom: 1px solid var(--color-zinc-200); }
 .ui-header__brand { font-size: var(--text-lg); font-weight: 700; color: var(--color-primary-600); text-decoration: none; }
 .ui-header__nav { display: flex; align-items: center; gap: 12px; }
 .ui-header__user { color: var(--color-zinc-700); text-decoration: none; font-weight: 500; }
@@ -133,13 +133,30 @@ select.ui-input { padding-right: 36px; cursor: pointer; }
 .ui-dl dd { margin: 0; }
 .ui-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
+/* ---------- Pagination (ui_pagination) ---------- */
+.ui-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.ui-pagination__info { font-size: var(--text-xs); color: var(--color-zinc-500); font-variant-numeric: tabular-nums; }
+
+/* ---------- ฟอร์มหลายคอลัมน์ / แถบตัวกรอง ---------- */
+/* แถวกรอกข้อมูลหลายช่อง (เช่น ชื่อทรัพย์สิน + มูลค่า) ยุบเป็นคอลัมน์เดียวบนมือถือ */
+.ui-form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 0 16px; }
+.ui-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0 16px; }
+.ui-filter-bar .ui-field { min-width: 180px; flex: 1 1 180px; }
+@media (max-width: 640px) {
+  .ui-form-row { grid-template-columns: 1fr; }
+}
+
+/* รูปย่อหลายรูป (เช่น รูปสินค้า) */
+.ui-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.ui-thumbs__item { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.ui-thumbs__item img { width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); background: var(--color-zinc-50); }
+
 /* ---------- ส่วนเสริมของหน้ารายการ/ฟอร์ม (ใช้ซ้ำได้) ---------- */
 .ui-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .ui-text-strong { font-weight: 500; color: var(--color-zinc-900); }
 .ui-text-muted { font-size: var(--text-xs); color: var(--color-zinc-500); }
 .ui-actions--end { justify-content: flex-end; }
 .ui-table th.ui-table__actions-head { text-align: right; }
-.ui-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 16px; }
 .ui-fieldset { margin: 0 0 16px; padding: 0; border: 0; min-width: 0; }
 .ui-check-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 12px 16px; list-style: none; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); }
 .ui-check-list label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; cursor: pointer; }

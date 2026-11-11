@@ -95,7 +95,7 @@ class AuctionEvent < ApplicationRecord
   # ยกเลิกก่อนเริ่ม: lot ที่ยังไม่จบเป็น cancelled เพื่อปล่อยสินค้าไปใส่ event อื่นได้ (ITEM-10)
   def cancel!
     transaction do
-      transition_to!(:cancelled, cancelled_at: Time.current)
+      transition_to!(:cancelled, cancelled_at: Clock.now)
       lots.pending.find_each { |lot| lot.update!(status: :cancelled) }
     end
   end
@@ -111,7 +111,7 @@ class AuctionEvent < ApplicationRecord
     end
 
     def starts_in_future
-      return if starts_at.blank? || starts_at > Time.current
+      return if starts_at.blank? || starts_at > Clock.now
 
       errors.add(:starts_at, :in_past, message: "ต้องเป็นเวลาในอนาคต")
     end

@@ -4,8 +4,38 @@
 # ค่าตั้งต้นด้านล่างเป็นข้อเสนอเริ่มต้น ปรับให้ตรงกับ enum จริงของ model เมื่อสร้างแล้ว
 module StatusHelper
   STATUSES = {
-    # ตรงกับ AuctionEvent.statuses (EVT-10)
     auction: {
+      "scheduled" => { label: "รอเริ่ม", tone: :warning },
+      "active" => { label: "กำลังประมูล", tone: :success },
+      "closed" => { label: "ปิดประมูล", tone: :neutral },
+      "cancelled" => { label: "ยกเลิก", tone: :danger }
+    },
+    # สถานะคุณสมบัติของผู้ประมูล (QUAL, User::Qualification)
+    qualification: {
+      "awaiting_assets" => { label: "รอกรอกทรัพย์สิน", tone: :neutral },
+      "awaiting_review" => { label: "รอ admin ตรวจ", tone: :warning },
+      "approved" => { label: "ผ่าน", tone: :success },
+      "rejected" => { label: "ไม่ผ่าน", tone: :danger }
+    },
+    # ผลตรวจของรอบส่งทรัพย์สิน (QualificationSubmission#status)
+    submission: {
+      "pending" => { label: "รอตรวจ", tone: :warning },
+      "approved" => { label: "ผ่าน", tone: :success },
+      "rejected" => { label: "ไม่ผ่าน", tone: :danger }
+    },
+    # การระงับบัญชีผู้ใช้ (SUSP): ส่ง user.suspended? ? "suspended" : "active"
+    suspension: {
+      "active" => { label: "ใช้งานได้", tone: :success },
+      "suspended" => { label: "ถูกระงับ", tone: :danger }
+    },
+    # ประเภทเหตุการณ์ในประวัติการระงับ (SuspensionEvent#action)
+    suspension_event: {
+      "suspend" => { label: "ระงับ", tone: :danger },
+      "unsuspend" => { label: "ยกเลิกระงับ", tone: :success }
+    },
+    # ตรงกับ AuctionEvent.statuses (EVT-10) ใช้ในหน้า admin
+    # (:auction ด้านบนเป็นป้ายแบบดูจากเวลาของการ์ดสินค้าฝั่งผู้ใช้)
+    auction_event: {
       "scheduled" => { label: "ยังไม่เริ่ม", tone: :warning },
       "bidding" => { label: "เปิดรับราคา", tone: :success },
       "settled" => { label: "สรุปผลแล้ว", tone: :neutral },

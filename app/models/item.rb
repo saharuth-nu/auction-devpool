@@ -17,6 +17,7 @@ class Item < ApplicationRecord
     sold: "sold"
   }
 
+  belongs_to :approved_by, class_name: "User", optional: true
   has_many_attached :images
   has_many :lots, dependent: :restrict_with_error
 
@@ -28,16 +29,18 @@ class Item < ApplicationRecord
   validate :prices_locked_during_auction
   validate :images_acceptable
 
-  before_destroy :prevent_destroy_during_auction
+  # prepend: ให้ข้อความ "อยู่ระหว่างการประมูล" (ITEM-09) ขึ้นก่อนข้อห้ามเพราะมี lot (NFR-19) ของ has_many :lots
+  before_destroy :prevent_destroy_during_auction, prepend: true
 
   # ค่าว่างหรือสถานะที่ไม่รู้จัก → ทั้งหมด (ITEM-03)
   scope :filter_by_status, ->(status) { statuses.key?(status.to_s) ? where(status: status) : all }
 
   # รออนุมัติ → พร้อมขาย (ITEM-04)
-  def approve!
+  def approve!(by:)
     raise InvalidTransition, "อนุมัติได้เฉพาะสินค้าที่รออนุมัติ" unless awaiting_approval?
+    raise InvalidTransition, "ผู้อนุมัติต้องเป็น admin" unless by&.admin?
 
-    update!(status: :available, approved_at: Time.current)
+    update!(status: :available, approved_at: Time.current, approved_by: by)
   end
 
   def archive!
