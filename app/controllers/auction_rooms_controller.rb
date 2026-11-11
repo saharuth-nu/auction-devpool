@@ -16,6 +16,9 @@ class AuctionRoomsController < ApplicationController
     @lots = @event.lots.pending.joins(:item).merge(Item.active)
                   .includes(item: { images_attachments: :blob }).order(:id).to_a
     @joined_lot_ids = Participation.active.where(user: current_user, lot_id: @lots.map(&:id)).pluck(:lot_id).to_set
+    # ราคาที่ยื่นไว้ของผู้ใช้คนนี้เท่านั้น (BID-11, USR-13) ห้ามดึงของคนอื่นมาหน้านี้ (NFR-04)
+    @my_bids = Bid.where(user: current_user, lot_id: @lots.map(&:id)).index_by(&:lot_id)
+    @ceiling = current_user.bid_ceiling
     @participants = Participation.participants_count(@event)
     # เต็ม = ห้องเต็มและผู้ใช้ยังไม่ได้เป็นผู้เข้าร่วมของ event นี้ (คนเดิมเข้าร่วมสินค้าเพิ่มได้แม้เต็ม, USR-07)
     @full = !Participation.joined?(current_user, @event) && Participation.full?(@event)

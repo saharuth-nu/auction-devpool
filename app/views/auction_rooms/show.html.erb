@@ -24,7 +24,8 @@
   <% else %>
     <ul class="ui-room-lots">
       <% @lots.each do |lot| %>
-        <%= render "auction_rooms/lot", lot: lot, joined: @joined_lot_ids.include?(lot.id), phase: phase, full: @full %>
+        <%= render "auction_rooms/lot", lot: lot, joined: @joined_lot_ids.include?(lot.id), phase: phase, full: @full,
+                                        my_bid: @my_bids[lot.id], ceiling: @ceiling %>
       <% end %>
     </ul>
   <% end %>

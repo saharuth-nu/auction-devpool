@@ -1,0 +1,10 @@
+<%# ช่องยื่นราคาของ lot หนึ่งในห้องประมูล (BID-01, BID-20, BID-21, USR-13)
+    locals: lot, phase (:upcoming/:open/:closed), my_bid (Bid ของผู้ใช้คนนี้เท่านั้น หรือ nil), ceiling (เพดานทรัพย์สินรวม)
+    ห้ามแสดงราคาของคนอื่น ราคาขั้นต่ำ (reserve) หรือจำนวนผู้ยื่น (BID-11, BID-18) %>
+<% if my_bid %>
+  <span class="ui-bid-mine">คุณยื่นราคาแล้ว <strong><%= baht my_bid.amount %></strong></span>
+<% elsif phase == :open %>
+  <%= render "bids/form", lot: lot, ceiling: ceiling %>
+<% elsif phase == :closed %>
+  <span class="ui-bid-mine ui-bid-mine--none">คุณไม่ได้ยื่นราคา</span>
+<% end %>

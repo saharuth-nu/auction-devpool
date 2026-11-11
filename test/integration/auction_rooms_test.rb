@@ -138,7 +138,8 @@ class AuctionRoomsTest < ActionDispatch::IntegrationTest
     Participation.create!(user: @user, lot: lot_a)
     open_room_at(event.starts_at + 5.seconds, event) do
       assert_equal "เข้าร่วมแล้ว", row_for("ของ ก").at_css(".ui-badge").text
-      assert_nil row_for("ของ ก").at_css("button")
+      # lot ที่เข้าร่วมแล้วไม่มีปุ่ม "เข้าร่วมประมูล" ซ้ำ (มีแต่ช่องยื่นราคาของ #65 ในช่วงเปิดรับราคา)
+      assert_nil row_for("ของ ก").css("button").find { |b| b.text == "เข้าร่วมประมูล" }
       assert_equal "เข้าร่วมประมูล", row_for("ของ ข").at_css("button").text
     end
   end

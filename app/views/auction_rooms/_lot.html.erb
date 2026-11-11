@@ -14,6 +14,7 @@
   <div class="ui-room-lot__action">
     <% if joined %>
       <%= ui_badge "เข้าร่วมแล้ว", tone: :success %>
+      <%= render "bids/slot", lot: lot, phase: phase, my_bid: my_bid, ceiling: ceiling %>
     <% elsif phase == :open && full %>
       <%= ui_button "เต็มแล้ว", size: :sm, disabled: true %>
     <% elsif phase == :open %>
