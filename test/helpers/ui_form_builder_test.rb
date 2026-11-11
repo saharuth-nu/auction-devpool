@@ -38,7 +38,7 @@ class UiFormBuilderTest < ActionView::TestCase
     input = doc.at_css("input.ui-input")
     assert_includes input["class"].split, "ui-input--invalid"
     assert_equal "true", input["aria-invalid"]
-    assert_match(/blank/, doc.at_css(".ui-field__error").text)
+    assert_match(/ต้องกรอก/, doc.at_css(".ui-field__error").text) # NFR-01: error เป็นภาษาไทย
     assert_nil doc.at_css(".ui-field__hint")
   end
 
