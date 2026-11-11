@@ -3,6 +3,9 @@
 <%= ui_card title: "Module" do %>
   <ul class="ui-dl" style="list-style:none;padding:0;grid-template-columns:1fr">
     <li><%= link_to "บัญชี admin", admin_admins_path %></li>
-    <li>สินค้าประมูล · วิธีการประมูล · ห้องประมูล · การประมูล · ตรวจสอบผู้ใช้ (อยู่ระหว่างพัฒนา)</li>
+    <li><%= link_to "สินค้าประมูล", admin_items_path %></li>
+    <li><%= link_to "วิธีการประมูล", admin_auction_methods_path %></li>
+    <li><%= link_to "ห้องประมูล", admin_rooms_path %></li>
+    <li>การประมูล · ตรวจสอบผู้ใช้ (อยู่ระหว่างพัฒนา)</li>
   </ul>
 <% end %>

@@ -80,7 +80,7 @@
 | `ui_page_header` | `ui_page_header("รายการประมูล", description: "...") { ui_link_button(...) }` (block = ปุ่มชิดขวา) |
 | `ui_stat_card` | `ui_stat_card("เปิดอยู่", 12, hint: "รายการ")` |
 | `ui_table_card` / `ui_table_message` | ดูตัวอย่างด้านล่าง |
-| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
+| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ · `as:` ได้แก่ `:text :email :password :number :url :tel :search :date :datetime_local :textarea :file` |
 
 - ตัวเลือก: `variant:` (`:primary :secondary :outline :danger :danger_outline :ghost :link`), `size:` (`:sm :md :xl`), `shape:` (`:round :square`), `block: true`, `icon_left:` / `icon_right:` (HTML ของ SVG)
 - ส่งค่าที่ไม่อยู่ในมาตรฐาน (เช่น `variant: :purple`) จะ **raise ArgumentError** ทันที

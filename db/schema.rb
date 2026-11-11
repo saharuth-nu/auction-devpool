@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_075457) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_080659) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -60,6 +60,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_075457) do
     t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "approved_by_id"
+    t.index ["approved_by_id"], name: "index_items_on_approved_by_id"
     t.index ["archived_at"], name: "index_items_on_archived_at"
     t.index ["status"], name: "index_items_on_status"
     t.check_constraint "reserve_price >= starting_price", name: "items_reserve_not_below_starting"
@@ -109,6 +111,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_075457) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "items", "users", column: "approved_by_id"
   add_foreign_key "sessions", "users"
   add_foreign_key "users", "users", column: "disabled_by_id"
 end

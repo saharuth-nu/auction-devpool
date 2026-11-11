@@ -17,6 +17,7 @@ class Item < ApplicationRecord
     sold: "sold"
   }
 
+  belongs_to :approved_by, class_name: "User", optional: true
   has_many_attached :images
 
   validates :name, presence: true
@@ -33,10 +34,11 @@ class Item < ApplicationRecord
   scope :filter_by_status, ->(status) { statuses.key?(status.to_s) ? where(status: status) : all }
 
   # รออนุมัติ → พร้อมขาย (ITEM-04)
-  def approve!
+  def approve!(by:)
     raise InvalidTransition, "อนุมัติได้เฉพาะสินค้าที่รออนุมัติ" unless awaiting_approval?
+    raise InvalidTransition, "ผู้อนุมัติต้องเป็น admin" unless by&.admin?
 
-    update!(status: :available, approved_at: Time.current)
+    update!(status: :available, approved_at: Time.current, approved_by: by)
   end
 
   def archive!

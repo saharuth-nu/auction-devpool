@@ -1,0 +1,35 @@
+<% content_for :title, @item.name %>
+<%= ui_page_header @item.name, description: "รายละเอียดสินค้า" do %>
+  <% if @item.awaiting_approval? %>
+    <%= ui_button_to "อนุมัติ", approve_admin_item_path(@item), method: :patch,
+          data: { turbo_confirm: "อนุมัติ “#{@item.name}”? สินค้าจะเปลี่ยนเป็นพร้อมขาย และนำไปใส่การประมูลได้" } %>
+  <% end %>
+  <%= ui_link_button "แก้ไข", edit_admin_item_path(@item), variant: :secondary %>
+<% end %>
+
+<%= ui_card title: "ข้อมูลสินค้า" do %>
+  <dl class="ui-dl">
+    <dt>สถานะ</dt><dd><%= status_badge :item, @item.status %><%= ui_badge("เก็บถาวร", tone: :muted) if @item.archived? %></dd>
+    <dt>รายละเอียด</dt><dd><%= @item.description.presence ? simple_format(@item.description) : "-" %></dd>
+    <dt>ราคาเริ่มต้น</dt><dd><%= number_to_currency @item.starting_price, unit: "฿" %></dd>
+    <dt>ราคาขั้นต่ำ (reserve)</dt><dd><%= number_to_currency @item.reserve_price, unit: "฿" %> <span class="ui-field__hint">(ผู้ใช้ไม่เห็น)</span></dd>
+    <dt>อนุมัติโดย</dt>
+    <dd><%= @item.approved_by ? "#{@item.approved_by.username} เมื่อ #{l @item.approved_at, format: :short}" : "-" %></dd>
+  </dl>
+<% end %>
+
+<%= ui_card title: "รูปสินค้า" do %>
+  <%= render "images", item: @item %>
+<% end %>
+
+<%= ui_card title: "จัดการ" do %>
+  <div class="ui-actions">
+    <% unless @item.archived? %>
+      <%= ui_button_to "เก็บถาวร", archive_admin_item_path(@item), method: :patch, variant: :secondary,
+            data: { turbo_confirm: "เก็บถาวร “#{@item.name}”? จะหายจากรายการปกติและเลือกใส่การประมูลใหม่ไม่ได้" } %>
+    <% end %>
+    <%= ui_button_to "ลบสินค้า", admin_item_path(@item), method: :delete, variant: :danger_outline,
+          data: { turbo_confirm: "ลบ “#{@item.name}” ถาวร? ย้อนกลับไม่ได้" } %>
+    <%= ui_link_button "กลับไปรายการสินค้า", admin_items_path, variant: :ghost %>
+  </div>
+<% end %>

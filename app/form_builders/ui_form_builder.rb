@@ -20,7 +20,8 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
     search: :search_field,
     date: :date_field,
     datetime_local: :datetime_local_field,
-    textarea: :text_area
+    textarea: :text_area,
+    file: :file_field
   }.freeze
 
   def ui_field(method, as: :text, label: nil, hint: nil, **options)
