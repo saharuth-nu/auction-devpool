@@ -8,6 +8,10 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # ---- ผู้ใช้ (bidder)
+  match "/404", to: "errors#show", via: :all
+  match "/422", to: "errors#show", via: :all
+  match "/500", to: "errors#show", via: :all
+
   root "home#show"
   get "my-auctions", to: "my_auctions#index", as: :my_auctions # การประมูลของฉัน (USR-16)
   resources :auction_events, only: [], path: "events" do

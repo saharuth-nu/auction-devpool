@@ -75,6 +75,7 @@ module Authentication
     return if record.nil?
 
     if record.expired? || !record.user.active_for_login?
+      @session_ended = true # request_authentication จะแจ้งผู้ใช้ว่าต้อง login ใหม่ (NFR-20)
       record.destroy
       cookies.delete(:session_id)
       return
@@ -84,6 +85,7 @@ module Authentication
 
   def request_authentication
     session[:return_to_after_authenticating] = request.fullpath if request.get? || request.head?
+    flash[:alert] = "เซสชันของคุณหมดอายุหรือสิ้นสุดแล้ว กรุณาเข้าสู่ระบบอีกครั้ง" if @session_ended
     redirect_to request.path.start_with?("/admin") ? admin_login_path : login_path
   end
 

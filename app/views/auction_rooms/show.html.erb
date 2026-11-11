@@ -1,5 +1,14 @@
 <% content_for :title, "ห้องประมูล: #{@event.name}" %>
 <% phase = lot_phase(@event) %>
+<%# NFR-21: ห้องรับการอัปเดตเมื่อการประมูลเริ่ม/สรุปผลแบบเรียลไทม์ ถ้าการเชื่อมต่อหลุดจะมีแบนเนอร์และต่อใหม่เอง
+    การยื่นราคาเป็น POST ปกติ ไม่พึ่งการเชื่อมต่อนี้ %>
+<div data-controller="connection-status">
+  <%= turbo_stream_from @event %>
+  <div class="ui-alert ui-alert--warning" role="alert" data-connection-status-target="banner" hidden>
+    การเชื่อมต่อแบบเรียลไทม์ขาดหาย กำลังเชื่อมต่อใหม่… (ยังยื่นราคาได้ตามปกติ)
+  </div>
+</div>
+
 <%= ui_page_header @event.name, description: "ห้องประมูล #{@event.room.name}" do %>
   <%= lot_phase_badge(@event) %>
 <% end %>
