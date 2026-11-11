@@ -61,10 +61,16 @@
 | **StatCard** | `ui-stat` + `__label` `__value` | การ์ดตัวเลขสรุป มุม 16px ตัวเลข 30px bold `tabular-nums` |
 | **Input / Textarea** | `ui-input` (`--sm`, `--invalid`) | สูง **48px** (sm = 40px) มุมโค้งเต็ม ขอบ **2px** `zinc-300` → hover/focus `brand-border` · invalid ขอบ `danger-500` · ข้อความ error ใต้ช่อง `ui-field__error` · Textarea มุม 16px |
 | **Field** | `ui-field__label` `__hint` `__error` | ป้ายชื่อด้านบน 14px medium `zinc-600` |
+| **Select** | `ui-select` (`f.ui_select`, `f.ui_field as: :select`) | ช่องเลือกแบบรายการเปิดลง: ปุ่มหน้าตาเดียวกับ `ui-input` (สูง 48px ขอบ 2px) + ลูกศร 24px `zinc-400` หมุน 180° ตอนเปิด · แผ่นรายการมุม 16px เงา `xl` padding 8px แถวสูง 44px ตัวอักษร 16px ชี้ = พื้น `zinc-100` เลือกแล้ว = `primary-700` หนา · คีย์บอร์ดครบ (↑ ↓ Home End Enter Space Esc พิมพ์เพื่อข้าม) · ทำงานเสริมบน `<select>` จริง (Stimulus `ui-select`) จึงส่งค่ากับฟอร์มและใช้ได้แม้ไม่มี JS |
 | **Checkbox / Radio** | `ui-checkbox` `ui-radio` | 16px สี `primary-600` · ต้องมี `<label>` หรือ `aria-label` |
 | **Pagination** | `ui-pagination` + `__info` | ชิดขวา ปุ่ม secondary sm · ข้อความ 14px `zinc-500` `tabular-nums` |
 | **Form row / Filter bar** | `ui-form-row` `ui-filter-bar` | `ui-form-row` = แถวกรอกหลายช่อง (2:1) ยุบเป็นคอลัมน์เดียวบนมือถือ · `ui-filter-bar` = แถบตัวกรองเหนือตาราง ช่องละ ≥ 180px ขึ้นบรรทัดใหม่อัตโนมัติ |
 | **Table** | `ui-table-card` `ui-table` `ui-table__message` | การ์ด มุม 16px · หัวคอลัมน์สูง 44px พื้น `zinc-50` ตัวอักษร 14px semibold `zinc-500` · แถวสูง ~72px padding ข้าง 24px · คอลัมน์แรกเด่น (`zinc-900` medium) · เส้นคั่นแถว `zinc-200` · ตัวเลขใส่ class `num` (ชิดขวา, `tabular-nums`) |
+| **BackLink** | `ui-back-link` (`ui_back_link`) | ลิงก์ "กลับ" บนหน้ารายละเอียด วางเหนือ PageHeader · ใช้แทนปุ่ม/ลิงก์กลับที่เขียนเอง |
+| **SectionTitle** | `ui-section-title` | หัวข้อของส่วนที่มีการ์ดหลายใบ (เช่น กลุ่มใน "การประมูลของฉัน") 20px semibold · หน้าหนึ่งมี `h1` เดียว (PageHeader) |
+| **ItemCard** | `ui-item-card` (`item_card`) | การ์ดสินค้าในหน้าแรก: เหมือน Card (มุม 8px ขอบ `zinc-200` เงา `xs`) รูป 4:3 + Badge + ชื่อ + ป้าย/ค่า · ลิงก์เดียวคลุมทั้งการ์ด |
+| **Gallery / RoomLot / BidForm** | `ui-gallery`, `ui-room-lot`, `ui-bid-form` | เฉพาะหน้ารายละเอียดสินค้าและห้องประมูล: รูปใช้สเปกเดียวกับ Thumbs (มุม 8px ขอบ `zinc-200`) · ฟอร์มยื่นราคาใช้ `ui_form_with`/`ui_button` และหน้าต่างยืนยันแบบ ConfirmDialog (`ui-dialog`: ชื่อ 24px หนา ข้อความ 20px) |
+| **Link list / Prose** | `ui-link-list`, `ui-prose` `ui-prose__heading` | `ui-link-list` = รายการลิงก์แนวตั้งคั่นเส้น (เมนู module) · `ui-prose` = เนื้อหาข้อความยาว/หัวข้อย่อย (เงื่อนไขการใช้งาน) |
 | **Thumbs** | `ui-thumbs` + `__item` | รายการรูปย่อแบบ grid (เช่น รูปสินค้า) รูปสี่เหลี่ยมจัตุรัส `object-fit: cover` ขอบ `zinc-200` มุม `radius-lg` · ใช้ `<ul>`/`<ol>` และ `image_tag` ต้องมี `alt` |
 
 ### วิธีใช้ใน view (component กลาง)
@@ -165,4 +171,4 @@
 
 ## ที่ยังไม่ได้ย้ายมา
 
-Select/DatePicker แบบ custom (ตอนนี้ใช้ native: `f.ui_field ..., as: :select` หรือ `f.ui_select` สำหรับแถบตัวกรอง และ `as: :date`), Modal ทั่วไป (มีเฉพาะหน้าต่างยืนยันของ `ui_confirm_button`), Tabs, SegmentedControl, Pagination แบบมีเลขหน้า (มี `ui_pagination` แบบก่อนหน้า/ถัดไป), Switch, DetailGrid (ตอนนี้ใช้ `<dl class="ui-dl">`) — ต้นทางเป็น React component ที่มี interaction เยอะ ให้ทำเมื่อมีหน้าที่ต้องใช้จริง (ใช้ Stimulus + สเปกใน `mmm-admin-fe/docs/ui-standards.md` ส่วน 2 เป็นแบบ)
+Banner/hero (ใช้ PageHeader แทน), DatePicker แบบ custom (ตอนนี้ใช้ native `as: :date`), Modal ทั่วไป (มีเฉพาะหน้าต่างยืนยันของ `ui_confirm_button`), Tabs, SegmentedControl, Pagination แบบมีเลขหน้า (มี `ui_pagination` แบบก่อนหน้า/ถัดไป), Switch, DetailGrid (ตอนนี้ใช้ `<dl class="ui-dl">`) — ต้นทางเป็น React component ที่มี interaction เยอะ ให้ทำเมื่อมีหน้าที่ต้องใช้จริง (ใช้ Stimulus + สเปกใน `mmm-admin-fe/docs/ui-standards.md` ส่วน 2 เป็นแบบ)

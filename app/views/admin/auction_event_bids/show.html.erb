@@ -1,7 +1,7 @@
 <% content_for :title, "ราคาที่ยื่น: #{@event.name}" %>
+<%= ui_back_link "กลับรายการการประมูล", admin_auction_events_path %>
 <%= ui_page_header "ราคาที่ยื่น", description: "#{@event.name} · ห้อง #{@event.room.name}" do %>
   <%= status_badge(:auction, { "scheduled" => "scheduled", "bidding" => "active", "settled" => "closed", "cancelled" => "cancelled" }.fetch(@event.status)) %>
-  <%= ui_link_button "กลับรายการการประมูล", admin_auction_events_path, variant: :secondary %>
 <% end %>
 
 <%= ui_alert "หน้านี้แสดงราคาที่ผู้ใช้ทุกคนยื่น (ความลับ เห็นได้เฉพาะ admin) การเปิดดูถูกบันทึกใน audit log (#{@phase == 'open' ? 'ช่วงเปิดรับราคา' : 'หลังปิดรับราคา'})", tone: :warning %>

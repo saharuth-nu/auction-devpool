@@ -176,6 +176,14 @@ module UiHelper
     end
   end
 
+  # ลิงก์ "กลับ" บนหน้ารายละเอียด (BackLink)  ui_back_link("กลับรายการสินค้า", admin_items_path)
+  def ui_back_link(label, url, **html)
+    icon = tag.svg(tag.path(d: "M12.5 15 7.5 10l5-5", fill: "none", stroke: "currentColor", "stroke-width": "2",
+                            "stroke-linecap": "round", "stroke-linejoin": "round"),
+                   viewBox: "0 0 20 20", "aria-hidden": "true")
+    link_to(safe_join([ icon, label ]), url, class: class_names("ui-back-link", html.delete(:class)), **html)
+  end
+
   # การ์ดตัวเลขสรุป  ui_stat_card("การประมูลที่เปิดอยู่", 12)
   def ui_stat_card(label, value, hint: nil, **html)
     classes = class_names("ui-stat", html.delete(:class))

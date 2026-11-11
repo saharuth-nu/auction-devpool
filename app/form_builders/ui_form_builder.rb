@@ -59,7 +59,7 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
       when :select
         raise ArgumentError, "ui: as: :select ต้องส่ง choices:" if choices.nil?
 
-        select(method, choices, { include_blank: }.compact, class: classes, **options)
+        select(method, choices, { include_blank: }.compact, class: classes, **options, data: ui_select_data(options))
       when :file
         file_field(method, class: classes, **options)
       else
@@ -86,7 +86,7 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
     @template.content_tag(:div, class: "ui-field") do
       @template.safe_join([
         self.label(method, label, class: "ui-field__label"),
-        select(method, choices, select_options, html),
+        select(method, choices, select_options, html.merge(data: ui_select_data(html))),
         ui_field_message(message_id, error, hint)
       ].compact)
     end
@@ -123,6 +123,12 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
   end
 
   private
+
+  # Select มาตรฐาน: ครอบ <select> ด้วย Stimulus ui-select (รายการเปิดลงตามสเปก DESIGN.md) ผู้เรียกส่ง data: เพิ่มได้
+  def ui_select_data(options)
+    extra = options[:data] || {}
+    extra.merge(controller: [ extra[:controller], "ui-select" ].compact.join(" "))
+  end
 
   def ui_check_field_type!(as)
     return if FIELD_TYPES.key?(as) || SPECIAL_TYPES.include?(as)

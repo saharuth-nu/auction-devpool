@@ -22,8 +22,8 @@ input[type="file"].ui-input { height: auto; padding: 10px 14px; border-radius: v
 .ui-dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; color: var(--color-zinc-900); background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xl); }
 .ui-dialog::backdrop { background: rgb(0 0 0 / 0.5); }
 .ui-dialog__body { padding: 24px 24px 16px; }
-.ui-dialog__title { margin: 0; font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; }
-.ui-dialog__message { margin: 8px 0 0; color: var(--color-zinc-600); }
+.ui-dialog__title { margin: 0; font-size: var(--text-xl); line-height: var(--text-xl-lh); font-weight: 700; }
+.ui-dialog__message { margin: 8px 0 0; font-size: var(--text-lg); line-height: var(--text-lg-lh); color: var(--color-zinc-600); }
 .ui-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 0 24px 24px; }
 
 /* ---------- Empty / Loading (NFR-11: แสดงสถานะว่างและกำลังโหลดเสมอ) ---------- */
@@ -80,3 +80,19 @@ img, video { max-width: 100%; height: auto; }
   .ui-checkbox, .ui-radio { width: 24px; height: 24px; }
   .ui-check .ui-checkbox { margin-top: 0; }
 }
+
+/* ---------- Select (รายการเปิดลงมาตรฐาน: ui_select / f.ui_field as: :select) ---------- */
+.ui-select { position: relative; }
+.ui-select__native { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ui-select__trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px 0 16px; text-align: left; cursor: pointer; }
+.ui-select__value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-select__trigger--placeholder .ui-select__value { color: var(--color-zinc-500); }
+.ui-select__chevron { flex-shrink: 0; width: 24px; height: 24px; color: var(--color-zinc-400); transition: transform .15s; }
+.ui-select.is-open .ui-select__chevron { transform: rotate(180deg); }
+.ui-select.is-open .ui-select__trigger { border-color: var(--color-brand-border); }
+.ui-select__list { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; right: 0; max-height: 288px; margin: 0; padding: 8px; overflow-y: auto; list-style: none; background: var(--color-white); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xl); }
+.ui-select--up .ui-select__list { top: auto; bottom: calc(100% + 4px); }
+.ui-select__option { display: flex; align-items: center; min-height: 44px; padding: 0 16px; font-size: var(--text-sm); line-height: var(--text-sm-lh); color: var(--color-zinc-800); border-radius: var(--radius-full); cursor: pointer; overflow-wrap: anywhere; }
+.ui-select__option.is-active { background: var(--color-zinc-100); }
+.ui-select__option[aria-selected="true"] { font-weight: 600; color: var(--color-primary-700); }
+.ui-select__option[aria-disabled="true"] { color: var(--color-zinc-400); cursor: not-allowed; }

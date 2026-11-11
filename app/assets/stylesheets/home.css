@@ -1,14 +1,10 @@
 /*
- * หน้าแรกของผู้ใช้: banner และการ์ดสินค้า (USR-01, USR-02) · ใช้ token จาก tokens.css เท่านั้น
+ * หน้าแรกของผู้ใช้: การ์ดสินค้า (USR-01, USR-02) · ใช้ token จาก tokens.css เท่านั้น
  * ปรับ responsive: การ์ดเรียงตามความกว้างจอ (1 คอลัมน์บนมือถือ) · banner ขยับขนาดที่ ≥768px
  */
-.ui-banner { padding: 24px 20px; color: var(--color-white); background: linear-gradient(135deg, var(--color-primary-800), var(--color-primary-600)); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
-.ui-banner__title { margin: 0; font-size: var(--text-xl); line-height: var(--text-xl-lh); font-weight: 700; }
-.ui-banner__text { margin: 8px 0 0; max-width: 60ch; }
-.ui-section-title { margin: 0 0 12px; font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; }
 
 .ui-item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
-.ui-item-card { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
+.ui-item-card { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-xs); }
 .ui-item-card:hover { border-color: var(--color-brand-border); }
 .ui-item-card:focus-within { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
 .ui-item-card__image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-zinc-100); }
@@ -22,7 +18,3 @@
 .ui-item-card__meta dd { margin: 0; font-variant-numeric: tabular-nums; }
 .ui-item-card__price { font-weight: 700; color: var(--color-primary-700); }
 
-@media (min-width: 768px) {
-  .ui-banner { padding: 40px; }
-  .ui-banner__title { font-size: var(--text-2xl); line-height: var(--text-2xl-lh); }
-}
