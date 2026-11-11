@@ -1,0 +1,13 @@
+<% content_for :title, page_title %>
+<div class="ui-auth">
+  <%= ui_card title: page_title do %>
+    <%= ui_form_with url: form_url, scope: :login do |f| %>
+      <%= f.ui_field :username, label: "ชื่อผู้ใช้", value: params.dig(:login, :username), autocomplete: "username", autofocus: true, required: true %>
+      <%= f.ui_field :password, as: :password, label: "รหัสผ่าน", autocomplete: "current-password", required: true %>
+      <%= f.ui_submit "เข้าสู่ระบบ", block: true %>
+    <% end %>
+    <% unless request.path.start_with?("/admin") %>
+      <p class="ui-auth__links">ยังไม่มีบัญชี? <%= link_to "สมัครสมาชิก", new_registration_path %></p>
+    <% end %>
+  <% end %>
+</div>

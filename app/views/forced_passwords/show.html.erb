@@ -1,0 +1,11 @@
+<% content_for :title, "ตั้งรหัสผ่านใหม่" %>
+<div class="ui-auth">
+  <%= ui_card title: "ตั้งรหัสผ่านใหม่" do %>
+    <%= ui_alert "ผู้ดูแลระบบรีเซ็ตรหัสผ่านของคุณ กรุณาตั้งรหัสผ่านใหม่ก่อนใช้งานต่อ", tone: :info %>
+    <%= ui_form_with model: @user, url: forced_password_path, method: :patch do |f| %>
+      <%= f.ui_field :password, as: :password, label: "รหัสผ่านใหม่", hint: "อย่างน้อย 8 ตัวอักษร และต้องไม่ซ้ำรหัสชั่วคราว", autocomplete: "new-password", autofocus: true, required: true %>
+      <%= f.ui_field :password_confirmation, as: :password, label: "ยืนยันรหัสผ่านใหม่", autocomplete: "new-password", required: true %>
+      <%= f.ui_submit "ตั้งรหัสผ่านใหม่", block: true %>
+    <% end %>
+  <% end %>
+</div>

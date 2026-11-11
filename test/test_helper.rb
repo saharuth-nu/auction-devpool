@@ -11,5 +11,32 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+    DEFAULT_PASSWORD = "password123"
+
+    def create_bidder(**attrs)
+      n = next_user_number
+      User.create!({ username: "bidder#{n}", email: "bidder#{n}@example.com", fullname: "ผู้ประมูล #{n}",
+                     password: DEFAULT_PASSWORD, password_confirmation: DEFAULT_PASSWORD }.merge(attrs))
+    end
+
+    def create_admin(**attrs)
+      n = next_user_number
+      User.create!({ username: "admin#{n}", role: :admin,
+                     password: DEFAULT_PASSWORD, password_confirmation: DEFAULT_PASSWORD }.merge(attrs))
+    end
+
+    def next_user_number
+      @user_counter = (@user_counter || 0) + 1
+      format("%04d", @user_counter)
+    end
+  end
+end
+
+class ActionDispatch::IntegrationTest
+  setup { Rails.cache.clear } # rate limit ของ login เก็บใน cache: ล้างให้แต่ละ test เริ่มใหม่
+
+  # login ผ่านหน้าจริง (หน้าแยกตามบทบาท)
+  def sign_in(user, password: ActiveSupport::TestCase::DEFAULT_PASSWORD)
+    post(user.admin? ? admin_login_path : login_path, params: { login: { username: user.username, password: password } })
   end
 end
