@@ -17,7 +17,7 @@ class Room < ApplicationRecord
 
   # จำนวนคนมากที่สุดใน event เดียวของห้องนี้ ที่ยังไม่จบ
   def max_participants_in_use
-    Participation.active.joins(lot: :auction_event).merge(AuctionEvent.unfinished)
+    Participation.holding_seat.joins(lot: :auction_event).merge(AuctionEvent.unfinished)
                  .where(auction_events: { room_id: id }).group("auction_events.id").distinct.count(:user_id).values.max.to_i
   end
 

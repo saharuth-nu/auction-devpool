@@ -25,9 +25,15 @@ class Participation < ApplicationRecord
   validate :event_has_room, on: :create
 
   class << self
-    # จำนวนคน (ไม่ใช่จำนวนสินค้า) ที่เข้าร่วมอยู่ใน event หนึ่ง
+    # จำนวนคน (ไม่ใช่จำนวนสินค้า) ที่เข้าร่วมอยู่ใน event หนึ่ง · นับเฉพาะการเข้าร่วมบน lot ที่ยัง pending
+    # (lot ที่ถูกยกเลิก/เอาออกจาก event ไม่ถือที่นั่ง)
     def participants_count(event)
-      active.joins(:lot).where(lots: { auction_event_id: event.id }).distinct.count(:user_id)
+      holding_seat.where(lots: { auction_event_id: event.id }).distinct.count(:user_id)
+    end
+
+    # การเข้าร่วมที่ยังถือที่นั่ง: ไม่ยกเลิก และ lot ยังรอการประมูล
+    def holding_seat
+      active.joins(:lot).merge(Lot.pending)
     end
 
     def full?(event)
@@ -35,7 +41,7 @@ class Participation < ApplicationRecord
     end
 
     def joined?(user, event)
-      active.joins(:lot).where(user_id: user.id, lots: { auction_event_id: event.id }).exists?
+      holding_seat.where(user_id: user.id, lots: { auction_event_id: event.id }).exists?
     end
   end
 

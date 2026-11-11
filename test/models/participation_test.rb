@@ -140,6 +140,27 @@ class ParticipationTest < ActiveSupport::TestCase
     assert_equal 1, Participation.participants_count(event)
   end
 
+  test "USR-07 lot ที่ถูกยกเลิก (เอาสินค้าออกจาก event) ไม่ถือที่นั่ง แม้แถวเข้าร่วมยังอยู่เป็นประวัติ" do
+    event, lot_a, lot_b = build_event(max_participants: 1, lots: 2)
+    member = create_approved_bidder
+    join!(member, lot_a)
+    assert Participation.full?(event)
+
+    lot_a.update!(status: :cancelled)
+    assert_equal 1, Participation.where(lot: lot_a).active.count, "แถวเข้าร่วมเป็นประวัติ ไม่ถูกลบ (NFR-19)"
+    assert_equal 0, Participation.participants_count(event)
+    assert_not Participation.full?(event)
+    assert join(create_approved_bidder, lot_b).persisted?, "ที่นั่งว่างให้คนอื่นแล้ว"
+  end
+
+  test "ROOM-04 lot ที่ถูกยกเลิกไม่ถูกนับว่าใช้ที่นั่งของห้อง" do
+    event, lot = build_event(max_participants: 2)
+    join!(create_approved_bidder, lot)
+    join!(create_approved_bidder, lot)
+    lot.update!(status: :cancelled)
+    assert_equal 0, event.room.max_participants_in_use
+  end
+
   # ---------- ใครเข้าร่วมได้ ----------
 
   test "QUAL-05 ผู้ใช้ที่ยังไม่ผ่านการตรวจคุณสมบัติเข้าร่วมไม่ได้" do
