@@ -33,6 +33,8 @@ class MyAuctionsPageTest < ActionDispatch::IntegrationTest
 
   def buttons(scope) = scope.css("button").map(&:text)
 
+  def room_links(scope, event) = scope.css("a[href='#{auction_event_room_path(event)}']")
+
   # ---------- USR-16: 3 กลุ่ม ----------
 
   test "USR-16 แสดง 3 กลุ่ม พร้อมจำนวนในแต่ละกลุ่ม" do
@@ -105,10 +107,10 @@ class MyAuctionsPageTest < ActionDispatch::IntegrationTest
   # ---------- กลุ่ม กำลังประมูล / จบแล้ว ----------
 
   test "USR-16 กำลังประมูล: มีปุ่มเข้าห้องประมูล ไม่มีปุ่มยกเลิกและไม่มีนับถอยหลัง" do
-    build_joined_event(hours: 2)
+    event, = build_joined_event(hours: 2)
     view_at(@base + 2.hours + 5.seconds) do
       live = section("live")
-      assert_includes buttons(live), "เข้าห้องประมูล"
+      assert_equal [ "เข้าห้องประมูล" ], room_links(live, event).map(&:text)
       assert_nil live.at_css("dialog")
       assert_nil live.at_css("[data-controller=countdown]")
     end
@@ -213,33 +215,33 @@ class MyAuctionsPageTest < ActionDispatch::IntegrationTest
     view_at(@base + 2.hours + 5.seconds) do
       get root_path
       assert_includes page.text, "กำลังประมูล: #{event.name}"
-      assert_includes buttons(page), "เข้าห้องประมูล"
+      assert_equal 1, room_links(page, event).size
     end
   end
 
   test "USR-17 หน้าแรกไม่มีปุ่มเข้าห้องเมื่อยังไม่เริ่ม หรือไม่ได้เข้าร่วม หรือปิดรับราคาแล้ว" do
-    build_joined_event(hours: 2)
+    event, = build_joined_event(hours: 2)
     get root_path
-    assert_not_includes buttons(page), "เข้าห้องประมูล" # ยังไม่เริ่ม
+    assert_empty room_links(page, event) # ยังไม่เริ่ม
 
     travel_to(@base + 2.hours + 5.seconds) do
       sign_in create_approved_bidder # ไม่ได้เข้าร่วม
       get root_path
-      assert_not_includes buttons(page), "เข้าห้องประมูล"
+      assert_empty room_links(page, event) # ไม่ได้เข้าร่วม จึงไม่มีแบนเนอร์
     end
     travel_to(@base + 2.hours + 31.seconds) do
       sign_in @user
       get root_path
-      assert_not_includes buttons(page), "เข้าห้องประมูล" # ปิดรับราคาแล้ว
+      assert_empty room_links(page, event) # ปิดรับราคาแล้ว
     end
   end
 
   test "USR-17 หน้ารายละเอียดสินค้ามีปุ่มเข้าห้องประมูลเมื่อ event ที่เข้าร่วมกำลังเปิดรับราคา" do
-    _event, lot = build_joined_event(hours: 2)
+    event, lot = build_joined_event(hours: 2)
     travel_to(@base + 2.hours + 5.seconds) do
       sign_in @user
       get lot_path(lot)
-      assert_includes buttons(page), "เข้าห้องประมูล"
+      assert_equal 1, room_links(page, event).size
       assert_includes page.text, "ยกเลิกไม่ได้หลังเริ่มประมูล"
     end
   end

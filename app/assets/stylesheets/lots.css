@@ -14,3 +14,19 @@
 @media (min-width: 768px) {
   .ui-lot { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; }
 }
+
+/* ห้องประมูล: รายการสินค้าในห้อง (USR-09, USR-10) */
+.ui-room-lots { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.ui-room-lot { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--color-zinc-100); }
+.ui-room-lot:first-child { border-top: 0; }
+.ui-room-lot__thumb { display: block; width: 72px; height: 72px; object-fit: cover; background: var(--color-zinc-100); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); }
+.ui-room-lot__thumb--empty { display: flex; align-items: center; justify-content: center; font-size: var(--text-2xs); color: var(--color-zinc-500); }
+.ui-room-lot__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ui-room-lot__name { font-weight: 600; color: var(--color-zinc-900); text-decoration: none; overflow-wrap: anywhere; }
+.ui-room-lot__name:hover { text-decoration: underline; }
+.ui-room-lot__price { font-size: var(--text-xs); color: var(--color-zinc-500); font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .ui-room-lot { grid-template-columns: 56px minmax(0, 1fr); }
+  .ui-room-lot__thumb { width: 56px; height: 56px; }
+  .ui-room-lot__action { grid-column: 1 / -1; }
+}
