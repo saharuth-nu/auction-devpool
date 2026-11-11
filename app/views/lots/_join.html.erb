@@ -1,0 +1,13 @@
+<%# USR-05: ปุ่ม "เข้าร่วมประมูล" มีเฉพาะก่อนถึงเวลาเริ่ม (ตัดสินด้วย Clock ที่ server)
+    ปุ่มยังกดไม่ได้ (disabled) การเข้าร่วมจริงทำใน issue #59 (Participation) เปลี่ยนเป็นฟอร์มส่งไป participation ของ lot นั้น %>
+<% case lot_phase(event) %>
+<% when :upcoming %>
+  <%= ui_card do %>
+    <%= ui_button "เข้าร่วมประมูล", size: :xl, block: true, disabled: true %>
+    <p class="ui-field__hint">ยื่นราคาได้เฉพาะสินค้าที่เข้าร่วมไว้ก่อนเริ่มประมูล</p>
+  <% end %>
+<% when :open %>
+  <%= ui_alert "การประมูลนี้เริ่มแล้ว", tone: :info %>
+<% else %>
+  <%= ui_alert "ปิดรับราคาแล้ว กำลังสรุปผล", tone: :info %>
+<% end %>
