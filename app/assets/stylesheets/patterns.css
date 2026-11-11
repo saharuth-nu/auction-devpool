@@ -1,0 +1,69 @@
+/*
+ * Pattern เสริมของ Design System + ปรับ responsive ของโครงหน้า (NFR-11, NFR-12, NFR-13)
+ * โหลดต่อจาก components.css (เรียงตามชื่อไฟล์) จึงทับกฎของ .ui-header / .ui-main ได้
+ * ใช้ token จาก tokens.css เท่านั้น ห้ามฝังสีหรือขนาดตัวอักษร (ดู DESIGN.md)
+ *
+ * จุดตัด: ≤640px = มือถือ · ≥768px = แท็บเล็ต/เดสก์ท็อป
+ */
+
+/* ---------- Skip link (ข้ามไปเนื้อหาด้วยคีย์บอร์ด) ---------- */
+.ui-skip-link { position: absolute; top: 8px; left: -9999px; z-index: 100; padding: 8px 16px; color: var(--color-primary-700); background: var(--color-white); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
+.ui-skip-link:focus { left: 16px; }
+
+/* ---------- Select / Checkbox / File ---------- */
+select.ui-input { cursor: pointer; }
+input[type="file"].ui-input { height: auto; padding: 10px 14px; border-radius: var(--radius-2xl); }
+.ui-check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.ui-check .ui-checkbox { flex-shrink: 0; margin: 4px 0 0; }
+.ui-check__text { font-size: var(--text-sm); line-height: var(--text-sm-lh); color: var(--color-zinc-700); }
+
+/* ---------- Confirm dialog (NFR-13: ย้อนกลับไม่ได้ต้องยืนยัน) ---------- */
+.ui-confirm { display: inline-block; }
+.ui-dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; color: var(--color-zinc-900); background: var(--color-white); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xl); }
+.ui-dialog::backdrop { background: rgb(0 0 0 / 0.5); }
+.ui-dialog__body { padding: 24px 24px 16px; }
+.ui-dialog__title { margin: 0; font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; }
+.ui-dialog__message { margin: 8px 0 0; color: var(--color-zinc-600); }
+.ui-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 0 24px 24px; }
+
+/* ---------- Empty / Loading (NFR-11: แสดงสถานะว่างและกำลังโหลดเสมอ) ---------- */
+.ui-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 16px; text-align: center; color: var(--color-zinc-500); background: var(--color-white); border: 1px dashed var(--color-zinc-300); border-radius: var(--radius-2xl); }
+.ui-empty__title { margin: 0; font-size: var(--text-base); line-height: var(--text-base-lh); font-weight: 600; color: var(--color-zinc-700); }
+.ui-empty__desc { margin: 0; }
+.ui-empty__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
+.ui-loading { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 32px 16px; color: var(--color-zinc-500); }
+.ui-spinner { flex-shrink: 0; width: 20px; height: 20px; border: 3px solid var(--color-zinc-200); border-top-color: var(--color-primary-600); border-radius: var(--radius-full); animation: ui-spin 0.8s linear infinite; }
+@keyframes ui-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ui-spinner { animation-duration: 2.4s; } }
+
+.ui-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; } /* แถวการ์ดตัวเลข: เรียงตามความกว้างจอ */
+
+/* ---------- Responsive (NFR-12) ---------- */
+img, video { max-width: 100%; height: auto; }
+.ui-main > * { min-width: 0; } /* ตาราง/ข้อความยาวหดได้ ไม่ดันหน้าล้นจอ */
+.ui-header { flex-wrap: wrap; }
+.ui-header__nav { flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  .ui-header { padding: 10px 16px; }
+  .ui-main { padding: 16px; }
+  .ui-auth { margin-block: 16px; }
+  .ui-card__header, .ui-card__body, .ui-stat, .ui-table-card__head { padding: 16px; }
+  .ui-table th { padding-inline: 16px; }
+  .ui-table td { padding: 16px; }
+  .ui-dl { grid-template-columns: 1fr; gap: 2px; }
+  .ui-dl dd { margin-bottom: 10px; }
+  .ui-page-header__actions { width: 100%; }
+  .ui-page-header__actions > .ui-btn, .ui-page-header__actions > .ui-confirm { flex: 1 1 auto; }
+  .ui-dialog__body { padding: 20px 20px 12px; }
+  .ui-dialog__actions { flex-direction: column; padding: 0 20px 20px; }
+  .ui-dialog__actions .ui-btn { width: 100%; }
+}
+
+/* จอสัมผัส (นิ้ว): พื้นที่กดอย่างน้อย 44px (ปุ่มลิงก์ในบรรทัดไม่นับ) */
+@media (pointer: coarse) {
+  .ui-btn:not(.ui-btn--link) { min-height: 44px; }
+  .ui-input--sm { min-height: 44px; }
+  .ui-checkbox, .ui-radio { width: 24px; height: 24px; }
+  .ui-check .ui-checkbox { margin-top: 0; }
+}

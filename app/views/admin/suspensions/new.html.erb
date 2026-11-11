@@ -4,14 +4,8 @@
     <p>ผู้ใช้จะ login ไม่ได้ และ session ที่ใช้อยู่จะหมดผลทันที ยื่นราคาใหม่ไม่ได้ (สถานะคุณสมบัติคงเดิม ยกเลิกการระงับได้ภายหลัง)</p>
     <%= ui_form_with url: admin_user_suspension_path(@user), scope: :suspension,
                      data: { turbo_confirm: "ยืนยันระงับบัญชี “#{@user.username}”?" } do |f| %>
-      <div class="ui-field">
-        <%= f.label :reason, "เหตุผล (บังคับ)", class: "ui-field__label" %>
-        <%= f.text_area :reason, value: params.dig(:suspension, :reason), rows: 3, required: true,
-              maxlength: SuspensionEvent::REASON_MAX,
-              class: class_names("ui-input", "ui-input--invalid" => @reason_error),
-              "aria-invalid": (@reason_error.present? || nil), "aria-describedby": ("suspension_reason_message" if @reason_error) %>
-        <% if @reason_error %><p id="suspension_reason_message" class="ui-field__error"><%= @reason_error %></p><% end %>
-      </div>
+      <%= f.ui_field :reason, as: :textarea, label: "เหตุผล (บังคับ)", error: @reason_error.presence,
+            value: params.dig(:suspension, :reason), rows: 3, required: true, maxlength: SuspensionEvent::REASON_MAX %>
       <div class="ui-actions">
         <%= f.ui_submit "ยืนยันระงับบัญชี", variant: :danger %>
         <%= ui_link_button "ยกเลิก", admin_user_path(@user), variant: :secondary, size: :xl %>

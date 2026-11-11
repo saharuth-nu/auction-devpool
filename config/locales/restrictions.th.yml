@@ -1,0 +1,22 @@
+# ข้อความเมื่อลบระเบียนที่มีประวัติอ้างถึงไม่ได้ (NFR-19, ITEM-12, ROOM-05)
+# ใช้กับ has_many ... dependent: :restrict_with_error ของ Item / Room / AuctionMethod
+# (ข้อความทั่วไปของ Rails อยู่ใน th.yml แต่ที่นี่บอกทางออกให้ผู้ใช้: เก็บถาวร/ปิดใช้งานแทน)
+th:
+  activerecord:
+    errors:
+      models:
+        item:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: "ลบสินค้าที่เคยอยู่ในการประมูลไม่ได้ ให้เก็บถาวรแทน"
+        room:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: "ลบห้องที่มีการประมูล (event) อ้างถึงอยู่ไม่ได้ ให้เก็บถาวรแทน"
+        auction_method:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: "ลบวิธีประมูลที่มีการประมูล (event) อ้างถึงอยู่ไม่ได้ ให้ปิดใช้งานแทน"

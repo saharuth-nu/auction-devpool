@@ -9,6 +9,9 @@ Rails.application.routes.draw do
 
   # ---- ผู้ใช้ (bidder)
   root "home#show"
+
+  # หน้าตัวอย่าง component ของ Design System ไว้ดูบนมือถือ/เดสก์ท็อป (เฉพาะ development/test)
+  match "styleguide", to: "styleguide#show", via: %i[get post patch delete] if Rails.env.local?
   get "login", to: "sessions#new"
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
