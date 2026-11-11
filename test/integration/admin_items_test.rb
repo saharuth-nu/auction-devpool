@@ -20,7 +20,7 @@ class AdminItemsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "tr", text: /นาฬิกาข้อมือ/ do
       assert_select ".ui-badge--warning", "รออนุมัติ"
-      assert_select "td.num", /1,000\.00/
+      assert_select "td.num", "1,000 บาท"
     end
     assert_select "tr", text: /ภาพวาด/ do
       assert_select ".ui-badge", "อยู่ระหว่างการประมูล"
@@ -47,8 +47,31 @@ class AdminItemsTest < ActionDispatch::IntegrationTest
     item.approve!(by: @admin)
     get admin_item_path(item)
     assert_response :success
-    assert_select "dd", /1,500\.00/
+    assert_select "dd", /1,500 บาท/
     assert_select "dd", /#{@admin.username}/
+  end
+
+  test "NFR-13: ลบและเก็บถาวรต้องผ่านหน้าต่างยืนยันที่บอกผลลัพธ์" do
+    item = items(:car)
+    get admin_item_path(item)
+    assert_select ".ui-confirm dialog form[action=?]", admin_item_path(item)
+    assert_select ".ui-confirm dialog form[action=?]", archive_admin_item_path(item)
+    assert_select "[data-turbo-confirm]", count: 0
+  end
+
+  test "NFR-13: อนุมัติต้องผ่านหน้าต่างยืนยัน" do
+    item = items(:watch)
+    get admin_item_path(item)
+    assert_select ".ui-confirm dialog form[action=?]", approve_admin_item_path(item) do
+      assert_select "input[name=_method][value=patch]"
+    end
+  end
+
+  test "NFR-13: ลบรูปต้องผ่านหน้าต่างยืนยัน" do
+    item = items(:car)
+    item.images.attach(photo)
+    get edit_admin_item_path(item)
+    assert_select ".ui-confirm dialog form[action=?]", admin_item_image_path(item, item.images.first)
   end
 
   # ---- เพิ่ม / แก้ (ITEM-01/04/05/06/07)

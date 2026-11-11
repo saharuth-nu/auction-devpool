@@ -87,7 +87,7 @@
 | `ui_empty_state` | `ui_empty_state("ยังไม่มีการประมูล", description: "...") { ui_link_button("ดูสินค้า", root_path) }` — สถานะว่างของรายการที่ไม่ใช่ตาราง |
 | `ui_loading` | `ui_loading("กำลังโหลด...")` — placeholder ใน `<turbo-frame>` ที่โหลดทีหลัง |
 | `baht` / `baht_symbol` / `display_time` | จาก `FormatHelper`: `baht(1800)` → `1,800 บาท` · `baht_symbol(1800)` → `฿1,800` · `display_time(t)` → `13/11/2026 20:00` (ปี ค.ศ. ตามที่ทีมใช้) (ดู `.claude/knowledge/locale-time-money.md`) |
-| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ · `as:` ได้แก่ `:text :email :password :number :url :tel :search :date :datetime_local :textarea :file` |
+| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
 | `f.ui_select` | `f.ui_select :status, [["ผ่าน", "approved"]], include_blank: "ทั้งหมด", selected: params[:status]` (native select หน้าตาเดียวกับ `ui-input`) |
 | `ui_pagination` | `ui_pagination(@pagination)` คู่กับ `Paginated#paginate` ใน controller (ก่อนหน้า / หน้า X จาก Y / ถัดไป คงค่าตัวกรอง) วางใน `footer:` ของ `ui_table_card` |
 

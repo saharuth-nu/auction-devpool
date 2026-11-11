@@ -13,8 +13,8 @@
                   variant: :secondary, size: :sm, disabled: index.zero?, "aria-label": "เลื่อนรูปที่ #{index + 1} ขึ้นก่อน" %>
             <%= ui_button_to "→", move_admin_item_image_path(item, image, direction: "down"), method: :patch,
                   variant: :secondary, size: :sm, disabled: index == images.size - 1, "aria-label": "เลื่อนรูปที่ #{index + 1} ไปหลัง" %>
-            <%= ui_button_to "ลบรูป", admin_item_image_path(item, image), method: :delete, variant: :danger_outline, size: :sm,
-                  data: { turbo_confirm: "ลบรูปที่ #{index + 1}?" } %>
+            <%= ui_confirm_button "ลบรูป", admin_item_image_path(item, image), trigger_variant: :danger_outline, size: :sm,
+                  title: "ลบรูปนี้?", message: "ลบรูปที่ #{index + 1} ของ “#{item.name}” ถาวร กู้คืนไม่ได้" %>
           </div>
         <% end %>
       </li>

@@ -20,6 +20,14 @@ class AdminRoomsTest < ActionDispatch::IntegrationTest
     assert_select "td", text: "ห้องเก่า", count: 0
   end
 
+  test "NFR-13: ลบและเก็บถาวรห้องต้องผ่านหน้าต่างยืนยัน" do
+    room = rooms(:main_hall)
+    get admin_rooms_path
+    assert_select ".ui-confirm dialog form[action=?]", admin_room_path(room)
+    assert_select ".ui-confirm dialog form[action=?]", archive_admin_room_path(room)
+    assert_select "[data-turbo-confirm]", count: 0
+  end
+
   test "ROOM-05: ดูห้องที่เก็บถาวรได้แยกต่างหาก" do
     get admin_rooms_path(archived: 1)
     assert_response :success

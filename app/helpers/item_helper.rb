@@ -4,7 +4,7 @@
 #   item_card(entry.item, starts_at: entry.starts_at, url: item_path(entry.item))  # คลิกทั้งการ์ดไปหน้ารายละเอียด (USR-04)
 #
 # ป้ายสถานะดูจากเวลา: ยังไม่ถึงเวลาเริ่ม = รอเริ่ม, ถึงแล้ว = กำลังประมูล (ใช้ Clock ตัดสินที่ server, NFR-03)
-# รูปใช้รูปแรกของสินค้า ไม่มีรูปแสดงกรอบ "ไม่มีรูป"
+# รูปใช้รูปแรกตามลำดับที่ admin จัด (Item#ordered_images, ITEM-07) ไม่มีรูปแสดงกรอบ "ไม่มีรูป"
 # หมายเหตุ: ใช้รูปต้นฉบับ (ไม่ได้ย่อด้วย variant เพราะต้องมี libvips บนเครื่อง) ถ้ารายการยาวควรย่อรูปภายหลัง
 module ItemHelper
   def item_card(item, starts_at:, url: nil)
@@ -35,8 +35,8 @@ module ItemHelper
   end
 
   def item_card_image(item)
-    if item.images.attached?
-      image_tag(item.images.first, alt: item.name, loading: "lazy", decoding: "async", class: "ui-item-card__image")
+    if (cover = item.ordered_images.first)
+      image_tag(cover, alt: item.name, loading: "lazy", decoding: "async", class: "ui-item-card__image")
     else
       content_tag(:div, "ไม่มีรูป", class: "ui-item-card__image ui-item-card__image--empty",
                                     role: "img", "aria-label": "ไม่มีรูปสินค้า #{item.name}")

@@ -25,11 +25,12 @@
             <div class="ui-actions">
               <%= ui_link_button "แก้ไข", edit_admin_room_path(room), variant: :secondary, size: :sm %>
               <% unless room.archived? %>
-                <%= ui_button_to "เก็บถาวร", archive_admin_room_path(room), method: :patch, variant: :secondary, size: :sm,
-                      data: { turbo_confirm: "เก็บถาวรห้อง “#{room.name}”? จะเลือกตอนสร้างการประมูลใหม่ไม่ได้" } %>
+                <%= ui_confirm_button "เก็บถาวร", archive_admin_room_path(room), method: :patch, trigger_variant: :secondary, size: :sm,
+                      title: "เก็บถาวรห้องนี้?",
+                      message: "“#{room.name}” จะเลือกตอนสร้างการประมูลใหม่ไม่ได้ การประมูลเดิมยังอ้างถึงได้" %>
               <% end %>
-              <%= ui_button_to "ลบ", admin_room_path(room), method: :delete, variant: :danger_outline, size: :sm,
-                    data: { turbo_confirm: "ลบห้อง “#{room.name}” ถาวร? ย้อนกลับไม่ได้" } %>
+              <%= ui_confirm_button "ลบ", admin_room_path(room), trigger_variant: :danger_outline, size: :sm,
+                    title: "ลบห้องนี้?", message: "ลบห้อง “#{room.name}” ถาวร กู้คืนไม่ได้ (ห้องที่มีการประมูลอ้างถึงลบไม่ได้ ให้เก็บถาวรแทน)" %>
             </div>
           </td>
         </tr>
