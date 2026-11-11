@@ -9,11 +9,11 @@
 
 | ไฟล์ | หมวด | รหัส |
 |---|---|---|
-| [01-accounts.md](01-accounts.md) | บัญชี, login, register, ตรวจสอบคุณสมบัติ | `AUTH` `QUAL` |
+| [01-accounts.md](01-accounts.md) | บัญชี, login, register, ตรวจสอบคุณสมบัติ, ระงับบัญชี, จัดการบัญชีผู้ใช้/admin | `AUTH` `QUAL` `SUSP` `ADM` |
 | [02-admin.md](02-admin.md) | Module ฝั่ง admin: สินค้า, วิธีประมูล, ห้อง, event | `ITEM` `METH` `ROOM` `EVT` |
 | [03-user-portal.md](03-user-portal.md) | หน้าฝั่งผู้ใช้: หน้าแรก, เข้าร่วม, ห้อง, ผลการประมูล | `USR` |
 | [04-bidding.md](04-bidding.md) | กติกาการประมูล first-price sealed | `BID` |
-| [05-non-functional.md](05-non-functional.md) | ความปลอดภัย ความถูกต้อง ประสิทธิภาพ UI | `NFR` |
+| [05-non-functional.md](05-non-functional.md) | ความปลอดภัย ความถูกต้อง ประสิทธิภาพ UI, audit log, การเก็บประวัติ | `NFR` |
 | [06-out-of-scope.md](06-out-of-scope.md) | สิ่งที่ไม่อยู่ใน M1 (ไป M2) | `OOS` |
 | [07-open-items.md](07-open-items.md) | ข้อที่ยังรอตัดสินใจ | — |
 
