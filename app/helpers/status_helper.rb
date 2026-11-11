@@ -4,10 +4,11 @@
 # ค่าตั้งต้นด้านล่างเป็นข้อเสนอเริ่มต้น ปรับให้ตรงกับ enum จริงของ model เมื่อสร้างแล้ว
 module StatusHelper
   STATUSES = {
+    # ตรงกับ AuctionEvent.statuses (EVT-10)
     auction: {
-      "scheduled" => { label: "รอเริ่ม", tone: :warning },
-      "active" => { label: "กำลังประมูล", tone: :success },
-      "closed" => { label: "ปิดประมูล", tone: :neutral },
+      "scheduled" => { label: "ยังไม่เริ่ม", tone: :warning },
+      "bidding" => { label: "เปิดรับราคา", tone: :success },
+      "settled" => { label: "สรุปผลแล้ว", tone: :neutral },
       "cancelled" => { label: "ยกเลิก", tone: :danger }
     },
     # ตรงกับ Item.statuses (ITEM-02)

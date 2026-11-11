@@ -80,7 +80,7 @@
 | `ui_page_header` | `ui_page_header("รายการประมูล", description: "...") { ui_link_button(...) }` (block = ปุ่มชิดขวา) |
 | `ui_stat_card` | `ui_stat_card("เปิดอยู่", 12, hint: "รายการ")` |
 | `ui_table_card` / `ui_table_message` | ดูตัวอย่างด้านล่าง |
-| `ui_form_with` + `f.ui_field` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ |
+| `ui_form_with` + `f.ui_field` / `f.ui_select` / `f.ui_submit` | ฟอร์มพร้อม label, hint และ error ใต้ช่องอัตโนมัติ · `f.ui_select :room_id, choices, include_blank: "เลือกห้อง"` ใช้ select ของเบราว์เซอร์ (ยังไม่มี select แบบ custom) |
 
 - ตัวเลือก: `variant:` (`:primary :secondary :outline :danger :danger_outline :ghost :link`), `size:` (`:sm :md :xl`), `shape:` (`:round :square`), `block: true`, `icon_left:` / `icon_right:` (HTML ของ SVG)
 - ส่งค่าที่ไม่อยู่ในมาตรฐาน (เช่น `variant: :purple`) จะ **raise ArgumentError** ทันที
@@ -124,7 +124,7 @@
 
 ### สถานะของโดเมน
 
-ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน ค่าตั้งต้นของประมูล: รอเริ่ม→`warning`, กำลังประมูล→`success`, ปิด→`neutral`, ยกเลิก→`danger` (ปรับให้ตรง enum จริงเมื่อสร้าง model) สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
+ห้ามกำหนดสี badge ในแต่ละหน้า ให้ใช้ `status_badge(:auction, status)` จาก [`StatusHelper`](app/helpers/status_helper.rb) ซึ่งแมปสถานะ → `{label, tone}` ที่เดียว (เหมือน `src/lib/status.ts` ของต้นทาง) สถานะใหม่เพิ่มที่ `STATUSES` แล้วทุกหน้าได้สีเหมือนกัน สถานะ event การประมูล (EVT-10): `scheduled` ยังไม่เริ่ม→`warning`, `bidding` เปิดรับราคา→`success`, `settled` สรุปผลแล้ว→`neutral`, `cancelled` ยกเลิก→`danger` สถานะที่ไม่รู้จักแสดงเป็น "ไม่ทราบ" (`muted`)
 
 ## 4. หลักการเขียนหน้า
 

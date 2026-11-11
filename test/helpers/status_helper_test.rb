@@ -4,7 +4,7 @@ class StatusHelperTest < ActionView::TestCase
   include UiHelper
 
   test "สถานะประมูลแมปเป็น label และ tone" do
-    assert_equal({ label: "กำลังประมูล", tone: :success }, status_style(:auction, "active"))
+    assert_equal({ label: "เปิดรับราคา", tone: :success }, status_style(:auction, "bidding"))
     assert_equal :danger, status_style(:auction, :cancelled)[:tone]
   end
 
@@ -20,7 +20,7 @@ class StatusHelperTest < ActionView::TestCase
   test "status_badge ออกเป็น Badge" do
     html = status_badge(:auction, "scheduled")
     assert_includes html, "ui-badge--warning"
-    assert_includes html, "รอเริ่ม"
+    assert_includes html, "ยังไม่เริ่ม"
   end
 
   test "สถานะสินค้าครบทุกค่าของ Item และไม่มีค่าไหนเป็น ไม่ทราบ (ITEM-02)" do

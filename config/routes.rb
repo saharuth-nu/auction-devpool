@@ -32,5 +32,10 @@ Rails.application.routes.draw do
     resources :users, only: [] do
       resource :password_reset, only: :create
     end
+
+    # การประมูล (EVT-01): ไม่มีหน้า show แยก ดู/แก้ที่หน้า edit · ยกเลิกเป็น PATCH แยก (EVT-08)
+    resources :auction_events, path: "auctions", except: :show do
+      patch :cancel, on: :member
+    end
   end
 end

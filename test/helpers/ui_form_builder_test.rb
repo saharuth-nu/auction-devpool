@@ -61,4 +61,19 @@ class UiFormBuilderTest < ActionView::TestCase
       ui_form_with(model: Sample.new, url: "/samples", scope: :sample) { |f| f.ui_field(:title, as: :color) }
     end
   end
+
+  test "ui_select มี label, ui-input, ตัวเลือกว่าง และแสดง error ใต้ช่อง" do
+    record = Sample.new
+    record.validate
+    html = ui_form_with(model: record, url: "/samples", scope: :sample) do |f|
+      f.ui_select(:title, [ [ "ก", "a" ], [ "ข", "b" ] ], label: "หมวด", include_blank: "เลือก")
+    end
+    doc = Nokogiri::HTML.fragment(html)
+    select = doc.at_css("select.ui-input")
+    assert_equal "sample[title]", select["name"]
+    assert_equal [ "เลือก", "ก", "ข" ], select.css("option").map(&:text)
+    assert_equal "หมวด", doc.at_css("label.ui-field__label").text
+    assert_includes select["class"].split, "ui-input--invalid"
+    assert_equal doc.at_css(".ui-field__error")["id"], select["aria-describedby"]
+  end
 end

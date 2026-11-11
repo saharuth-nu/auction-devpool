@@ -1,0 +1,63 @@
+<%# ฟอร์มสร้าง/แก้การประมูล (EVT-02) · กฎตรวจที่ AuctionEvent %>
+<%
+  rooms = Room.active.order(:name).to_a
+  rooms |= [ event.room ] if event.room
+  methods = AuctionMethod.selectable.order(:name).to_a
+  methods |= [ event.auction_method ] if event.auction_method
+  items = event.selectable_items.to_a
+  item_error = event.errors[:selected_item_ids].first
+  locked = !event.new_record? && !event.editable? # EVT-08: เริ่มแล้วแก้ได้เฉพาะชื่อ
+%>
+<%= ui_form_with model: event, url: (event.persisted? ? admin_auction_event_path(event) : admin_auction_events_path) do |f| %>
+  <%= f.ui_field :name, label: "ชื่อรายการประมูล", required: true, autofocus: event.new_record? %>
+
+  <%= f.ui_select :room_id, rooms.map { |r| [ "#{r.name} (สินค้าได้ #{r.max_items} ชิ้น · ผู้เข้าร่วม #{r.max_participants} คน)", r.id ] },
+        label: "ห้องประมูล", include_blank: "เลือกห้อง", required: true, disabled: locked %>
+
+  <%= f.ui_select :auction_method_id, methods.map { |m| [ "#{m.name} (ยื่นราคา #{m.bidding_seconds} วินาที)", m.id ] },
+        label: "วิธีประมูล", include_blank: "เลือกวิธีประมูล", required: true, disabled: locked %>
+
+  <div class="ui-form-row">
+    <%= f.ui_field :starts_at, as: :datetime_local, label: "เวลาเริ่ม", required: true, disabled: locked,
+          hint: "เปิดรับราคาตามระยะเวลาของวิธีประมูลนับจากเวลานี้" %>
+    <%= f.ui_field :ends_at, as: :datetime_local, label: "เวลาสิ้นสุด (ปิดห้อง)", required: true, disabled: locked,
+          hint: "หลังเวลานี้ผู้ใช้เข้าห้องไม่ได้ ไม่ใช่เวลาปิดรับราคา" %>
+  </div>
+
+  <fieldset class="ui-fieldset" aria-describedby="auction_event_selected_item_ids_message">
+    <legend class="ui-field__label">สินค้า</legend>
+    <% if locked %>
+      <ul class="ui-check-list">
+        <% event.items.order(:name).each do |item| %>
+          <li><%= item.name %></li>
+        <% end %>
+      </ul>
+    <% elsif items.empty? %>
+      <p class="ui-text-muted">ไม่มีสินค้าที่เลือกได้ (ต้องมีสถานะ "พร้อมขาย" และไม่อยู่ในการประมูลอื่น)</p>
+    <% else %>
+      <%= hidden_field_tag "auction_event[selected_item_ids][]", "", id: nil %>
+      <ul class="ui-check-list">
+        <% items.each do |item| %>
+          <li>
+            <label>
+              <%= check_box_tag "auction_event[selected_item_ids][]", item.id, event.current_item_ids.include?(item.id),
+                    id: "auction_event_item_#{item.id}", class: "ui-checkbox" %>
+              <span><%= item.name %></span>
+              <span class="ui-text-muted">ราคาเริ่มต้น <%= number_with_delimiter(item.starting_price) %> บาท</span>
+            </label>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+    <% if item_error %>
+      <p id="auction_event_selected_item_ids_message" class="ui-field__error"><%= item_error %></p>
+    <% else %>
+      <p id="auction_event_selected_item_ids_message" class="ui-field__hint">จำนวนต้องไม่เกินที่ห้องรองรับ</p>
+    <% end %>
+  </fieldset>
+
+  <div class="ui-actions">
+    <%= f.ui_submit(event.persisted? ? "บันทึก" : "สร้างการประมูล") %>
+    <%= ui_link_button "ยกเลิก", admin_auction_events_path, variant: :secondary, size: :xl %>
+  </div>
+<% end %>

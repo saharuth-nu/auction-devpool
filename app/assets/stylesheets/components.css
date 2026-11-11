@@ -89,6 +89,7 @@ textarea.ui-input { height: auto; min-height: 96px; padding: 12px 14px; border-r
 .ui-field__label { display: block; margin-bottom: 4px; font-size: var(--text-xs); font-weight: 500; color: var(--color-zinc-600); }
 .ui-field__hint  { margin: 4px 0 0; padding: 0 16px; font-size: var(--text-xs); color: var(--color-zinc-500); }
 .ui-field__error { margin: 4px 0 0; padding: 0 16px; font-size: var(--text-xs); color: var(--color-danger-600); }
+select.ui-input { padding-right: 36px; cursor: pointer; }
 .ui-checkbox, .ui-radio { width: 16px; height: 16px; accent-color: var(--color-primary-600); cursor: pointer; }
 
 /* ---------- Table ---------- */
@@ -131,3 +132,14 @@ textarea.ui-input { height: auto; min-height: 96px; padding: 12px 14px; border-r
 .ui-dl dt { color: var(--color-zinc-500); }
 .ui-dl dd { margin: 0; }
 .ui-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* ---------- ส่วนเสริมของหน้ารายการ/ฟอร์ม (ใช้ซ้ำได้) ---------- */
+.ui-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.ui-text-strong { font-weight: 500; color: var(--color-zinc-900); }
+.ui-text-muted { font-size: var(--text-xs); color: var(--color-zinc-500); }
+.ui-actions--end { justify-content: flex-end; }
+.ui-table th.ui-table__actions-head { text-align: right; }
+.ui-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 16px; }
+.ui-fieldset { margin: 0 0 16px; padding: 0; border: 0; min-width: 0; }
+.ui-check-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 12px 16px; list-style: none; border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); }
+.ui-check-list label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; cursor: pointer; }

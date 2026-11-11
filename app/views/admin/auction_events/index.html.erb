@@ -1,0 +1,60 @@
+<% content_for :title, "การประมูล" %>
+
+<%= ui_page_header "การประมูล", description: "จัดการรอบการประมูล แก้ไข ยกเลิก หรือลบได้เฉพาะรายการที่ยังไม่เริ่ม" do %>
+  <%= ui_link_button "สร้างการประมูลใหม่", new_admin_auction_event_path %>
+<% end %>
+
+<%= ui_table_card title: "การประมูลทั้งหมด (#{@events.size})" do %>
+  <table class="ui-table">
+    <thead>
+      <tr>
+        <th>ลำดับ</th>
+        <th>วันที่สร้าง</th>
+        <th>ชื่อรายการประมูล</th>
+        <th>วันที่-เวลา</th>
+        <th class="ui-table__actions-head">จัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if @events.empty? %>
+        <%= ui_table_message 5, "ยังไม่มีการประมูล" %>
+      <% end %>
+      <% @events.each.with_index(1) do |event, i| %>
+        <tr>
+          <td class="num"><%= i %></td>
+          <td><%= thai_date(event.created_at.to_date) %></td>
+          <td>
+            <div class="ui-stack">
+              <span class="ui-text-strong"><%= event.name %></span>
+              <span class="ui-text-muted">
+                <%= event.room.name %> · <%= event.auction_method.name %> ·
+                สินค้า <%= @lot_counts.fetch(event.id, 0) %>/<%= event.room.max_items %> ชิ้น
+              </span>
+              <span><%= status_badge :auction, event.status %></span>
+            </div>
+          </td>
+          <td>
+            <div><%= thai_date(event.starts_at.to_date) %></div>
+            <div class="ui-text-muted">เริ่ม–ปิดห้อง <%= thai_time_range(event.starts_at, event.ends_at) %></div>
+          </td>
+          <td>
+            <div class="ui-actions ui-actions--end">
+              <% if event.editable? %>
+                <%= ui_link_button "แก้ไข", edit_admin_auction_event_path(event), variant: :secondary, size: :sm,
+                      "aria-label": "แก้ไข #{event.name}" %>
+                <%= ui_button_to "ยกเลิก", cancel_admin_auction_event_path(event), method: :patch,
+                      variant: :danger_outline, size: :sm, "aria-label": "ยกเลิก #{event.name}",
+                      data: { turbo_confirm: "ยกเลิกการประมูล “#{event.name}”?\nสินค้าใน event นี้จะถูกปล่อยไปใส่การประมูลอื่นได้ และย้อนกลับไม่ได้" } %>
+                <%= ui_button_to "ลบ", admin_auction_event_path(event), method: :delete,
+                      variant: :ghost, size: :sm, "aria-label": "ลบ #{event.name}",
+                      data: { turbo_confirm: "ลบการประมูล “#{event.name}” ถาวร?\nย้อนกลับไม่ได้" } %>
+              <% else %>
+                <span class="ui-text-muted">เริ่มแล้ว แก้ไขไม่ได้</span>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

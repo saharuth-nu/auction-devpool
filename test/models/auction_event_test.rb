@@ -42,7 +42,8 @@ class AuctionEventTest < ActiveSupport::TestCase
   test "ระยะเวลาขั้นต่ำมาจากวิธีประมูล ไม่ได้ฝังตัวเลข (METH-07)" do
     starts_at = 2.days.from_now
     event = build(auction_method: auction_methods(:english), starts_at: starts_at, ends_at: starts_at + 45.seconds)
-    assert_not event.valid?, "english ใช้ 60 วินาที จึงสิ้นสุดที่ 45 วินาทีไม่ได้"
+    assert_not event.valid?
+    assert event.errors.of_kind?(:ends_at, :before_bidding_window), "english ใช้ 60 วินาที จึงสิ้นสุดที่ 45 วินาทีไม่ได้"
   end
 
   test "ปิดรับราคาเมื่อครบระยะเวลาของวิธีประมูลนับจากเวลาเริ่ม ไม่ใช่ ends_at (EVT-06)" do
@@ -94,7 +95,8 @@ class AuctionEventTest < ActiveSupport::TestCase
 
   test "ก่อนเริ่มแก้เวลา ห้อง และวิธีประมูลได้ (EVT-08)" do
     event = auction_events(:upcoming)
-    assert event.update(starts_at: event.starts_at + 1.hour, ends_at: event.ends_at + 1.hour, room: rooms(:old_room))
+    other_room = Room.create!(name: "ห้องเล็ก", max_participants: 5, max_items: 3)
+    assert event.update(starts_at: event.starts_at + 1.hour, ends_at: event.ends_at + 1.hour, room: other_room)
     assert event.editable?
   end
 
@@ -103,7 +105,7 @@ class AuctionEventTest < ActiveSupport::TestCase
     assert_not event.editable?
     assert_not event.update(ends_at: event.ends_at + 1.hour)
     assert event.errors.of_kind?(:ends_at, :locked_after_start)
-    assert_not event.update(room: rooms(:old_room))
+    assert_not event.update(room: Room.create!(name: "ห้องเล็ก", max_participants: 5, max_items: 3))
 
     assert event.reload.update(name: "ชื่อใหม่")
   end
@@ -137,5 +139,81 @@ class AuctionEventTest < ActiveSupport::TestCase
     assert_equal %w[live upcoming].sort,
       AuctionEvent.unfinished.map { |e| e == auction_events(:live) ? "live" : "upcoming" }.sort
     assert_not_includes AuctionEvent.unfinished, auction_events(:finished)
+  end
+
+  # --- สร้าง/เลือกสินค้า (#54: EVT-02/03/04, METH-06, ROOM-05) ---
+
+  test "สร้างพร้อมเลือกสินค้าแล้วได้ lot ตามที่เลือก (EVT-02)" do
+    event = build(selected_item_ids: [ items(:car).id ])
+    assert event.save, event.errors.full_messages.to_sentence
+    assert_equal [ items(:car) ], event.items.to_a
+    assert event.lots.all?(&:pending?)
+  end
+
+  test "ต้องเลือกสินค้าอย่างน้อย 1 ชิ้น (EVT-02)" do
+    event = build(selected_item_ids: [])
+    assert_not event.valid?
+    assert event.errors.of_kind?(:selected_item_ids, :blank)
+  end
+
+  test "จำนวนสินค้าต้องไม่เกินที่ห้องรองรับ (EVT-03)" do
+    small = Room.create!(name: "ห้องจิ๋ว", max_participants: 5, max_items: 1)
+    extra = Item.create!(name: "ชิ้นที่สอง", starting_price: 100, reserve_price: 100, status: :available)
+    event = build(room: small, selected_item_ids: [ items(:car).id, extra.id ])
+    assert_not event.valid?
+    assert event.errors.of_kind?(:selected_item_ids, :too_many)
+  end
+
+  test "เลือกได้เฉพาะสินค้าพร้อมขาย ไม่เก็บถาวร และไม่อยู่ใน event อื่นที่ยังไม่จบ (EVT-04)" do
+    [ :watch, :vase, :painting, :necklace, :lamp ].each do |name| # รออนุมัติ / เก็บถาวร / อยู่ใน event อื่น x2 / ขายแล้ว
+      event = build(selected_item_ids: [ items(name).id ])
+      assert_not event.valid?, "#{name} ต้องเลือกไม่ได้"
+      assert event.errors.of_kind?(:selected_item_ids, :not_selectable)
+    end
+  end
+
+  test "รายการสินค้าที่เลือกได้รวมสินค้าที่อยู่ใน event นี้อยู่แล้ว (EVT-04)" do
+    selectable = auction_events(:upcoming).selectable_items
+    assert_includes selectable, items(:necklace)
+    assert_includes selectable, items(:car)
+    assert_not_includes selectable, items(:painting)
+    assert_not_includes AuctionEvent.new.selectable_items, items(:necklace)
+  end
+
+  test "แก้รายการสินค้าก่อนเริ่ม: เพิ่มและเอาออกได้ (EVT-01)" do
+    event = auction_events(:upcoming)
+    necklace_lot_id = lots(:upcoming_necklace).id
+    assert event.update(selected_item_ids: [ items(:car).id ])
+    assert_equal [ items(:car) ], event.reload.items.to_a
+    assert_not Lot.exists?(necklace_lot_id)
+  end
+
+  test "เริ่มแล้วแก้รายการสินค้าไม่ได้ (EVT-08)" do
+    event = auction_events(:live)
+    assert_not event.update(selected_item_ids: [ items(:car).id ])
+    assert event.errors.of_kind?(:selected_item_ids, :locked_after_start)
+  end
+
+  test "เวลาเริ่มต้องอยู่ในอนาคตตอนสร้าง" do
+    event = build(starts_at: 1.minute.ago, ends_at: 1.hour.from_now)
+    assert_not event.valid?
+    assert event.errors.of_kind?(:starts_at, :in_past)
+  end
+
+  test "วิธีประมูลที่ปิดใช้งานหรือยังไม่มีกติกาเลือกตอนสร้างไม่ได้ แต่ event เดิมไม่กระทบ (METH-06)" do
+    event = build(auction_method: auction_methods(:english), ends_at: 2.days.from_now + 1.hour)
+    assert_not event.valid?
+    assert event.errors.of_kind?(:auction_method, :not_selectable)
+
+    auction_methods(:first_price).disable!
+    assert_not build.valid?
+    existing = auction_events(:upcoming)
+    assert existing.update(name: "เปลี่ยนชื่อได้"), existing.errors.full_messages.to_sentence
+  end
+
+  test "ห้องที่เก็บถาวรเลือกใส่ event ใหม่ไม่ได้ (ROOM-05)" do
+    event = build(room: rooms(:old_room))
+    assert_not event.valid?
+    assert event.errors.of_kind?(:room, :archived)
   end
 end
