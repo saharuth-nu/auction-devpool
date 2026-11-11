@@ -19,6 +19,17 @@ class AdminAuctionEventsTest < ActionDispatch::IntegrationTest
     }.merge(overrides) }
   end
 
+  # ---- #59: เอาสินค้าที่มีคนเข้าร่วมแล้วออกจาก event ต้องไม่พัง (participations ผูก FK แบบ restrict)
+  test "admin เอาสินค้าที่มีคนเข้าร่วมแล้วออกจาก event ได้ ไม่เจอ 500 และการเข้าร่วมเป็นประวัติ" do
+    event = auction_events(:upcoming)
+    participation = Participation.create!(user: create_approved_bidder, lot: lots(:upcoming_necklace))
+    patch admin_auction_event_path(event), params: { auction_event: { name: "ชื่อใหม่", selected_item_ids: [ items(:car).id ] } }
+    assert_redirected_to admin_auction_events_path
+    assert_equal "cancelled", lots(:upcoming_necklace).reload.status
+    assert Participation.exists?(participation.id)
+    assert_not participation.reload.active?
+  end
+
   # ---- สิทธิ์ (AUTH-10, NFR-08)
   test "ผู้ใช้ทั่วไปเข้าหน้าจัดการการประมูลไม่ได้" do
     delete logout_path

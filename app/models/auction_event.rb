@@ -158,10 +158,26 @@ class AuctionEvent < ApplicationRecord
     # สร้าง lot ของสินค้าที่เพิ่ม และลบ lot ของสินค้าที่เอาออก (ทำได้เฉพาะก่อนเริ่ม ตรวจไว้ใน items_selection_valid)
     def sync_lots
       current = lots.pending.to_a
-      current.reject { |lot| selected_item_ids.include?(lot.item_id) }.each(&:destroy!)
-      (selected_item_ids - current.map(&:item_id)).each { |item_id| lots.create!(item_id: item_id) }
+      current.reject { |lot| selected_item_ids.include?(lot.item_id) }.each { |lot| remove_lot(lot) }
+      (selected_item_ids - current.map(&:item_id)).each { |item_id| add_lot(item_id) }
       lots.reset
       @selected_item_ids = nil
+    end
+
+    # เอาสินค้าออกจาก event: lot ที่มีประวัติการเข้าร่วมลบไม่ได้ (NFR-19, FK restrict ของ participations)
+    # จึงยกเลิกการเข้าร่วมที่ยังค้างอยู่ (คืนที่นั่ง) แล้วตั้ง lot เป็น cancelled เก็บแถวเป็นประวัติ · ไม่มีประวัติลบได้ตามปกติ
+    def remove_lot(lot)
+      return lot.destroy! unless Participation.exists?(lot_id: lot.id)
+
+      Participation.active.where(lot_id: lot.id).update_all(cancelled_at: Time.current, updated_at: Time.current)
+      lot.update!(status: :cancelled)
+    end
+
+    # เพิ่มสินค้า: ถ้าเคยเอาสินค้านี้ออกจาก event นี้ (lot เป็น cancelled, unique index ของ event+สินค้า) ใช้ lot เดิมกลับมา
+    # ผู้ที่เคยเข้าร่วมถูกยกเลิกไปแล้วตอนเอาออก ต้องกดเข้าร่วมใหม่
+    def add_lot(item_id)
+      revived = lots.cancelled.find_by(item_id: item_id)
+      revived ? revived.update!(status: :pending) : lots.create!(item_id: item_id)
     end
 
     def status_transition_allowed
