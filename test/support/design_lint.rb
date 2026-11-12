@@ -12,7 +12,7 @@ module DesignLint
   end
 
   COLOR_PROPERTY = /(?:color|background(?:-color)?|border(?:-color)?|fill|stroke)\s*[:=]\s*["']?#[0-9a-fA-F]{3,8}\b/
-  INLINE_STYLE_LOOK = /style\s*=\s*["'][^"']*(?:color|font|background)[^"']*["']/i
+  INLINE_STYLE_LOOK = /style\s*=\s*["'][^"']*(?:color|font|background|list-style|padding|margin|display|grid|border|gap|align)[^"']*["']/i
   RAW_TAG = /<(?:input|select|textarea|button)\b[^>]*>/i
   FIELD_METHODS = %w[text_field text_area password_field email_field number_field telephone_field url_field search_field
                      date_field datetime_local_field time_field file_field check_box radio_button collection_select
@@ -42,7 +42,10 @@ module DesignLint
     code = blank_out(source, /<%#.*?%>/m) # คอมเมนต์ ERB ไม่ตรวจ
     found = []
     each_match(code, COLOR_PROPERTY) { |m, line| found << violation(file, line, "hex-in-view", m, "ใช้ token สี เช่น var(--color-primary-600) ใน CSS (DESIGN.md หัวข้อ 1)") }
-    each_match(code, INLINE_STYLE_LOOK) { |m, line| found << violation(file, line, "inline-style", m, "อย่าตั้งสี/ฟอนต์ใน style= ใช้ class ui-* หรือเพิ่ม class ใน CSS") }
+    each_match(code, INLINE_STYLE_LOOK) { |m, line| found << violation(file, line, "inline-style", m, "อย่าตั้งสี/ฟอนต์/ระยะห่าง/layout ใน style= ใช้ class ui-* หรือเพิ่ม class ใน CSS") }
+    each_match(code, /<(?:p|span|div)[^>]*class\s*=\s*["'][^"']*\bui-field__hint\b/) do |m, line|
+      found << violation(file, line, "misused-hint", m, "ui-field__hint ใช้ใต้ช่องกรอกเท่านั้น: สถานะว่างใช้ ui_empty_state, ข้อความรองใช้ ui-text-muted")
+    end
     each_match(code, RAW_TAG) do |m, line|
       next if m =~ /\btype\s*=\s*["']hidden["']/i
 

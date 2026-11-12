@@ -1,4 +1,5 @@
 <% content_for :title, @item.name %>
+<%= ui_back_link "กลับหน้าแรก", root_path %>
 <%= ui_page_header @item.name do %>
   <%= lot_phase_badge(@event) %>
 <% end %>
@@ -29,10 +30,7 @@
   <% if @item.description.present? %>
     <%= simple_format(@item.description) %>
   <% else %>
-    <p class="ui-field__hint">ยังไม่มีรายละเอียด</p>
+    <p class="ui-text-muted">ยังไม่มีรายละเอียด</p>
   <% end %>
 <% end %>
 
-<div class="ui-actions">
-  <%= ui_link_button "กลับหน้าแรก", root_path, variant: :ghost %>
-</div>

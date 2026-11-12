@@ -10,18 +10,35 @@ class AuctionRoomsController < ApplicationController
   allow_roles :bidder
 
   def show
-    @event = AuctionEvent.unfinished.includes(:room, :auction_method).find(params[:auction_event_id])
+    @event = AuctionEvent.includes(:room, :auction_method).find(params[:auction_event_id])
+    raise ActiveRecord::RecordNotFound, "ไม่มีห้องของการประมูลที่ถูกยกเลิก" if @event.cancelled?
+
+    # สรุปผลแล้ว: ผู้ที่นั่งอยู่ในห้องตอนหมดเวลา (หน้ารีเฟรชเองเมื่อนับถอยหลังถึงศูนย์ ตอนนั้นมักสรุปผลเสร็จแล้ว)
+    # ต้องไปหน้าที่ดูผลได้ ไม่ใช่เจอ 404 (หน้าผลการประมูลโดยเฉพาะอยู่ที่ #61)
+    if @event.settled?
+      return redirect_to(auction_event_results_path(@event), notice: "การประมูลนี้สรุปผลแล้ว") if participated?(@event)
+
+      return redirect_to(my_auctions_path, notice: "การประมูลนี้สรุปผลแล้ว")
+    end
+
     return redirect_to(my_auctions_path, alert: closed_message(@event)) unless may_enter?(@event)
 
     @lots = @event.lots.pending.joins(:item).merge(Item.active)
                   .includes(item: { images_attachments: :blob }).order(:id).to_a
     @joined_lot_ids = Participation.active.where(user: current_user, lot_id: @lots.map(&:id)).pluck(:lot_id).to_set
+    # ราคาที่ยื่นไว้ของผู้ใช้คนนี้เท่านั้น (BID-11, USR-13) ห้ามดึงของคนอื่นมาหน้านี้ (NFR-04)
+    @my_bids = Bid.where(user: current_user, lot_id: @lots.map(&:id)).index_by(&:lot_id)
+    @ceiling = current_user.bid_ceiling
     @participants = Participation.participants_count(@event)
     # เต็ม = ห้องเต็มและผู้ใช้ยังไม่ได้เป็นผู้เข้าร่วมของ event นี้ (คนเดิมเข้าร่วมสินค้าเพิ่มได้แม้เต็ม, USR-07)
     @full = !Participation.joined?(current_user, @event) && Participation.full?(@event)
   end
 
   private
+    def participated?(event)
+      Participation.active.joins(:lot).exists?(user_id: current_user.id, lots: { auction_event_id: event.id })
+    end
+
     # USR-08 / EVT-06: ถึงเวลาเริ่มแล้ว และยังไม่เลยเวลาปิดห้อง
     def may_enter?(event)
       Clock.within?(event.starts_at, event.ends_at)

@@ -28,6 +28,15 @@ module User::Suspension
 
   private
 
+  # SUSP-06: ระงับแล้วการเข้าร่วมใน event ที่ยังไม่จบ (ยังไม่เริ่มหรือกำลังรับราคา) ถูกยกเลิกและคืนที่นั่งให้ห้อง
+  # ราคาที่ยื่นไว้แล้วไม่ถูกแตะ นับตามปกติ (SUSP-04, BID-17) · ยกเลิกระงับแล้วต้องเข้าร่วมใหม่เอง (SUSP-07 คืนแค่สถานะคุณสมบัติ)
+  # คืนจำนวนที่ยกเลิก เพื่อบันทึกใน audit log
+  def cancel_unfinished_participations
+    now = Clock.now
+    Participation.active.where(user_id: id).joins(lot: :auction_event).merge(AuctionEvent.unfinished)
+                 .update_all(cancelled_at: now, updated_at: now)
+  end
+
   def change_suspension!(by:, reason:, action:)
     raise Error, "ผู้ทำต้องเป็น admin" unless by&.admin?
     raise Error, "ระงับได้เฉพาะบัญชีผู้ใช้ (bidder)" unless bidder?
@@ -43,8 +52,9 @@ module User::Suspension
       event = suspension_events.create!(admin: by, action:, reason: reason.to_s.strip)
       before = suspended_at
       update_columns(suspended_at: action == :suspend ? event.created_at : nil, updated_at: Time.current)
-      AuditLog.record!(admin: by, action: "user.#{action}", target: self, reason: event.reason,
-                       change_set: { suspended_at: [ before, suspended_at ] })
+      change_set = { suspended_at: [ before, suspended_at ] }
+      change_set[:cancelled_participations] = cancel_unfinished_participations if action == :suspend
+      AuditLog.record!(admin: by, action: "user.#{action}", target: self, reason: event.reason, change_set:)
       event
     end
   end

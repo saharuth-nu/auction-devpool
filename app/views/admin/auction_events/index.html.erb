@@ -39,6 +39,10 @@
           </td>
           <td>
             <div class="ui-actions ui-actions--end">
+              <% unless event.scheduled? || event.cancelled? %>
+                <%= ui_link_button "ดูราคาที่ยื่น", bids_admin_auction_event_path(event), variant: :secondary, size: :sm,
+                      "aria-label": "ดูราคาที่ยื่นของ #{event.name}" %>
+              <% end %>
               <% if event.editable? %>
                 <%= ui_link_button "แก้ไข", edit_admin_auction_event_path(event), variant: :secondary, size: :sm,
                       "aria-label": "แก้ไข #{event.name}" %>

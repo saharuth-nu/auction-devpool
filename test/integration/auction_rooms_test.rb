@@ -15,7 +15,7 @@ class AuctionRoomsTest < ActionDispatch::IntegrationTest
     starts = @base + hours.hours
     event = AuctionEvent.create!(name: "รอบทดสอบ", room:, auction_method: auction_methods(:first_price),
                                  starts_at: starts, ends_at: starts + 1.hour)
-    lots = items.map { |name| Lot.create!(auction_event: event, item: Item.create!(name:, starting_price: 1000, reserve_price: 4321, status: :available)) }
+    lots = items.map { |name| Lot.create!(auction_event: event, item: Item.create!(description: "รายละเอียด", name:, starting_price: 1000, reserve_price: 4321, status: :available)) }
     [ event, *lots ]
   end
 
@@ -63,11 +63,17 @@ class AuctionRoomsTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "event ที่สรุปผลหรือยกเลิกแล้วไม่มีห้อง (404)" do
+  test "event ที่สรุปผลแล้ว พาไปการประมูลของฉันพร้อมข้อความ (ผู้ที่อยู่ในห้องตอนหมดเวลาต้องไม่เจอ 404)" do
     event, = build_event
     event.update_columns(status: "settled")
-    open_room_at(event.starts_at + 5.seconds, event) { assert_response :not_found }
+    open_room_at(event.starts_at + 5.seconds, event) do
+      assert_redirected_to my_auctions_path
+      follow_redirect!
+      assert_select ".ui-alert--success", /สรุปผลแล้ว/
+    end
+  end
 
+  test "event ที่ยกเลิกแล้วไม่มีห้อง (404)" do
     other, = build_event(hours: 3)
     other.update_columns(status: "cancelled")
     open_room_at(other.starts_at + 5.seconds, other) { assert_response :not_found }
@@ -138,7 +144,8 @@ class AuctionRoomsTest < ActionDispatch::IntegrationTest
     Participation.create!(user: @user, lot: lot_a)
     open_room_at(event.starts_at + 5.seconds, event) do
       assert_equal "เข้าร่วมแล้ว", row_for("ของ ก").at_css(".ui-badge").text
-      assert_nil row_for("ของ ก").at_css("button")
+      # lot ที่เข้าร่วมแล้วไม่มีปุ่ม "เข้าร่วมประมูล" ซ้ำ (มีแต่ช่องยื่นราคาของ #65 ในช่วงเปิดรับราคา)
+      assert_nil row_for("ของ ก").css("button").find { |b| b.text == "เข้าร่วมประมูล" }
       assert_equal "เข้าร่วมประมูล", row_for("ของ ข").at_css("button").text
     end
   end

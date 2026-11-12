@@ -47,3 +47,5 @@
 - **เพิ่มหน้าใหม่ของผู้ประมูล: เพิ่มใน `bidder_pages` ของไฟล์นี้** · ครึ่งหลัง (ราคาที่ผู้ใช้ยื่น) เพิ่มต่อเมื่อมีโมเดล Bid (#63) ใช้โครงเดียวกัน
 - ช่องรั่วจริงที่แก้ไว้: (1) `Item#inspect` ขึ้น log/ข้อความ error → `filter_parameters` มี `:reserve, :amount` (Rails ใช้กรอง `inspect` ด้วย) (2) `to_json`/`as_json` ของ Item มี reserve_price → `Item#serializable_hash` ตัดออกโดยค่าเริ่มต้น (ขอชัดเจนด้วย `as_json(only: [:reserve_price])` ได้) (3) พารามิเตอร์ `reserve_price` / `amount` ขึ้น log ตรงๆ → ถูกกรอง
 - **ทำเลขเงินที่ผู้ใช้ยื่น (#65) ให้ตั้งชื่อพารามิเตอร์ที่มีคำว่า `amount`** (เช่น `bid[amount]`) จะถูกกรองใน log อัตโนมัติ · ห้าม `render json:` ข้อมูล Bid ของผู้อื่น และห้ามเขียน Bid ลง `Rails.logger`
+
+- (อัปเดตหลัง merge `dev`) Saharuth ทำ `test/integration/no_leak_test.rb` (ครอบราคาที่ยื่นของคนอื่น การยื่นราคา และ broadcast) ไว้แล้ว ไฟล์ `secret_price_leak_test.rb` ของผมเสริมส่วนที่ไฟล์นั้นไม่ครอบ: reserve ในทุกช่องทาง, `Item#inspect`/`filter_parameters` (`:reserve`), JSON ของ Item และ Bid (`serializable_hash` ตัด reserve_price / amount / user_id โดยค่าเริ่มต้น), และหน้า admin ที่ผู้ประมูลเปิดไม่ได้ (403)

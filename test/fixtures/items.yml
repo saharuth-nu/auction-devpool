@@ -6,6 +6,7 @@ watch:
   status: awaiting_approval
 
 car:
+  description: รถยนต์คลาสสิกสภาพดี
   name: รถยนต์
   starting_price: 300000.00
   reserve_price: 350000.00
@@ -13,6 +14,7 @@ car:
   approved_at: <%= 1.day.ago.to_fs(:db) %>
 
 painting:
+  description: ภาพวาดสีน้ำมันบนผ้าใบ
   name: ภาพวาด
   starting_price: 5000.00
   reserve_price: 8000.00
@@ -20,6 +22,7 @@ painting:
   approved_at: <%= 2.days.ago.to_fs(:db) %>
 
 vase:
+  description: แจกันเซรามิกลายคราม
   name: แจกันโบราณ
   starting_price: 2000.00
   reserve_price: 2000.00
@@ -28,6 +31,7 @@ vase:
   archived_at: <%= 1.day.ago.to_fs(:db) %>
 
 necklace:
+  description: สร้อยคอทองคำ
   name: สร้อยคอทองคำ
   starting_price: 20000.00
   reserve_price: 25000.00
@@ -35,6 +39,7 @@ necklace:
   approved_at: <%= 1.day.ago.to_fs(:db) %>
 
 lamp:
+  description: โคมไฟทองเหลือง
   name: โคมไฟโบราณ
   starting_price: 3000.00
   reserve_price: 3500.00

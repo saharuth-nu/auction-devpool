@@ -15,12 +15,12 @@
   <% elsif full %>
     <%= ui_card do %>
       <%= ui_button "เต็มแล้ว", size: :xl, block: true, disabled: true %>
-      <p class="ui-field__hint">ห้องนี้มีผู้เข้าร่วมครบแล้ว ถ้ามีคนยกเลิกจะกลับมาเข้าร่วมได้</p>
+      <p class="ui-text-muted">ห้องนี้มีผู้เข้าร่วมครบแล้ว ถ้ามีคนยกเลิกจะกลับมาเข้าร่วมได้</p>
     <% end %>
   <% else %>
     <%= ui_card do %>
       <%= ui_button_to "เข้าร่วมประมูล", lot_participation_path(lot), method: :post, size: :xl, block: true %>
-      <p class="ui-field__hint">ยื่นราคาได้เฉพาะสินค้าที่เข้าร่วมไว้ก่อนเริ่มประมูล</p>
+      <p class="ui-text-muted">ยื่นราคาได้เฉพาะสินค้าที่เข้าร่วมไว้ก่อนเริ่มประมูล</p>
     <% end %>
   <% end %>
 <% when :open %>

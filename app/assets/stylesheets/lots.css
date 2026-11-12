@@ -8,8 +8,8 @@
 
 .ui-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
 .ui-gallery__item--main { grid-column: 1 / -1; }
-.ui-gallery__image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-zinc-100); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-2xl); }
-.ui-gallery__empty { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; color: var(--color-zinc-500); background: var(--color-zinc-100); border: 1px dashed var(--color-zinc-300); border-radius: var(--radius-2xl); }
+.ui-gallery__image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-zinc-100); border: 1px solid var(--color-zinc-200); border-radius: var(--radius-lg); }
+.ui-gallery__empty { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; color: var(--color-zinc-500); background: var(--color-zinc-100); border: 1px dashed var(--color-zinc-300); border-radius: var(--radius-lg); }
 
 @media (min-width: 768px) {
   .ui-lot { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; }
@@ -30,3 +30,12 @@
   .ui-room-lot__thumb { width: 56px; height: 56px; }
   .ui-room-lot__action { grid-column: 1 / -1; }
 }
+
+/* ฟอร์มยื่นราคาในห้องประมูล (BID-20, BID-21) */
+.ui-bid-form { display: flex; flex-direction: column; gap: 8px; min-width: 220px; }
+.ui-bid-form__range { margin: 0; color: var(--color-zinc-600); font-size: var(--text-xs); line-height: var(--text-xs-lh); }
+.ui-bid-mine { color: var(--color-zinc-700); }
+.ui-bid-mine--none { color: var(--color-zinc-500); }
+.ui-bid-confirm__item { margin: 8px 0 0; color: var(--color-zinc-600); }
+/* จำนวนเงินตัวใหญ่ในหน้าต่างยืนยัน */
+.ui-bid-confirm__amount { margin: 8px 0 0; font-size: var(--text-2xl); line-height: var(--text-2xl-lh); font-weight: 700; color: var(--color-primary-700); font-variant-numeric: tabular-nums; }

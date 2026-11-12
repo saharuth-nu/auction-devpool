@@ -41,6 +41,21 @@ module StatusHelper
       "settled" => { label: "สรุปผลแล้ว", tone: :neutral },
       "cancelled" => { label: "ยกเลิก", tone: :danger }
     },
+    # ผลของ lot ที่ผู้ใช้เห็น (Lot#outcome_for): ไม่แยกสาเหตุที่ไม่ขาย (BID-19)
+    outcome: {
+      "won" => { label: "คุณชนะ", tone: :success },
+      "lost" => { label: "ไม่ชนะ", tone: :neutral },
+      "unsold" => { label: "ไม่ขาย", tone: :muted },
+      "cancelled" => { label: "ยกเลิก", tone: :danger },
+      "pending" => { label: "รอสรุปผล", tone: :warning }
+    },
+    # ผลของ lot ในการประมูล (Lot.statuses): รอผล / ขายได้ / ไม่ขาย / ยกเลิก
+    lot: {
+      "pending" => { label: "รอสรุปผล", tone: :warning },
+      "sold" => { label: "ขายได้", tone: :success },
+      "unsold" => { label: "ไม่ขาย", tone: :neutral },
+      "cancelled" => { label: "ยกเลิก", tone: :danger }
+    },
     # ตรงกับ Item.statuses (ITEM-02)
     item: {
       "awaiting_approval" => { label: "รออนุมัติ", tone: :warning },

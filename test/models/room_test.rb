@@ -40,7 +40,7 @@ class RoomTest < ActiveSupport::TestCase
   def fill_upcoming_with(count)
     event = auction_events(:upcoming)
     (count - event.lots.count).times do |i|
-      item = Item.create!(name: "ของ #{i}", starting_price: 100, reserve_price: 100, status: :available)
+      item = Item.create!(description: "รายละเอียด", name: "ของ #{i}", starting_price: 100, reserve_price: 100, status: :available)
       event.lots.create!(item:)
     end
     event

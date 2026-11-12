@@ -1,0 +1,41 @@
+<% content_for :title, "ราคาที่ยื่น: #{@event.name}" %>
+<%= ui_back_link "กลับรายการการประมูล", admin_auction_events_path %>
+<%= ui_page_header "ราคาที่ยื่น", description: "#{@event.name} · ห้อง #{@event.room.name}" do %>
+  <%= status_badge(:auction, { "scheduled" => "scheduled", "bidding" => "active", "settled" => "closed", "cancelled" => "cancelled" }.fetch(@event.status)) %>
+<% end %>
+
+<%= ui_alert "หน้านี้แสดงราคาที่ผู้ใช้ทุกคนยื่น (ความลับ เห็นได้เฉพาะ admin) การเปิดดูถูกบันทึกใน audit log (#{@phase == 'open' ? 'ช่วงเปิดรับราคา' : 'หลังปิดรับราคา'})", tone: :warning %>
+
+<% @lots.each do |lot| %>
+  <% ranked = lot.bids.sort_by { |bid| [ -bid.amount, bid.placed_at, bid.id ] } %>
+  <%= ui_table_card title: lot.item.name,
+                    actions: safe_join([ ui_badge("ราคาเริ่มต้น #{baht lot.item.starting_price}", tone: :neutral),
+                                         ui_badge("ขั้นต่ำ (reserve) #{baht lot.item.reserve_price}", tone: :warning),
+                                         status_badge(:lot, lot.status) ]) do %>
+    <% if ranked.empty? %>
+      <table class="ui-table">
+        <tbody><%= ui_table_message 5, "ยังไม่มีผู้ยื่นราคา" %></tbody>
+      </table>
+    <% else %>
+      <table class="ui-table">
+        <thead>
+          <tr><th>อันดับ</th><th>ผู้ยื่น</th><th class="num">ราคา</th><th>เวลาที่ยื่น</th><th>หมายเหตุ</th></tr>
+        </thead>
+        <tbody>
+          <% ranked.each_with_index do |bid, index| %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= link_to bid.user.fullname.presence || bid.user.username, admin_user_path(bid.user) %> <small>(<%= bid.user.username %>)</small></td>
+              <td class="num"><%= baht bid.amount %></td>
+              <td><%= bid.placed_at.in_time_zone.strftime("%d/%m/%Y %H:%M:%S.%L") %></td>
+              <td>
+                <%= ui_badge("ผู้ชนะ", tone: :success) if lot.winning_bid_id == bid.id %>
+                <%= ui_badge("บัญชีถูกระงับ (ราคายังนับ)", tone: :danger) if bid.user.suspended? %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  <% end %>
+<% end %>

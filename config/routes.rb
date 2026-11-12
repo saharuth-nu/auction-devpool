@@ -8,13 +8,20 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # ---- ผู้ใช้ (bidder)
+  match "/404", to: "errors#show", via: :all
+  match "/422", to: "errors#show", via: :all
+  match "/500", to: "errors#show", via: :all
+
   root "home#show"
   get "my-auctions", to: "my_auctions#index", as: :my_auctions # การประมูลของฉัน (USR-16)
   resources :auction_events, only: [], path: "events" do
     resource :room, only: :show, controller: "auction_rooms" # ห้องประมูล (USR-08..10)
+    resource :results, only: :show, controller: "auction_results" # ผลการประมูลของ event นี้ (USR-11..15, #61)
   end
+  get "results", to: "auction_results#index", as: :results # รายการผลการประมูลของฉัน (USR-17)
   resources :lots, only: :show do # หน้ารายละเอียดสินค้าในการประมูล (USR-04)
     resource :participation, only: %i[create destroy] # เข้าร่วม / ยกเลิกก่อนเริ่ม (USR-05..07)
+    resource :bid, only: :create # ยื่นราคา ครั้งเดียว แก้/ถอนไม่ได้ (BID-01, #65)
   end
 
   # หน้าตัวอย่าง component ของ Design System ไว้ดูบนมือถือ/เดสก์ท็อป (เฉพาะ development/test)
@@ -23,6 +30,7 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
   resource :registration, only: %i[new create]
+  get "terms", to: "terms#show", as: :terms # เงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว (AUTH-19) เปิดได้โดยไม่ต้อง login
   # หน้าสถานะคุณสมบัติ + ส่ง/แก้ทรัพย์สิน (QUAL-02/04/05/06/09)
   resource :qualification, only: %i[show create]
 
@@ -79,6 +87,7 @@ Rails.application.routes.draw do
     # การประมูล (EVT-01): ไม่มีหน้า show แยก ดู/แก้ที่หน้า edit · ยกเลิกเป็น PATCH แยก (EVT-08)
     resources :auction_events, path: "auctions", except: :show do
       patch :cancel, on: :member
+      get :bids, on: :member, to: "auction_event_bids#show" # ราคาที่ยื่นของแต่ละสินค้า (EVT-09, #56)
     end
   end
 end

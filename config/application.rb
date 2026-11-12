@@ -14,7 +14,7 @@ module AuctionDevpool
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+    config.autoload_lib(ignore: %w[assets tasks middleware])
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -25,6 +25,11 @@ module AuctionDevpool
     # - เวลาเก็บใน DB เป็น UTC เสมอ (ค่าเริ่มต้นของ Rails) แสดงผลเป็นเวลาไทย (Time.zone = Asia/Bangkok)
     # - :en ยังโหลดไว้เป็นตาข่ายรองให้ gem ภายใน แต่ผู้ใช้ไม่เห็น: locale เริ่มต้นคือ :th
     config.time_zone = "Bangkok"
+    # หน้า error ภาษาไทย (NFR-20) และโหมดปิดปรับปรุง
+    config.exceptions_app = routes
+    require_relative "../lib/middleware/maintenance_mode"
+    config.middleware.insert_before 0, Middleware::MaintenanceMode
+
     config.i18n.default_locale = :th
     config.i18n.available_locales = %i[th en]
     # config.eager_load_paths << Rails.root.join("extras")

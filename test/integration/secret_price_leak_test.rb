@@ -17,7 +17,7 @@ class SecretPriceLeakTest < ActionDispatch::IntegrationTest
     @event = AuctionEvent.create!(name: "รอบทดสอบราคาลับ", room:, auction_method: auction_methods(:first_price),
                                   starts_at: starts, ends_at: starts + 1.hour)
     @item_a = Item.create!(name: "ของลับ ก", description: "สภาพดี", starting_price: 1000, reserve_price: RESERVE, status: :available)
-    @item_b = Item.create!(name: "ของลับ ข", starting_price: 2000, reserve_price: RESERVE + 1, status: :available)
+    @item_b = Item.create!(name: "ของลับ ข", description: "มือสอง", starting_price: 2000, reserve_price: RESERVE + 1, status: :available)
     @lot_a = Lot.create!(auction_event: @event, item: @item_a)
     @lot_b = Lot.create!(auction_event: @event, item: @item_b)
     Participation.create!(user: @user, lot: @lot_a)
@@ -103,6 +103,16 @@ class SecretPriceLeakTest < ActionDispatch::IntegrationTest
       assert_no_leak json, "to_json ของ Item"
       assert_not_includes json, "reserve_price"
     end
+  end
+
+  test "NFR-04 JSON: Bid แปลงเป็น JSON ไม่มีจำนวนเงินและตัวตนผู้ยื่นโดยค่าเริ่มต้น (ราคาที่ยื่น เป็นความลับเหมือน reserve)" do
+    bid = Bid.new(user: @user, lot: @lot_a, amount: BigDecimal("555123.45"), placed_at: Time.current)
+    [ bid.to_json, bid.as_json.to_json, { bid: bid }.to_json, [ bid ].to_json ].each do |json|
+      assert_not_includes json, "555123"
+      assert_not_includes json, "amount"
+      assert_not_includes json, "user_id"
+    end
+    assert_equal({ "amount" => "555123.45" }, bid.as_json(only: [ :amount ])) # ขอชัดเจนได้
   end
 
   test "admin ขอ reserve_price ใน JSON ได้เมื่อระบุชัดเจนเท่านั้น" do

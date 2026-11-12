@@ -7,6 +7,8 @@
       <%= f.ui_field :email, as: :email, label: "อีเมล", autocomplete: "email", required: true %>
       <%= f.ui_field :password, as: :password, label: "รหัสผ่าน", hint: "อย่างน้อย 8 ตัวอักษร (ไม่เกิน 72 ไบต์ ตัวอักษรไทย 1 ตัว = 3 ไบต์)", autocomplete: "new-password", required: true %>
       <%= f.ui_field :password_confirmation, as: :password, label: "ยืนยันรหัสผ่าน", autocomplete: "new-password", required: true %>
+      <%= f.ui_field :accept_terms, as: :checkbox, label: "ข้าพเจ้ายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว (PDPA)", required: true,
+            hint: safe_join([ "อ่านรายละเอียดได้ที่ ", link_to("เงื่อนไขและนโยบาย", terms_path, target: "_blank", rel: "noopener") ]) %>
       <%= f.ui_submit "สมัครสมาชิก", block: true %>
     <% end %>
     <p class="ui-auth__links">มีบัญชีอยู่แล้ว? <%= link_to "เข้าสู่ระบบ", login_path %></p>
