@@ -4,5 +4,8 @@
 # Use this to limit dissemination of sensitive information.
 # See the ActiveSupport::ParameterFilter documentation for supported notations and behaviors.
 Rails.application.config.filter_parameters += [
-  :passw, :email, :secret, :token, :_key, :crypt, :salt, :certificate, :otp, :ssn, :cvv, :cvc
+  :passw, :email, :secret, :token, :_key, :crypt, :salt, :certificate, :otp, :ssn, :cvv, :cvc,
+  # ราคาลับ (NFR-04, BID-18): ราคาขั้นต่ำของสินค้า และจำนวนเงินที่ยื่น ห้ามขึ้น log ทั้งพารามิเตอร์และ inspect ของโมเดล
+  # (Rails ใช้รายการนี้กับ ActiveRecord filter_attributes ด้วย จึงกรอง Item#inspect ที่ปรากฏใน log และข้อความ error)
+  :reserve, :amount
 ]

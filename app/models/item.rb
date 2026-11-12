@@ -35,6 +35,14 @@ class Item < ApplicationRecord
   # ค่าว่างหรือสถานะที่ไม่รู้จัก → ทั้งหมด (ITEM-03)
   scope :filter_by_status, ->(status) { statuses.key?(status.to_s) ? where(status: status) : all }
 
+  # BID-18 / NFR-04: ราคาขั้นต่ำเป็นความลับ ไม่ออกไปกับ JSON / Turbo Stream โดยไม่ตั้งใจ
+  # (เช่น render json: item หรือ to_json) · ถ้า admin ต้องการจริงให้ขอชัดเจน: item.as_json(only: [:reserve_price, ...])
+  def serializable_hash(options = nil)
+    options = (options || {}).dup
+    options[:except] = Array(options[:except]) | [ :reserve_price ] unless options[:only]
+    super(options)
+  end
+
   # รออนุมัติ → พร้อมขาย (ITEM-04)
   def approve!(by:)
     raise InvalidTransition, "อนุมัติได้เฉพาะสินค้าที่รออนุมัติ" unless awaiting_approval?
